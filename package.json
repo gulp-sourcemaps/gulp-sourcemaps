@@ -1,0 +1,21 @@
+{
+  "name": "gulp-sourcemap",
+  "version": "0.1.0",
+  "description": "Writes sourcemaps",
+  "homepage": "http://github.com/floridoo/gulp-sourcemap",
+  "repository": "git://github.com/floridoo/gulp-sourcemap.git",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gulp",
+    "sourcemap"
+  ],
+  "author": "Florian Reiterer <me@florianreiterer.com>",
+  "license": "ISC",
+  "dependencies": {
+    "gulp-util": "^2.2.14",
+    "through2": "^0.4.1"
+  }
+}
