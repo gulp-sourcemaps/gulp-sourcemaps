@@ -4,70 +4,131 @@ var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var fs = require('fs');
 var path = require('path');
+var SourceMapGenerator = require('source-map').SourceMapGenerator;
+var SourceMapConsumer = require('source-map').SourceMapConsumer;
 
 var PLUGIN_NAME = 'gulp-sourcemap';
 
-module.exports = function(options) {
-	options = options || {};
+/**
+ * Apply source map to the end of the source map chain
+ *
+ * @param sourceMap source map to be appended
+ */
+function applySourceMap(sourceMap) {
+  /*jshint validthis:true */
+  try {
+    if (typeof sourceMap === 'string' || sourceMap instanceof String) {
+      sourceMap = JSON.parse(sourceMap);
+    }
+    sourceMap.sources = [this.sourceMap.file];
+    var generator = SourceMapGenerator.fromSourceMap(new SourceMapConsumer(sourceMap));
+    generator.applySourceMap(new SourceMapConsumer(this.sourceMap));
+    this.sourceMap = JSON.parse(generator.toString());
+  } catch (e) {
+    gutil.log(gutil.colors.red('Error applying source map:'));
+    console.error(e.stack);
+  }
+}
 
-	if (options.includeContent === undefined)
-		options.includeContent = true;
-	if (options.inline === undefined)
-		options.inline = true;
+/**
+ * Initialize source mapping chain
+ */
+module.exports.init = function init() {
+  function sourceMapInit(file, encoding, callback) {
+    /*jshint validthis:true */
 
-	function sourcemap(file, encoding, callback) {
-		/*jshint validthis:true */
+    if (file.isNull()) {
+      this.push(file);
+      return callback();
+    }
 
-		if (file.isNull() || !file.sourceMap) {
-			this.push(file);
-			return callback();
-		}
+    if (file.isStream()) {
+      return callback(new PluginError(PLUGIN_NAME, 'Streaming not supported'));
+    }
 
-		if (file.isStream()) {
-			return callback(new PluginError(PLUGIN_NAME, 'Streaming not supported'));
-		}
+    // initialize source map
+    file.sourceMap = {
+      version : 3,
+      file: file.relative,
+      names: [],
+      mappings: '',
+      sources: [file.relative],
+      sourcesContent: [file.contents.toString()]
+    };
 
-		var sourceMap = file.sourceMap;
-		sourceMap.file = file.relative;
+    // add helper method to vinyl file
+    file.applySourceMap = applySourceMap;
 
+    this.push(file);
+    callback();
+  }
 
-		if (options.sourceRoot)
-			sourceMap.sourceRoot = options.sourceRoot;
+  return through.obj(sourceMapInit);
+};
 
-		if (options.includeContent) {
-			sourceMap.sourcesContent = sourceMap.sourcesContent || new Array(sourceMap.sources.length);
-			sourceMap.sources.forEach(function(source, i) {
-				if (!sourceMap.sourcesContent[i])
-					try {
-						sourceMap.sourcesContent[i] = fs.readFileSync(path.join(file.base, source)).toString();
-					} catch(e) {
-						sourceMap.sourcesContent[i] = null;
-					}
-			});
-			sourceMap.sourceRoot = options.sourceRoot || '/source/';
-		}
+/**
+ * Write the source map
+ *
+ * @param options options to change the way the source map is written
+ *
+ */
+module.exports.write = function write(options) {
+  options = options || {};
 
-		var comment;
-		if (options.inline) {
-			var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
-			comment = '\n//# sourceMappingURL=data:application/json;base64,' + base64Map;
-		} else {
-			var sourceMapFile = new gutil.File({
-				cwd: file.cwd,
-				base: file.base,
-				path: file.path + '.map',
-				contents: new Buffer(JSON.stringify(sourceMap))
-			});
-			this.push(sourceMapFile);
+  // set defaults for options if unset
+  if (options.includeContent === undefined)
+    options.includeContent = true;
+  if (options.inline === undefined)
+    options.inline = true;
 
-			comment = '\n//# sourceMappingURL=' + path.basename(file.path) + '.map';
-		}
+  function sourceMapWrite(file, encoding, callback) {
+    /*jshint validthis:true */
 
-		file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
+    if (file.isNull() || !file.sourceMap) {
+      this.push(file);
+      return callback();
+    }
 
-		this.push(file);
-		callback();
-	}
+    if (file.isStream()) {
+      return callback(new PluginError(PLUGIN_NAME, 'Streaming not supported'));
+    }
 
-	return through.obj(sourcemap);
+    var sourceMap = file.sourceMap;
+    sourceMap.file = file.relative;
+
+    if (options.sourceRoot)
+      sourceMap.sourceRoot = options.sourceRoot;
+
+    if (options.includeContent) {
+      sourceMap.sourceRoot = options.sourceRoot || '/source/';
+    } else {
+      delete sourceMap.sourcesContent;
+    }
+
+    var comment;
+    if (options.inline) {
+      // encode source map into comment
+      var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
+      comment = '\n//# sourceMappingURL=data:application/json;base64,' + base64Map;
+    } else {
+      // add new source map file to stream
+      var sourceMapFile = new gutil.File({
+        cwd: file.cwd,
+        base: file.base,
+        path: file.path + '.map',
+        contents: new Buffer(JSON.stringify(sourceMap))
+      });
+      this.push(sourceMapFile);
+
+      comment = '\n//# sourceMappingURL=' + path.basename(file.path) + '.map';
+    }
+
+    // append source map comment
+    file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
+
+    this.push(file);
+    callback();
+  }
+
+  return through.obj(sourceMapWrite);
 };
