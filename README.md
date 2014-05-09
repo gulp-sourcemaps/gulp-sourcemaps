@@ -16,6 +16,9 @@
 
 ## Usage
 
+### Inline maps
+Inline maps are embedded in the source file.
+
 ```javascript
 var gulp = require('gulp');
 var concat = require('gulp-concat');
@@ -32,14 +35,47 @@ gulp.task('javascript', function() {
 });
 ```
 
-All plugin between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps.
+All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps.
+
+### External source map files
+
+To write external source map files, pass a path relative to the destination to `sourcemaps.write()`.
+
+Example:
+```javascript
+var gulp = require('gulp');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
+
+gulp.task('javascript', function() {
+  gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init())
+      .pipe(concat('all.js'))
+      .pipe(uglify())
+    .pipe(sourcemaps.write('../maps'))
+    .pipe(gulp.dest('dist'));
+});
+```
 
 
 ## Options
 
-- `inline`
+- `addComment`
 
-  By default the source maps are inlined. Pass `false` to write separate files.
+  By default a comment containing / referencing the source map is added. Set this to `false` to disable the comment (e.g. if you want to load the source maps by header).
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(concat('all.js'))
+        .pipe(uglify())
+      .pipe(sourcemaps.write('../maps', {addComment: false}))
+      .pipe(gulp.dest('dist'));
+  });
+  ```
 
 - `includeContent`
 
@@ -48,6 +84,18 @@ All plugin between `sourcemaps.init()` and `sourcemaps.write()` need to support 
 - `sourceRoot`
 
   Set the path where the source files are hosted (use this when `includeContent` is set to `false`).
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(concat('all.js'))
+        .pipe(uglify())
+      .pipe(sourcemaps.write({includeContent: false, sourceRoot: '/src'}))
+      .pipe(gulp.dest('dist'));
+  });
+  ```
 
 ## Plugin developers only: How to add source map support to plugins
 

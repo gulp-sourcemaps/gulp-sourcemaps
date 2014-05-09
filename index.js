@@ -72,14 +72,18 @@ module.exports.init = function init() {
  * @param options options to change the way the source map is written
  *
  */
-module.exports.write = function write(options) {
+module.exports.write = function write(destPath, options) {
+  if (options === undefined && Object.prototype.toString.call(destPath) === '[object Object]') {
+    options = destPath;
+    destPath = undefined;
+  }
   options = options || {};
 
   // set defaults for options if unset
   if (options.includeContent === undefined)
     options.includeContent = true;
-  if (options.inline === undefined)
-    options.inline = true;
+  if (options.addComment === undefined)
+    options.addComment = true;
 
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
@@ -106,7 +110,7 @@ module.exports.write = function write(options) {
     }
 
     var comment;
-    if (options.inline) {
+    if (!destPath) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
       comment = '\n//# sourceMappingURL=data:application/json;base64,' + base64Map;
@@ -115,20 +119,32 @@ module.exports.write = function write(options) {
       var sourceMapFile = new gutil.File({
         cwd: file.cwd,
         base: file.base,
-        path: file.path + '.map',
+        path: path.join(path.dirname(file.path), destPath, path.basename(file.path)) + '.map',
         contents: new Buffer(JSON.stringify(sourceMap))
       });
       this.push(sourceMapFile);
 
-      comment = '\n//# sourceMappingURL=' + path.basename(file.path) + '.map';
+      comment = '\n//# sourceMappingURL=' + path.join(destPath, path.basename(file.path)) + '.map';
     }
 
     // append source map comment
-    file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
+    if (options.addComment)
+      file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
 
     this.push(file);
     callback();
   }
 
   return through.obj(sourceMapWrite);
+};
+
+module.exports.dest = function dest(options) {
+  options = options || {};
+
+  function sourceMapFilesWrite(file, encoding, callback) {
+    /*jshint validthis:true */
+
+  }
+
+  return through.obj(sourceMapFilesWrite);
 };
