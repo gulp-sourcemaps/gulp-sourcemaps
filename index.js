@@ -119,12 +119,12 @@ module.exports.write = function write(destPath, options) {
       var sourceMapFile = new gutil.File({
         cwd: file.cwd,
         base: file.base,
-        path: path.join(path.dirname(file.path), destPath, path.basename(file.path)) + '.map',
+        path: path.join(file.base, destPath, file.relative) + '.map',
         contents: new Buffer(JSON.stringify(sourceMap))
       });
       this.push(sourceMapFile);
 
-      comment = '\n//# sourceMappingURL=' + path.join(destPath, path.basename(file.path)) + '.map';
+      comment = '\n//# sourceMappingURL=' + path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map';
     }
 
     // append source map comment
