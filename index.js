@@ -20,7 +20,6 @@ function applySourceMap(sourceMap) {
     if (typeof sourceMap === 'string' || sourceMap instanceof String) {
       sourceMap = JSON.parse(sourceMap);
     }
-    sourceMap.sources = [this.sourceMap.file];
     var generator = SourceMapGenerator.fromSourceMap(new SourceMapConsumer(sourceMap));
     generator.applySourceMap(new SourceMapConsumer(this.sourceMap));
     this.sourceMap = JSON.parse(generator.toString());
