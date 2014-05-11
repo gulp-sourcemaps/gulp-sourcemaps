@@ -123,14 +123,3 @@ module.exports.write = function write(destPath, options) {
 
   return through.obj(sourceMapWrite);
 };
-
-module.exports.dest = function dest(options) {
-  options = options || {};
-
-  function sourceMapFilesWrite(file, encoding, callback) {
-    /*jshint validthis:true */
-
-  }
-
-  return through.obj(sourceMapFilesWrite);
-};
