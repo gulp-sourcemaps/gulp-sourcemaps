@@ -108,11 +108,23 @@ module.exports.write = function write(destPath, options) {
       delete sourceMap.sourcesContent;
     }
 
+    var extension = file.relative.split('.').pop();
+    var commentFormatter;
+
+    switch (extension) {
+      case 'css':
+        commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */"; }
+        break
+      case 'js':
+      default:
+        commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url; }
+    }
+
     var comment;
     if (!destPath) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
-      comment = '\n//# sourceMappingURL=data:application/json;base64,' + base64Map;
+      comment = commentFormatter('data:application/json;base64,' + base64Map);
     } else {
       // add new source map file to stream
       var sourceMapFile = new gutil.File({
@@ -123,7 +135,7 @@ module.exports.write = function write(destPath, options) {
       });
       this.push(sourceMapFile);
 
-      comment = '\n//# sourceMappingURL=' + path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map';
+      comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
     }
 
     // append source map comment
