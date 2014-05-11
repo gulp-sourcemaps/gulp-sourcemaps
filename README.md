@@ -1,4 +1,4 @@
-## gulp-sourcemaps  [![NPM version][npm-image]][npm-url]
+## gulp-sourcemaps  [![NPM version][npm-image]][npm-url] [![build status][travis-image]][travis-url] [![Test coverage][coveralls-image]][coveralls-url]
 
 ### Usage
 
@@ -123,3 +123,7 @@ module.exports = function(options) {
 
 [npm-image]: http://img.shields.io/npm/v/gulp-sourcemaps.svg?style=flat
 [npm-url]: https://npmjs.org/package/gulp-sourcemaps
+[travis-image]: http://img.shields.io/travis/floridoo/gulp-sourcemaps.svg?style=flat
+[travis-url]: http://travis-ci.org/floridoo/gulp-sourcemaps
+[coveralls-image]: http://img.shields.io/coveralls/floridoo/gulp-sourcemaps.svg?style=flat
+[coveralls-url]: https://coveralls.io/r/floridoo/gulp-sourcemaps?branch=master

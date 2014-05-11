@@ -8,7 +8,8 @@
   "scripts": {
     "test": "jshint *.js test/*.js && faucet test/*.js",
     "tap": "node node_modules/argg test/*.js",
-    "cover": "istanbul cover --dir reports/coverage node_modules/argg test/*.js"
+    "cover": "istanbul cover --dir reports/coverage node_modules/argg test/*.js",
+    "coveralls": "istanbul cover node_modules/argg test/*.js --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "keywords": [
     "gulp",
@@ -25,6 +26,7 @@
     "tape": "^2.12.3",
     "argg": "0.0.1",
     "istanbul": "^0.2.8",
-    "faucet": "0.0.1"
+    "faucet": "0.0.1",
+    "coveralls": "^2.10.0"
   }
 }
