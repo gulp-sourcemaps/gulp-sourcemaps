@@ -15,7 +15,7 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "gulp-util": "^2.2.14",
     "through2": "^0.4.1",
+    "vinyl": "^0.2.3"
   }
 }

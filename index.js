@@ -1,9 +1,8 @@
 'use strict';
 var through = require('through2');
-var gutil = require('gulp-util');
-var PluginError = gutil.PluginError;
 var fs = require('fs');
 var path = require('path');
+var File = require('vinyl');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
 
@@ -20,7 +19,7 @@ module.exports.init = function init() {
     }
 
     if (file.isStream()) {
-      return callback(new PluginError(PLUGIN_NAME, 'Streaming not supported'));
+      return callback(new Error(PLUGIN_NAME + ': Streaming not supported'));
     }
 
     // initialize source map
@@ -68,7 +67,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     if (file.isStream()) {
-      return callback(new PluginError(PLUGIN_NAME, 'Streaming not supported'));
+      return callback(new Error(PLUGIN_NAME + ': Streaming not supported'));
     }
 
     var sourceMap = file.sourceMap;
@@ -103,7 +102,7 @@ module.exports.write = function write(destPath, options) {
       comment = commentFormatter('data:application/json;base64,' + base64Map);
     } else {
       // add new source map file to stream
-      var sourceMapFile = new gutil.File({
+      var sourceMapFile = new File({
         cwd: file.cwd,
         base: file.base,
         path: path.join(file.base, destPath, file.relative) + '.map',
