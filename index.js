@@ -113,11 +113,12 @@ module.exports.write = function write(destPath, options) {
 
     switch (extension) {
       case 'css':
-        commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */"; }
-        break
+        commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */"; };
+        break;
       case 'js':
+      /* falls through */
       default:
-        commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url; }
+        commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url; };
     }
 
     var comment;
