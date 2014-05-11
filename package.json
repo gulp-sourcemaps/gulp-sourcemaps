@@ -17,6 +17,5 @@
   "dependencies": {
     "gulp-util": "^2.2.14",
     "through2": "^0.4.1",
-    "source-map": "^0.1.33"
   }
 }

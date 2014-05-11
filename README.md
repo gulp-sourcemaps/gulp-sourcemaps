@@ -100,13 +100,14 @@ gulp.task('javascript', function() {
 ## Plugin developers only: How to add source map support to plugins
 
 - Generate a source map for the transformation the plugin is applying
-- Apply this source map to the vinyl `file` by calling `file.applySourceMap(sourceMap)`.
+- Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/floridoo/vinyl-sourcemaps-apply).
   This combines the source map of this plugin with the source maps coming from plugins further up the chain.
 
 ### Example:
 
 ```javascript
 var through = require('through2');
+var applySourceMap = require('vinyl-sourcemaps-apply');
 var myTransform = require('myTransform');
 
 module.exports = function(options) {
@@ -123,7 +124,7 @@ module.exports = function(options) {
 
     // apply source map to the chain
     if (file.sourceMap) {
-      file.applySourceMap(result.map);
+      applySourceMap(file, result.map);
     }
 
     this.push(file);

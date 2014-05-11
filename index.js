@@ -4,30 +4,8 @@ var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var fs = require('fs');
 var path = require('path');
-var SourceMapGenerator = require('source-map').SourceMapGenerator;
-var SourceMapConsumer = require('source-map').SourceMapConsumer;
 
 var PLUGIN_NAME = 'gulp-sourcemap';
-
-/**
- * Apply source map to the end of the source map chain
- *
- * @param sourceMap source map to be appended
- */
-function applySourceMap(sourceMap) {
-  /*jshint validthis:true */
-  try {
-    if (typeof sourceMap === 'string' || sourceMap instanceof String) {
-      sourceMap = JSON.parse(sourceMap);
-    }
-    var generator = SourceMapGenerator.fromSourceMap(new SourceMapConsumer(sourceMap));
-    generator.applySourceMap(new SourceMapConsumer(this.sourceMap));
-    this.sourceMap = JSON.parse(generator.toString());
-  } catch (e) {
-    gutil.log(gutil.colors.red('Error applying source map:'));
-    console.error(e.stack);
-  }
-}
 
 /**
  * Initialize source mapping chain
@@ -54,9 +32,6 @@ module.exports.init = function init() {
       sources: [file.relative],
       sourcesContent: [file.contents.toString()]
     };
-
-    // add helper method to vinyl file
-    file.applySourceMap = applySourceMap;
 
     this.push(file);
     callback();
