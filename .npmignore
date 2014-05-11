@@ -6,3 +6,5 @@ reports
 test
 .jshintrc
 .npmignore
+.coveralls.yml
+.travis.yml
