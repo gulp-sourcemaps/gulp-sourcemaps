@@ -6,7 +6,9 @@
   "repository": "git://github.com/floridoo/gulp-sourcemaps.git",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jshint *.js test/*.js && faucet test/*.js",
+    "tap": "node node_modules/argg test/*.js",
+    "cover": "istanbul cover --dir reports/coverage node_modules/argg test/*.js"
   },
   "keywords": [
     "gulp",
@@ -17,5 +19,12 @@
   "dependencies": {
     "through2": "^0.4.1",
     "vinyl": "^0.2.3"
+  },
+  "devDependencies": {
+    "jshint": "^2.5.0",
+    "tape": "^2.12.3",
+    "argg": "0.0.1",
+    "istanbul": "^0.2.8",
+    "faucet": "0.0.1"
   }
 }
