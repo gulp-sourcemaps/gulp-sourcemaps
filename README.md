@@ -1,22 +1,8 @@
-## Information
+## gulp-sourcemaps  [![NPM version][npm-image]][npm-url]
 
-<table>
-<tr>
-<td>Package</td><td>gulp-sourcemaps</td>
-</tr>
-<tr>
-<td>Description</td>
-<td>Source map support for Gulp</td>
-</tr>
-<tr>
-<td>Node Version</td>
-<td>≥ 0.9</td>
-</tr>
-</table>
+### Usage
 
-## Usage
-
-### Inline maps
+#### Inline maps
 Inline maps are embedded in the source file.
 
 ```javascript
@@ -37,7 +23,7 @@ gulp.task('javascript', function() {
 
 All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps.
 
-### External source map files
+#### External source map files
 
 To write external source map files, pass a path relative to the destination to `sourcemaps.write()`.
 
@@ -59,7 +45,7 @@ gulp.task('javascript', function() {
 ```
 
 
-## Options
+### Options
 
 - `addComment`
 
@@ -97,13 +83,13 @@ gulp.task('javascript', function() {
   });
   ```
 
-## Plugin developers only: How to add source map support to plugins
+### Plugin developers only: How to add source map support to plugins
 
 - Generate a source map for the transformation the plugin is applying
 - Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/floridoo/vinyl-sourcemaps-apply).
   This combines the source map of this plugin with the source maps coming from plugins further up the chain.
 
-### Example:
+#### Example:
 
 ```javascript
 var through = require('through2');
@@ -134,3 +120,6 @@ module.exports = function(options) {
   return through.obj(transform);
 };
 ```
+
+[npm-image]: http://img.shields.io/npm/v/gulp-sourcemaps.svg?style=flat
+[npm-url]: https://npmjs.org/package/gulp-sourcemaps
