@@ -23,6 +23,8 @@ gulp.task('javascript', function() {
 
 All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps.
 
+Warning: the current NPM version of `gulp-concat` doesn't support source maps yet. You can use https://github.com/floridoo/gulp-concat/tree/sourcemap_pipe2 for now.
+
 #### External source map files
 
 To write external source map files, pass a path relative to the destination to `sourcemaps.write()`.
