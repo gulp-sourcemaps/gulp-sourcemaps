@@ -27,6 +27,15 @@ function makeStreamFile() {
     });
 }
 
+function makeFileWithInlineSourceMap() {
+    return new File({
+        cwd: '/',
+        base: '/src/',
+        path: '/src/test/all.js',
+        contents: new Buffer('console.log("line 1.1"),console.log("line 1.2"),console.log("line 2.1"),console.log("line 2.2");\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYWxsLmpzIiwic291cmNlcyI6WyJ0ZXN0MS5qcyIsInRlc3QyLmpzIl0sIm5hbWVzIjpbImNvbnNvbGUiLCJsb2ciXSwibWFwcGluZ3MiOiJBQUFBQSxRQUFBQyxJQUFBLFlBQ0FELFFBQUFDLElBQUEsWUNEQUQsUUFBQUMsSUFBQSxZQUNBRCxRQUFBQyxJQUFBIiwic291cmNlc0NvbnRlbnQiOlsiY29uc29sZS5sb2coJ2xpbmUgMS4xJyk7XG5jb25zb2xlLmxvZygnbGluZSAxLjInKTtcbiIsImNvbnNvbGUubG9nKCdsaW5lIDIuMScpO1xuY29uc29sZS5sb2coJ2xpbmUgMi4yJyk7Il0sInNvdXJjZVJvb3QiOiIvc291cmNlLyJ9')
+    });
+}
+
 test('init: should pass through when file is null', function(t) {
     var file = new File();
     var pipeline = sourcemaps.init();
@@ -77,4 +86,25 @@ test('init: should add a valid source map', function(t) {
             t.end();
         })
         .write(makeFile());
+});
+
+test('init: should import an existing inline source map', function(t) {
+    var pipeline = sourcemaps.init();
+    pipeline
+        .on('data', function(data) {
+            console.log(data.sourceMap);
+            t.ok(data, 'should pass something through');
+            t.ok(data instanceof File, 'should pass a vinyl file through');
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['test1.js', 'test2.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, ['console.log(\'line 1.1\');\nconsole.log(\'line 1.2\');\n', 'console.log(\'line 2.1\');\nconsole.log(\'line 2.2\');'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, 'AAAAA,QAAAC,IAAA,YACAD,QAAAC,IAAA,YCDAD,QAAAC,IAAA,YACAD,QAAAC,IAAA', 'should have right mappings');
+            t.end();
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(makeFileWithInlineSourceMap());
 });

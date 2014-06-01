@@ -3,6 +3,7 @@ var through = require('through2');
 var fs = require('fs');
 var path = require('path');
 var File = require('vinyl');
+var convert = require('convert-source-map');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
 
@@ -22,8 +23,7 @@ module.exports.init = function init() {
       return callback(new Error(PLUGIN_NAME + ': Streaming not supported'));
     }
 
-    // initialize source map
-    file.sourceMap = {
+    var map = {
       version : 3,
       file: file.relative,
       names: [],
@@ -32,6 +32,9 @@ module.exports.init = function init() {
       sourcesContent: [file.contents.toString()]
     };
 
+    var embeddedMap = convert.fromSource(file.contents.toString());
+
+    file.sourceMap = embeddedMap ? embeddedMap.toObject() : map;
     this.push(file);
     callback();
   }

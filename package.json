@@ -19,7 +19,8 @@
   "license": "ISC",
   "dependencies": {
     "through2": "^0.4.1",
-    "vinyl": "^0.2.3"
+    "vinyl": "^0.2.3",
+    "convert-source-map": "^0.3.3"
   },
   "devDependencies": {
     "jshint": "^2.5.0",
