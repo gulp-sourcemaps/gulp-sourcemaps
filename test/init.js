@@ -108,3 +108,13 @@ test('init: should import an existing inline source map', function(t) {
         })
         .write(makeFileWithInlineSourceMap());
 });
+
+test('should remove inline sourcemap', function(t) {
+    var pipeline = sourcemaps.init();
+    pipeline
+        .on('data', function(data) {
+            t.notOk(/sourceMappingURL/.test(data.contents.toString()), 'should not have sourcemapping');
+            t.end();
+        })
+        .write(makeFileWithInlineSourceMap());
+});

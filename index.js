@@ -35,6 +35,10 @@ module.exports.init = function init() {
     var embeddedMap = convert.fromSource(file.contents.toString());
 
     file.sourceMap = embeddedMap ? embeddedMap.toObject() : map;
+
+    var str = convert.removeComments(file.contents.toString());
+    file.contents = new Buffer(str, 'utf8');
+
     this.push(file);
     callback();
   }
