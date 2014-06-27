@@ -81,7 +81,7 @@ module.exports.write = function write(destPath, options) {
     sourceMap.file = file.relative;
 
     if (options.sourceRoot)
-      sourceMap.sourceRoot = options.sourceRoot;
+      sourceMap.sourceRoot = path.join(options.sourceRoot, path.dirname(file.relative));
 
     if (options.includeContent) {
       sourceMap.sourceRoot = options.sourceRoot || '/source/';
