@@ -18,7 +18,7 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "through2": "^0.4.1",
+    "through2": "^0.5.1",
     "vinyl": "^0.2.3",
     "convert-source-map": "^0.3.3"
   },
