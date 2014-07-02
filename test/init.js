@@ -92,7 +92,6 @@ test('init: should import an existing inline source map', function(t) {
     var pipeline = sourcemaps.init();
     pipeline
         .on('data', function(data) {
-            console.log(data.sourceMap);
             t.ok(data, 'should pass something through');
             t.ok(data instanceof File, 'should pass a vinyl file through');
             t.ok(data.sourceMap, 'should add a source map object');

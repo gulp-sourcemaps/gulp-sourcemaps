@@ -202,6 +202,20 @@ test('write: should fetch missing sourceContent', function(t) {
         .write(file);
 });
 
+test('write: should not throw when unable to fetch missing sourceContent', function(t) {
+    var file = makeFile();
+    file.sourceMap.sources[0] += '.invalid';
+    delete file.sourceMap.sourcesContent;
+    var pipeline = sourcemaps.write();
+    pipeline
+        .on('data', function(data) {
+            t.notEqual(data.sourceMap.sourcesContent, undefined, 'should have source content');
+            t.deepEqual(data.sourceMap.sourcesContent, [], 'should have correct source content');
+            t.end();
+        })
+        .write(file);
+});
+
 test('write: should set the sourceRoot by option sourceRoot', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot'});
