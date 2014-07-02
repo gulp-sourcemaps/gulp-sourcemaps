@@ -69,9 +69,11 @@ gulp.task('javascript', function() {
 
   By default the source maps include the source code. Pass `false` to use the original files.
 
+  Including the content is the recommended way, because it "just works". When setting this to `false` you have to host the source files and set the correct `sourceRoot`.
+
 - `sourceRoot`
 
-  Set the path where the source files are hosted (use this when `includeContent` is set to `false`).
+  Set the path where the source files are hosted (use this when `includeContent` is set to `false`). This is an URL (or subpath) relative to the source map, not a local file system path. If you have sources in different subpaths, an absolute path (from the domain root) pointing to the source file root is recommended.
 
   Example:
   ```javascript
