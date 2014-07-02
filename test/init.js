@@ -4,17 +4,17 @@ var test = require('tape');
 var sourcemaps = require('..');
 var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
+var path = require('path');
+var fs = require('fs');
 
-function helloWorld() {
-    console.log('Hello world!');
-}
+var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 
 function makeFile() {
     return new File({
         cwd: '/',
         base: '/src/',
         path: '/src/test/helloworld.js',
-        contents: new Buffer(helloWorld.toString())
+        contents: new Buffer(sourceContent)
     });
 }
 
@@ -77,7 +77,7 @@ test('init: should add a valid source map', function(t) {
             t.ok(data.sourceMap, 'should add a source map object');
             t.equal(String(data.sourceMap.version), '3', 'should have version 3');
             t.equal(data.sourceMap.sources[0], 'test/helloworld.js', 'should add file to sources');
-            t.equal(data.sourceMap.sourcesContent[0], 'function helloWorld() {\n    console.log(\'Hello world!\');\n}', 'should add file content to sourcesContent');
+            t.equal(data.sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
             t.equal(data.sourceMap.mappings, '', 'should add empty mappings');
             t.end();
         })

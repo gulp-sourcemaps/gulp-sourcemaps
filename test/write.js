@@ -4,19 +4,19 @@ var test = require('tape');
 var sourcemaps = require('..');
 var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
+var path = require('path');
+var fs = require('fs');
 
-function helloWorld() {
-    console.log('Hello world!');
-}
+var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 
 function makeSourceMap() {
     return {
         version: 3,
-        file: 'test/helloworld.js',
+        file: 'assets/helloworld.js',
         names: [],
         mappings: '',
-        sources: [ 'test/helloworld.js' ],
-        sourcesContent: [ helloWorld.toString() ]
+        sources: [ 'assets/helloworld.js' ],
+        sourcesContent: [ sourceContent ]
     };
 }
 
@@ -26,10 +26,10 @@ function base64JSON(object) {
 
 function makeFile() {
     var file = new File({
-        cwd: '/',
-        base: '/src/',
-        path: '/src/test/helloworld.js',
-        contents: new Buffer(helloWorld.toString())
+        cwd: process.cwd(),
+        base: path.join(process.cwd(), 'test'),
+        path: path.join(process.cwd(), 'test', 'assets/helloworld.js'),
+        contents: new Buffer(sourceContent)
     });
     file.sourceMap = makeSourceMap();
     return file;
@@ -74,7 +74,7 @@ test('write: should pass through when file has no source map', function(t) {
             t.ok(data, 'should pass something through');
             t.ok(data instanceof File, 'should pass a vinyl file through');
             t.deepEqual(data, file, 'should not change file');
-            t.equal(String(data.contents), helloWorld.toString(), 'should not change file content');
+            t.equal(String(data.contents), sourceContent, 'should not change file content');
             t.end();
         })
         .on('error', function() {
@@ -98,7 +98,7 @@ test('write: should emit an error if file content is a stream', function(t) {
         .write(makeStreamFile());
 });
 
-test('write: should write an inline souce map', function(t) {
+test('write: should write an inline source map', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write();
     pipeline
@@ -107,7 +107,7 @@ test('write: should write an inline souce map', function(t) {
             t.ok(data instanceof File, 'should pass a vinyl file through');
             t.deepEqual(data, file, 'should not change file');
             t.equal(String(data.contents),
-                helloWorld.toString() + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap),
+                sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap),
                 'should add source map as comment');
             t.end();
         })
@@ -125,7 +125,7 @@ test('write: should use CSS comments if CSS file', function(t) {
     pipeline
         .on('data', function(data) {
             t.equal(String(data.contents),
-                helloWorld.toString() + '\n/*# sourceMappingURL=' + base64JSON(data.sourceMap) + ' */',
+                sourceContent + '\n/*# sourceMappingURL=' + base64JSON(data.sourceMap) + ' */',
                 'should add source map with CSS comment');
             t.end();
         })
@@ -144,16 +144,16 @@ test('write: should write external map files', function(t) {
             fileCount++;
             if (fileCount == 2) {
                 outFiles.reverse().map(function(data) {
-                    if (data.path === '/src/test/helloworld.js') {
+                    if (data.path === path.join(process.cwd(), 'test/assets/helloworld.js')) {
                         sourceMap = data.sourceMap;
                         t.ok(data instanceof File, 'should pass a vinyl file through');
                         t.deepEqual(data, file, 'should not change file');
                         t.equal(String(data.contents),
-                            helloWorld.toString() + '\n//# sourceMappingURL=../../maps/test/helloworld.js.map',
+                            sourceContent + '\n//# sourceMappingURL=../../maps/assets/helloworld.js.map',
                             'should add a comment referencing the source map file');
                     } else {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
-                        t.equal(data.path, '/maps/test/helloworld.js.map');
+                        t.equal(data.path, path.join(process.cwd(), 'maps/assets/helloworld.js.map'));
                         t.deepEqual(JSON.parse(data.contents), sourceMap, 'should have the file\'s source map as content');
                     }
                 });
@@ -172,7 +172,7 @@ test('write: should write no comment with option addComment=false', function(t) 
     var pipeline = sourcemaps.write({addComment: false});
     pipeline
         .on('data', function(data) {
-            t.equal(String(data.contents), helloWorld.toString(), 'should not change file content');
+            t.equal(String(data.contents), sourceContent, 'should not change file content');
             t.end();
         })
         .write(file);
@@ -184,6 +184,19 @@ test('write: should not include source content with option includeContent=false'
     pipeline
         .on('data', function(data) {
             t.equal(data.sourceMap.sourcesContent, undefined, 'should not have source content');
+            t.end();
+        })
+        .write(file);
+});
+
+test('write: should fetch missing sourceContent', function(t) {
+    var file = makeFile();
+    delete file.sourceMap.sourcesContent;
+    var pipeline = sourcemaps.write();
+    pipeline
+        .on('data', function(data) {
+            t.notEqual(data.sourceMap.sourcesContent, undefined, 'should have source content');
+            t.deepEqual(data.sourceMap.sourcesContent, [sourceContent], 'should have correct source content');
             t.end();
         })
         .write(file);
