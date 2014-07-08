@@ -132,6 +132,18 @@ test('write: should use CSS comments if CSS file', function(t) {
         .write(file);
 });
 
+test('write: should write no comment if not JS or CSS file', function(t) {
+    var file = makeFile();
+    file.path = file.path.replace('.js', '.txt');
+    var pipeline = sourcemaps.write();
+    pipeline
+        .on('data', function(data) {
+            t.equal(String(data.contents), sourceContent);
+            t.end();
+        })
+        .write(file);
+});
+
 test('write: should write external map files', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write('../maps');

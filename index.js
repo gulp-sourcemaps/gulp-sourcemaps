@@ -110,9 +110,10 @@ module.exports.write = function write(destPath, options) {
         commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */"; };
         break;
       case 'js':
-      /* falls through */
-      default:
         commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url; };
+        break;
+      default:
+        commentFormatter = function(url) { return ""; };
     }
 
     var comment;
