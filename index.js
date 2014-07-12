@@ -23,21 +23,22 @@ module.exports.init = function init() {
       return callback(new Error(PLUGIN_NAME + ': Streaming not supported'));
     }
 
-    var map = {
-      version : 3,
-      file: file.relative,
-      names: [],
-      mappings: '',
-      sources: [file.relative],
-      sourcesContent: [file.contents.toString()]
-    };
+    var fileContent = file.contents.toString();
+    var embeddedMap = convert.fromSource(fileContent);
 
-    var embeddedMap = convert.fromSource(file.contents.toString());
-
-    file.sourceMap = embeddedMap ? embeddedMap.toObject() : map;
-
-    var str = convert.removeComments(file.contents.toString());
-    file.contents = new Buffer(str, 'utf8');
+    if (embeddedMap) {
+      file.sourceMap = embeddedMap.sourcemap;
+      file.contents = new Buffer(convert.removeComments(fileContent), 'utf8');
+    } else {
+      file.sourceMap = {
+        version : 3,
+        file: file.relative,
+        names: [],
+        mappings: '',
+        sources: [file.relative],
+        sourcesContent: [fileContent]
+      };
+    }
 
     this.push(file);
     callback();
