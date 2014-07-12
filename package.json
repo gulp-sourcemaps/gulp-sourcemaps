@@ -12,8 +12,10 @@
     "coveralls": "istanbul cover node_modules/argg test/*.js --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "keywords": [
+    "gulpplugin",
     "gulp",
-    "sourcemap"
+    "source maps",
+    "sourcemaps"
   ],
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
