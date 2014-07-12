@@ -11,27 +11,27 @@ var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')
 
 function makeFile() {
     return new File({
-        cwd: '/',
-        base: '/src/',
-        path: '/src/test/helloworld.js',
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'helloworld.js'),
         contents: new Buffer(sourceContent)
     });
 }
 
 function makeStreamFile() {
     return new File({
-        cwd: '/',
-        base: '/src/',
-        path: '/src/test/helloworld.js',
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'helloworld.js'),
         contents: new ReadableStream()
     });
 }
 
 function makeFileWithInlineSourceMap() {
     return new File({
-        cwd: '/',
-        base: '/src/',
-        path: '/src/test/all.js',
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'all.js'),
         contents: new Buffer('console.log("line 1.1"),console.log("line 1.2"),console.log("line 2.1"),console.log("line 2.2");\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYWxsLmpzIiwic291cmNlcyI6WyJ0ZXN0MS5qcyIsInRlc3QyLmpzIl0sIm5hbWVzIjpbImNvbnNvbGUiLCJsb2ciXSwibWFwcGluZ3MiOiJBQUFBQSxRQUFBQyxJQUFBLFlBQ0FELFFBQUFDLElBQUEsWUNEQUQsUUFBQUMsSUFBQSxZQUNBRCxRQUFBQyxJQUFBIiwic291cmNlc0NvbnRlbnQiOlsiY29uc29sZS5sb2coJ2xpbmUgMS4xJyk7XG5jb25zb2xlLmxvZygnbGluZSAxLjInKTtcbiIsImNvbnNvbGUubG9nKCdsaW5lIDIuMScpO1xuY29uc29sZS5sb2coJ2xpbmUgMi4yJyk7Il0sInNvdXJjZVJvb3QiOiIvc291cmNlLyJ9')
     });
 }
@@ -76,7 +76,7 @@ test('init: should add a valid source map', function(t) {
             t.ok(data instanceof File, 'should pass a vinyl file through');
             t.ok(data.sourceMap, 'should add a source map object');
             t.equal(String(data.sourceMap.version), '3', 'should have version 3');
-            t.equal(data.sourceMap.sources[0], 'test/helloworld.js', 'should add file to sources');
+            t.equal(data.sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
             t.equal(data.sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
             t.equal(data.sourceMap.mappings, '', 'should add empty mappings');
             t.end();
@@ -89,7 +89,7 @@ test('init: should add a valid source map', function(t) {
 });
 
 test('init: should import an existing inline source map', function(t) {
-    var pipeline = sourcemaps.init();
+    var pipeline = sourcemaps.init({loadMaps: true});
     pipeline
         .on('data', function(data) {
             t.ok(data, 'should pass something through');
@@ -108,12 +108,97 @@ test('init: should import an existing inline source map', function(t) {
         .write(makeFileWithInlineSourceMap());
 });
 
-test('should remove inline sourcemap', function(t) {
-    var pipeline = sourcemaps.init();
+test('init: should remove inline sourcemap', function(t) {
+    var pipeline = sourcemaps.init({loadMaps: true});
     pipeline
         .on('data', function(data) {
             t.notOk(/sourceMappingURL/.test(data.contents.toString()), 'should not have sourcemapping');
             t.end();
         })
         .write(makeFileWithInlineSourceMap());
+});
+
+test('init: should load external source map file referenced in comment', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld2.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, ['source content from source map'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should load external source map if no source mapping comment', function(t) {
+    var file = makeFile();
+    file.path = file.path.replace('helloworld.js', 'helloworld2.js');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld2.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, ['source content from source map'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should load external source map and add sourceContent if missing', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should load external source map and add sourceContent if missing', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should not throw when source file for sourceContent not found', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'missingfile'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), null], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
 });

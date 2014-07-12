@@ -5,6 +5,7 @@
 #### Inline maps
 Inline maps are embedded in the source file.
 
+Example:
 ```javascript
 var gulp = require('gulp');
 var concat = require('gulp-concat');
@@ -45,8 +46,37 @@ gulp.task('javascript', function() {
 });
 ```
 
+#### Load existing source maps
 
-### Options
+To load existing source maps, pass the option `loadMaps: true` to `sourcemaps.init()`.
+
+Example:
+```javascript
+var gulp = require('gulp');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
+
+gulp.task('javascript', function() {
+  gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(concat('all.js'))
+      .pipe(uglify())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('dist'));
+});
+```
+
+
+### Init Options
+
+- `loadMaps`
+  Set to true to load existing maps for source files. Supports the following:
+    - inline source maps
+    - source map files referenced by a `sourceMappingURL=` comment
+    - source map files with the same name (plus .map) in the same directory
+
+### Write Options
 
 - `addComment`
 

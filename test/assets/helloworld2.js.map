@@ -1,0 +1,8 @@
+{
+  "version":3,
+  "file":"helloworld2.js",
+  "names":[],
+  "mappings":"",
+  "sources":["helloworld2.js"],
+  "sourcesContent":["source content from source map"]
+}

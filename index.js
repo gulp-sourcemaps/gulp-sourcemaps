@@ -10,7 +10,7 @@ var PLUGIN_NAME = 'gulp-sourcemap';
 /**
  * Initialize source mapping chain
  */
-module.exports.init = function init() {
+module.exports.init = function init(options) {
   function sourceMapInit(file, encoding, callback) {
     /*jshint validthis:true */
 
@@ -20,17 +20,75 @@ module.exports.init = function init() {
     }
 
     if (file.isStream()) {
-      return callback(new Error(PLUGIN_NAME + ': Streaming not supported'));
+      return callback(new Error(PLUGIN_NAME + '-init: Streaming not supported'));
     }
 
     var fileContent = file.contents.toString();
-    var embeddedMap = convert.fromSource(fileContent);
+    var sourceMap;
 
-    if (embeddedMap) {
-      file.sourceMap = embeddedMap.sourcemap;
-      file.contents = new Buffer(convert.removeComments(fileContent), 'utf8');
-    } else {
-      file.sourceMap = {
+    if (options && options.loadMaps) {
+      var sourcePath = ''; //root path for the sources in the map
+
+      // Try to read inline source map
+      sourceMap = convert.fromSource(fileContent);
+      if (sourceMap) {
+        sourceMap = sourceMap.toObject();
+        // sources in map are relative to the source file
+        sourcePath = path.dirname(file.path);
+      } else {
+        // look for source map comment referencing a source map file
+        var mapComment = convert.mapFileCommentRegex.exec(fileContent);
+
+        var mapFile;
+        if (mapComment)
+          mapFile = path.resolve(path.dirname(file.path), mapComment[1]);
+        // if no comment try map file with same name as source file
+        else
+          mapFile = file.path + '.map';
+
+        // sources in external map are relative to map file
+        sourcePath = path.dirname(mapFile);
+
+        try {
+          sourceMap = JSON.parse(fs.readFileSync(mapFile).toString());
+        } catch(e) {}
+      }
+
+      // fix source paths and sourceContent for imported source map
+      if (sourceMap) {
+        sourceMap.sourcesContent = sourceMap.sourcesContent || [];
+        sourceMap.sources.forEach(function(source, i) {
+          var absPath = path.resolve(sourcePath, source);
+          sourceMap.sources[i] = path.relative(file.base, absPath);
+
+          if (!sourceMap.sourcesContent[i]) {
+            var sourceContent = null;
+
+            // if current file: use content
+            if (absPath === file.path) {
+              sourceContent = fileContent;
+
+            // else load content from file
+            } else {
+              try {
+                sourceContent = fs.readFileSync(absPath).toString();
+              } catch (e) {
+                console.warn(PLUGIN_NAME + '-init: source file not found:' + absPath);
+              }
+            }
+
+            sourceMap.sourcesContent[i] = sourceContent;
+          }
+        });
+
+        // remove source map comment from source
+        file.contents = new Buffer(convert.removeComments(fileContent), 'utf8');
+      }
+    }
+
+    if (!sourceMap) {
+      // Make an empty source map
+      sourceMap = {
         version : 3,
         file: file.relative,
         names: [],
@@ -39,6 +97,8 @@ module.exports.init = function init() {
         sourcesContent: [fileContent]
       };
     }
+
+    file.sourceMap = sourceMap;
 
     this.push(file);
     callback();
@@ -75,7 +135,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     if (file.isStream()) {
-      return callback(new Error(PLUGIN_NAME + ': Streaming not supported'));
+      return callback(new Error(PLUGIN_NAME + '-write: Streaming not supported'));
     }
 
     var sourceMap = file.sourceMap;
@@ -95,7 +155,7 @@ module.exports.write = function write(destPath, options) {
           try {
             sourceMap.sourcesContent[i] = fs.readFileSync(sourcePath).toString();
           } catch (e) {
-            console.warn(PLUGIN_NAME + ': source file not found:' + sourcePath);
+            console.warn(PLUGIN_NAME + '-write: source file not found:' + sourcePath);
           }
         }
       }

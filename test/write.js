@@ -12,10 +12,10 @@ var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')
 function makeSourceMap() {
     return {
         version: 3,
-        file: 'assets/helloworld.js',
+        file: 'helloworld.js',
         names: [],
         mappings: '',
-        sources: [ 'assets/helloworld.js' ],
+        sources: [ 'helloworld.js' ],
         sourcesContent: [ sourceContent ]
     };
 }
@@ -26,9 +26,9 @@ function base64JSON(object) {
 
 function makeFile() {
     var file = new File({
-        cwd: process.cwd(),
-        base: path.join(process.cwd(), 'test'),
-        path: path.join(process.cwd(), 'test', 'assets/helloworld.js'),
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'helloworld.js'),
         contents: new Buffer(sourceContent)
     });
     file.sourceMap = makeSourceMap();
@@ -37,9 +37,9 @@ function makeFile() {
 
 function makeStreamFile() {
     var file = new File({
-        cwd: '/',
-        base: '/src/',
-        path: '/src/test/helloworld.js',
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'helloworld.js'),
         contents: new ReadableStream()
     });
     file.sourceMap = {};
@@ -156,16 +156,16 @@ test('write: should write external map files', function(t) {
             fileCount++;
             if (fileCount == 2) {
                 outFiles.reverse().map(function(data) {
-                    if (data.path === path.join(process.cwd(), 'test/assets/helloworld.js')) {
+                    if (data.path === path.join(__dirname, 'assets/helloworld.js')) {
                         sourceMap = data.sourceMap;
                         t.ok(data instanceof File, 'should pass a vinyl file through');
                         t.deepEqual(data, file, 'should not change file');
                         t.equal(String(data.contents),
-                            sourceContent + '\n//# sourceMappingURL=../../maps/assets/helloworld.js.map',
+                            sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map',
                             'should add a comment referencing the source map file');
                     } else {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
-                        t.equal(data.path, path.join(process.cwd(), 'maps/assets/helloworld.js.map'));
+                        t.equal(data.path, path.join(__dirname, 'maps/helloworld.js.map'));
                         t.deepEqual(JSON.parse(data.contents), sourceMap, 'should have the file\'s source map as content');
                     }
                 });
