@@ -238,3 +238,16 @@ test('write: should set the sourceRoot by option sourceRoot', function(t) {
         })
         .write(file);
 });
+
+test('write: should set the sourceRoot by option sourceRoot, as a function', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({
+      sourceRoot: function(file) { return '/testSourceRoot'; }
+    });
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
+            t.end();
+        })
+        .write(file);
+});
