@@ -116,6 +116,23 @@ gulp.task('javascript', function() {
   });
   ```
 
+  Example (using a function):
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(concat('all.js'))
+        .pipe(uglify())
+      .pipe(sourcemaps.write({
+        includeContent: false,
+        sourceRoot: function(file) {
+          return '/src';
+        }
+       }))
+      .pipe(gulp.dest('dist'));
+  });
+  ```
+
 ### Plugin developers only: How to add source map support to plugins
 
 - Generate a source map for the transformation the plugin is applying
