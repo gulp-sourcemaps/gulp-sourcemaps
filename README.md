@@ -102,7 +102,7 @@ gulp.task('javascript', function() {
 
 - `sourceRoot`
 
-  Set the path where the source files are hosted (use this when `includeContent` is set to `false`). This is an URL (or subpath) relative to the source map, not a local file system path. If you have sources in different subpaths, an absolute path (from the domain root) pointing to the source file root is recommended.
+  Set the path where the source files are hosted (use this when `includeContent` is set to `false`). This is an URL (or subpath) relative to the source map, not a local file system path. If you have sources in different subpaths, an absolute path (from the domain root) pointing to the source file root is recommended, or define it with a function.
 
   Example:
   ```javascript

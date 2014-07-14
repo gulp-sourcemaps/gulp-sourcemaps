@@ -141,11 +141,17 @@ module.exports.write = function write(destPath, options) {
     var sourceMap = file.sourceMap;
     sourceMap.file = file.relative;
 
-    if (options.sourceRoot)
-      sourceMap.sourceRoot = options.sourceRoot;
+    if (options.sourceRoot) {
+      if (typeof options.sourceRoot === 'function') {
+        sourceMap.sourceRoot = options.sourceRoot(file);
+      } else {
+        sourceMap.sourceRoot = options.sourceRoot;
+      }
+
+    }
 
     if (options.includeContent) {
-      sourceMap.sourceRoot = options.sourceRoot || '/source/';
+      sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
 
       // load missing source content
