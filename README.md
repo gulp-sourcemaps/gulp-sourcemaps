@@ -22,7 +22,7 @@ gulp.task('javascript', function() {
 });
 ```
 
-All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps.
+All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps. You can find a list of such plugins in the [wiki](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
 
 
 #### External source map files
@@ -139,6 +139,7 @@ gulp.task('javascript', function() {
 - **Important**: Make sure the paths in the generated source map (`file` and `sources`) are relative to `file.base` (e.g. use `file.relative`).
 - Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/floridoo/vinyl-sourcemaps-apply).
   This combines the source map of this plugin with the source maps coming from plugins further up the chain.
+- Add your plugin to the [wiki page](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support)
 
 #### Example:
 
