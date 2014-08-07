@@ -41,7 +41,7 @@ module.exports.init = function init(options) {
 
         var mapFile;
         if (mapComment)
-          mapFile = path.resolve(path.dirname(file.path), mapComment[1]);
+          mapFile = path.resolve(path.dirname(file.path), mapComment[1] || mapComment[2]);
         // if no comment try map file with same name as source file
         else
           mapFile = file.path + '.map';
