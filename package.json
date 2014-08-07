@@ -1,6 +1,6 @@
 {
   "name": "gulp-sourcemaps",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Source map support for Gulp.js",
   "homepage": "http://github.com/floridoo/gulp-sourcemaps",
   "repository": "git://github.com/floridoo/gulp-sourcemaps.git",
