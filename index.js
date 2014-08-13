@@ -204,6 +204,10 @@ module.exports.write = function write(destPath, options) {
       comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
       // fix paths for Windows
       comment = comment.replace('\\', '/');
+
+      if (options.prefix) {
+        comment = comment.replace('sourceMappingURL=', 'sourceMappingURL=' + options.prefix);
+      }
     }
 
     // append source map comment
