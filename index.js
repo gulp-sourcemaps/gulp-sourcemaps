@@ -199,6 +199,8 @@ module.exports.write = function write(destPath, options) {
       this.push(sourceMapFile);
 
       comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
+      // fix paths for Windows
+      comment = comment.replace('\\', '/');
     }
 
     // append source map comment
