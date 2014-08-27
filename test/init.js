@@ -135,6 +135,19 @@ test('init: should load external source map file referenced in comment with the 
         .write(file);
 });
 
+test('init: should remove source map comment with the \/\/# syntax', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.notOk(/sourceMappingURL/.test(data.contents.toString()), 'should not have sourcemapping');
+            t.end();
+        })
+        .write(file);
+});
+
 test('init: should load external source map file referenced in comment with the \/*# *\/ syntax', function(t) {
     var file = makeFile();
     file.contents = new Buffer(sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
@@ -147,6 +160,19 @@ test('init: should load external source map file referenced in comment with the 
             t.deepEqual(data.sourceMap.sources, ['helloworld2.js'], 'should have right sources');
             t.deepEqual(data.sourceMap.sourcesContent, ['source content from source map'], 'should have right sourcesContent');
             t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should remove source map comment with the \/\/# syntax', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.notOk(/sourceMappingURL/.test(data.contents.toString()), 'should not have sourcemapping');
             t.end();
         })
         .write(file);

@@ -35,16 +35,19 @@ module.exports.init = function init(options) {
         sourceMap = sourceMap.toObject();
         // sources in map are relative to the source file
         sourcePath = path.dirname(file.path);
+        fileContent = convert.removeComments(fileContent);
       } else {
         // look for source map comment referencing a source map file
         var mapComment = convert.mapFileCommentRegex.exec(fileContent);
 
         var mapFile;
-        if (mapComment)
+        if (mapComment) {
           mapFile = path.resolve(path.dirname(file.path), mapComment[1] || mapComment[2]);
+          fileContent = convert.removeMapFileComments(fileContent);
         // if no comment try map file with same name as source file
-        else
+        } else {
           mapFile = file.path + '.map';
+        }
 
         // sources in external map are relative to map file
         sourcePath = path.dirname(mapFile);
@@ -82,7 +85,7 @@ module.exports.init = function init(options) {
         });
 
         // remove source map comment from source
-        file.contents = new Buffer(convert.removeComments(fileContent), 'utf8');
+        file.contents = new Buffer(fileContent, 'utf8');
       }
     }
 
