@@ -20,9 +20,9 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "through2": "^0.5.1",
-    "vinyl": "^0.2.3",
-    "convert-source-map": "^0.3.3"
+    "through2": "^0.6.1",
+    "vinyl": "^0.4.2",
+    "convert-source-map": "^0.4.1"
   },
   "devDependencies": {
     "jshint": "^2.5.2",
