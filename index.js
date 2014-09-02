@@ -200,8 +200,8 @@ module.exports.write = function write(destPath, options) {
 
       comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
 
-      if (options.prefix) {
-        comment = comment.replace('sourceMappingURL=', 'sourceMappingURL=' + options.prefix);
+      if (options.sourceMappingURLPrefix) {
+        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + options.sourceMappingURLPrefix);
       }
     }
 
