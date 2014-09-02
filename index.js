@@ -205,8 +205,8 @@ module.exports.write = function write(destPath, options) {
       // fix paths for Windows
       comment = comment.replace('\\', '/');
 
-      if (options.prefix) {
-        comment = comment.replace('sourceMappingURL=', 'sourceMappingURL=' + options.prefix);
+      if (options.sourceMappingURLPrefix) {
+        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + options.sourceMappingURLPrefix);
       }
     }
 

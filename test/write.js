@@ -251,3 +251,17 @@ test('write: should set the sourceRoot by option sourceRoot, as a function', fun
         })
         .write(file);
 });
+
+test('write: should accept a sourceMappingURLPrefix', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../maps', { sourceMappingURLPrefix: 'https://asset-host.example.com' });
+    pipeline
+      .on('data', function(data) {
+        if (/helloworld\.js$/.test(data.path)) {
+          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map');
+          t.end();
+        }
+      })
+      .write(file);
+});
