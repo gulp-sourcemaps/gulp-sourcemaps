@@ -62,7 +62,7 @@ module.exports.init = function init(options) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
           var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = path.relative(file.base, absPath);
+          sourceMap.sources[i] = path.relative(file.base, absPath).replace('\\', '/');
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
