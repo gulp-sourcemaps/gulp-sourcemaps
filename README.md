@@ -22,7 +22,7 @@ gulp.task('javascript', function() {
 });
 ```
 
-All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to support source maps. You can find a list of such plugins in the [wiki](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
+All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to have support for `gulp-sourcemaps`. You can find a list of such plugins in the [wiki](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
 
 
 #### External source map files
