@@ -62,7 +62,7 @@ module.exports.init = function init(options) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
           var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = path.relative(file.base, absPath).replace('\\', '/');
+          sourceMap.sources[i] = path.relative(file.base, absPath).replace(/\\/g, '/');
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
@@ -203,7 +203,7 @@ module.exports.write = function write(destPath, options) {
 
       comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
       // fix paths for Windows
-      comment = comment.replace('\\', '/');
+      comment = comment.replace(/\\/g, '/');
     }
 
     // append source map comment
