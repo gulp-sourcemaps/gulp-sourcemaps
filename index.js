@@ -93,14 +93,13 @@ module.exports.init = function init(options) {
       // Make an empty source map
       sourceMap = {
         version : 3,
-        file: file.relative,
+        file: file.relative.replace(/\\/g,"/"),
         names: [],
         mappings: '',
-        sources: [file.relative],
+        sources: [file.relative.replace(/\\/g,"/")],
         sourcesContent: [fileContent]
       };
     }
-
     file.sourceMap = sourceMap;
 
     this.push(file);
@@ -142,7 +141,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var sourceMap = file.sourceMap;
-    sourceMap.file = file.relative;
+    sourceMap.file = file.relative.replace(/\\/g,"/");
 
     if (options.sourceRoot) {
       if (typeof options.sourceRoot === 'function') {
@@ -151,6 +150,10 @@ module.exports.write = function write(destPath, options) {
         sourceMap.sourceRoot = options.sourceRoot;
       }
 
+    }
+    
+    for(var i = 0; i < sourceMap.sources.length; i++){
+      sourceMap.sources[i] = sourceMap.sources[i].replace(/\\/g,"/");
     }
 
     if (options.includeContent) {
