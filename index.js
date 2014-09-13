@@ -161,7 +161,7 @@ module.exports.write = function write(destPath, options) {
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
 
       // load missing source content
-      for (var i = 0; i < file.sourceMap.sources.length; i++) {
+      for (i = 0; i < file.sourceMap.sources.length; i++) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
