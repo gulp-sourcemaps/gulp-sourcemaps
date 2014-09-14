@@ -62,7 +62,7 @@ module.exports.init = function init(options) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
           var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = path.relative(file.base, absPath).replace(/\\/g, '/');
+          sourceMap.sources[i] = path.relative(file.base, absPath).split(path.sep).join('/');
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
@@ -93,10 +93,10 @@ module.exports.init = function init(options) {
       // Make an empty source map
       sourceMap = {
         version : 3,
-        file: file.relative.replace(/\\/g,"/"),
+        file: file.relative.split(path.sep).join('/'),
         names: [],
         mappings: '',
-        sources: [file.relative.replace(/\\/g,"/")],
+        sources: [file.relative.split(path.sep).join('/')],
         sourcesContent: [fileContent]
       };
     }
@@ -141,7 +141,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var sourceMap = file.sourceMap;
-    sourceMap.file = file.relative.replace(/\\/g,"/");
+    sourceMap.file = file.relative.split(path.sep).join('/');
 
     if (options.sourceRoot) {
       if (typeof options.sourceRoot === 'function') {
@@ -153,7 +153,7 @@ module.exports.write = function write(destPath, options) {
     }
     
     for(var i = 0; i < sourceMap.sources.length; i++){
-      sourceMap.sources[i] = sourceMap.sources[i].replace(/\\/g,"/");
+      sourceMap.sources[i] = sourceMap.sources[i].split(path.sep).join('/');
     }
 
     if (options.includeContent) {
@@ -206,7 +206,7 @@ module.exports.write = function write(destPath, options) {
 
       comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
       // fix paths for Windows
-      comment = comment.replace(/\\/g, '/');
+      comment = comment.split(path.sep).join('/');
     }
 
     // append source map comment
