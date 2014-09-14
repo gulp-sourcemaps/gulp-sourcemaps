@@ -62,7 +62,7 @@ module.exports.init = function init(options) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
           var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = path.relative(file.base, absPath).split(path.sep).join('/');
+          sourceMap.sources[i] = path.relative(file.base, absPath);
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
@@ -93,10 +93,10 @@ module.exports.init = function init(options) {
       // Make an empty source map
       sourceMap = {
         version : 3,
-        file: file.relative.split(path.sep).join('/'),
+        file: file.relative,
         names: [],
         mappings: '',
-        sources: [file.relative.split(path.sep).join('/')],
+        sources: [file.relative],
         sourcesContent: [fileContent]
       };
     }
