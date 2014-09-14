@@ -62,7 +62,7 @@ module.exports.init = function init(options) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
           var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = path.relative(file.base, absPath).replace('\\', '/');
+          sourceMap.sources[i] = path.relative(file.base, absPath);
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
@@ -100,7 +100,6 @@ module.exports.init = function init(options) {
         sourcesContent: [fileContent]
       };
     }
-
     file.sourceMap = sourceMap;
 
     this.push(file);
@@ -142,7 +141,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var sourceMap = file.sourceMap;
-    sourceMap.file = file.relative;
+    sourceMap.file = file.relative.split(path.sep).join('/');
 
     if (options.sourceRoot) {
       if (typeof options.sourceRoot === 'function') {
@@ -152,13 +151,17 @@ module.exports.write = function write(destPath, options) {
       }
 
     }
+    
+    for(var i = 0; i < sourceMap.sources.length; i++){
+      sourceMap.sources[i] = sourceMap.sources[i].split(path.sep).join('/');
+    }
 
     if (options.includeContent) {
       sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
 
       // load missing source content
-      for (var i = 0; i < file.sourceMap.sources.length; i++) {
+      for (i = 0; i < file.sourceMap.sources.length; i++) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
@@ -203,7 +206,7 @@ module.exports.write = function write(destPath, options) {
 
       comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
       // fix paths for Windows
-      comment = comment.replace('\\', '/');
+      comment = comment.split(path.sep).join('/');
     }
 
     // append source map comment
