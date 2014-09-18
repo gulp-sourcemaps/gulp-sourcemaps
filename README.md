@@ -133,6 +133,26 @@ gulp.task('javascript', function() {
   });
   ```
 
+- `sourceMappingURLPrefix`
+
+  Specify a prefix to be prepended onto the source map URL when writing external source maps. Relative paths will have their leading dots stripped.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(concat('all.js'))
+        .pipe(uglify())
+      .pipe(sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: 'https://asset-host.example.com/assets'
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
+
+  This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
+
 ### Plugin developers only: How to add source map support to plugins
 
 - Generate a source map for the transformation the plugin is applying
