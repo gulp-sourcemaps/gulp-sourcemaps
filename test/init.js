@@ -245,3 +245,17 @@ test('init: should not throw when source file for sourceContent not found', func
         })
         .write(file);
 });
+
+test('init: should use unix style paths in sourcemap', function(t) {
+    var file = makeFile();
+    file.base = file.cwd;
+
+    var pipeline = sourcemaps.init();
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.file, 'assets/helloworld.js', 'should have right file');
+            t.deepEqual(data.sourceMap.sources, ['assets/helloworld.js'], 'should have right sources');
+            t.end();
+        })
+        .write(file);
+});

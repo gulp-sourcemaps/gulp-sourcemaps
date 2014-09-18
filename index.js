@@ -62,7 +62,7 @@ module.exports.init = function init(options) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
           var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = path.relative(file.base, absPath).replace('\\', '/');
+          sourceMap.sources[i] = unixStylePath(path.relative(file.base, absPath));
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
@@ -93,10 +93,10 @@ module.exports.init = function init(options) {
       // Make an empty source map
       sourceMap = {
         version : 3,
-        file: file.relative,
+        file: unixStylePath(file.relative),
         names: [],
         mappings: '',
-        sources: [file.relative],
+        sources: [unixStylePath(file.relative)],
         sourcesContent: [fileContent]
       };
     }
@@ -142,7 +142,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var sourceMap = file.sourceMap;
-    sourceMap.file = file.relative;
+    sourceMap.file = unixStylePath(file.relative);
 
     if (options.sourceRoot) {
       if (typeof options.sourceRoot === 'function') {
@@ -201,9 +201,7 @@ module.exports.write = function write(destPath, options) {
       });
       this.push(sourceMapFile);
 
-      comment = commentFormatter(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map');
-      // fix paths for Windows
-      comment = comment.replace('\\', '/');
+      comment = commentFormatter(unixStylePath(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map'));
 
       if (options.sourceMappingURLPrefix) {
         comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + options.sourceMappingURLPrefix);
@@ -220,3 +218,7 @@ module.exports.write = function write(destPath, options) {
 
   return through.obj(sourceMapWrite);
 };
+
+function unixStylePath(filePath) {
+  return filePath.split(path.sep).join('/');
+}
