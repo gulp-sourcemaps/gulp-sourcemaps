@@ -61,7 +61,12 @@ module.exports.init = function init(options) {
       if (sourceMap) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
-          var absPath = path.resolve(sourcePath, source);
+          var sourceRoot = 'sourceRoot' in sourceMap ? sourceMap.sourceRoot : '';
+          if(sourceRoot[0] === '/'){
+            sourceRoot = '';
+            console.warn(PLUGIN_NAME + '-init: The sourceRoot in the sourceMap for ' + file.relative + ' is absolute. Only relative sourceRoots are currently supported by gulp-sourcemap. See https://github.com/floridoo/gulp-sourcemaps/issues/41');
+          }
+          var absPath = path.resolve(sourcePath, sourceRoot, source);
           sourceMap.sources[i] = unixStylePath(path.relative(file.base, absPath));
 
           if (!sourceMap.sourcesContent[i]) {

@@ -212,23 +212,6 @@ test('init: should load external source map and add sourceContent if missing', f
         .write(file);
 });
 
-test('init: should load external source map and add sourceContent if missing', function(t) {
-    var file = makeFile();
-    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
-
-    var pipeline = sourcemaps.init({loadMaps: true});
-    pipeline
-        .on('data', function(data) {
-            t.ok(data.sourceMap, 'should add a source map object');
-            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
-            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'test1.js'], 'should have right sources');
-            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
-            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
-            t.end();
-        })
-        .write(file);
-});
-
 test('init: should not throw when source file for sourceContent not found', function(t) {
     var file = makeFile();
     file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
@@ -240,6 +223,40 @@ test('init: should not throw when source file for sourceContent not found', func
             t.equal(String(data.sourceMap.version), '3', 'should have version 3');
             t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'missingfile'], 'should have right sources');
             t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), null], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should load external sourceContent using sourceRoot if present', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['../libs/lib.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, ['lib\n'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should load external sourceContent without using sourceRoot if sourceRoot is absolute', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, ['test1\n'], 'should have right sourcesContent');
             t.equal(data.sourceMap.mappings, '', 'should have right mappings');
             t.end();
         })
