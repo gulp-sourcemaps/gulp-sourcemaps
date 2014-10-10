@@ -101,6 +101,7 @@ module.exports.init = function init(options) {
       };
     }
 
+    sourceMap.file = file.relative;
     file.sourceMap = sourceMap;
 
     this.push(file);
