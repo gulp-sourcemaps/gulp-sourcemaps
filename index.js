@@ -159,13 +159,13 @@ module.exports.write = function write(destPath, options) {
     }
 
     if (options.includeContent) {
-      sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
+      sourceMap.sourceRoot = sourceMap.sourceRoot || path.dirname(file.path);
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
 
       // load missing source content
       for (var i = 0; i < file.sourceMap.sources.length; i++) {
         if (!sourceMap.sourcesContent[i]) {
-          var sourcePath = path.resolve(path.dirname(file.path), sourceMap.sources[i]);
+          var sourcePath = path.resolve(sourceMap.sourceRoot, sourceMap.sources[i]);
           try {
             sourceMap.sourcesContent[i] = fs.readFileSync(sourcePath).toString();
           } catch (e) {
