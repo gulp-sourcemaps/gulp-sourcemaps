@@ -8,15 +8,15 @@ Inline maps are embedded in the source file.
 Example:
 ```javascript
 var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('javascript', function() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
-      .pipe(concat('all.js'))
-      .pipe(uglify())
+      .pipe(plugin1())
+      .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
@@ -32,15 +32,15 @@ To write external source map files, pass a path relative to the destination to `
 Example:
 ```javascript
 var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('javascript', function() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
-      .pipe(concat('all.js'))
-      .pipe(uglify())
+      .pipe(plugin1())
+      .pipe(plugin2())
     .pipe(sourcemaps.write('../maps'))
     .pipe(gulp.dest('dist'));
 });
@@ -53,15 +53,15 @@ To load existing source maps, pass the option `loadMaps: true` to `sourcemaps.in
 Example:
 ```javascript
 var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('javascript', function() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(concat('all.js'))
-      .pipe(uglify())
+      .pipe(plugin1())
+      .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
@@ -87,8 +87,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {addComment: false}))
       .pipe(gulp.dest('dist'));
   });
@@ -109,8 +109,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write({includeContent: false, sourceRoot: '/src'}))
       .pipe(gulp.dest('dist'));
   });
@@ -121,8 +121,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write({
         includeContent: false,
         sourceRoot: function(file) {
@@ -142,8 +142,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {
         sourceMappingURLPrefix: 'https://asset-host.example.com/assets'
       }))
