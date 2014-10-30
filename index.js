@@ -6,6 +6,7 @@ var File = require('vinyl');
 var convert = require('convert-source-map');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
+var urlRegex = /^https?:\/\//;
 
 /**
  * Initialize source mapping chain
@@ -61,11 +62,22 @@ module.exports.init = function init(options) {
       if (sourceMap) {
         sourceMap.sourcesContent = sourceMap.sourcesContent || [];
         sourceMap.sources.forEach(function(source, i) {
+          if (source.match(urlRegex)) {
+            sourceMap.sourcesContent[i] = sourceMap.sourcesContent[i] || null;
+            return;
+          }
           var absPath = path.resolve(sourcePath, source);
           sourceMap.sources[i] = unixStylePath(path.relative(file.base, absPath));
 
           if (!sourceMap.sourcesContent[i]) {
             var sourceContent = null;
+            if (sourceMap.sourceRoot) {
+              if (sourceMap.sourceRoot.match(urlRegex)) {
+                sourceMap.sourcesContent[i] = null;
+                return;
+              }
+              absPath = path.resolve(sourcePath, sourceMap.sourceRoot, source);
+            }
 
             // if current file: use content
             if (absPath === file.path) {
@@ -74,13 +86,12 @@ module.exports.init = function init(options) {
             // else load content from file
             } else {
               try {
-                console.log(PLUGIN_NAME + '-init: No source content for "' + sourceMap.source + '". Trying to load from file.');
+                console.log(PLUGIN_NAME + '-init: No source content for "' + source + '". Loading from file.');
                 sourceContent = fs.readFileSync(absPath).toString();
               } catch (e) {
                 console.warn(PLUGIN_NAME + '-init: source file not found: ' + absPath);
               }
             }
-
             sourceMap.sourcesContent[i] = sourceContent;
           }
         });
@@ -168,7 +179,7 @@ module.exports.write = function write(destPath, options) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
-            console.log(PLUGIN_NAME + '-write: No source content for "' + sourceMap.sources[i] + '". Trying to load from file.');
+            console.log(PLUGIN_NAME + '-write: No source content for "' + sourceMap.sources[i] + '". Loading from file.');
             sourceMap.sourcesContent[i] = fs.readFileSync(sourcePath).toString();
           } catch (e) {
             console.warn(PLUGIN_NAME + '-write: source file not found: ' + sourcePath);

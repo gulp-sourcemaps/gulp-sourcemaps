@@ -212,23 +212,6 @@ test('init: should load external source map and add sourceContent if missing', f
         .write(file);
 });
 
-test('init: should load external source map and add sourceContent if missing', function(t) {
-    var file = makeFile();
-    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
-
-    var pipeline = sourcemaps.init({loadMaps: true});
-    pipeline
-        .on('data', function(data) {
-            t.ok(data.sourceMap, 'should add a source map object');
-            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
-            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'test1.js'], 'should have right sources');
-            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
-            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
-            t.end();
-        })
-        .write(file);
-});
-
 test('init: should not throw when source file for sourceContent not found', function(t) {
     var file = makeFile();
     file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
@@ -255,6 +238,41 @@ test('init: should use unix style paths in sourcemap', function(t) {
         .on('data', function(data) {
             t.equal(data.sourceMap.file, 'assets/helloworld.js', 'should have right file');
             t.deepEqual(data.sourceMap.sources, ['assets/helloworld.js'], 'should have right sources');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should use sourceRoot when resolving path to sources', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['../helloworld.js', '../test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.equal(data.sourceMap.sourceRoot, 'test', 'should have right sourceRoot');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should not load source content if the path is a url', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'http://example2.com/test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [null, null]);
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
             t.end();
         })
         .write(file);

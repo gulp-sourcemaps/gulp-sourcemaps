@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "helloworld.js",
+  "names": [],
+  "mappings": "",
+  "sources": ["helloworld.js", "http://example2.com/test1.js"],
+  "sourceRoot": "http://example.com/"
+}
