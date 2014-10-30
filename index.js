@@ -74,9 +74,10 @@ module.exports.init = function init(options) {
             // else load content from file
             } else {
               try {
+                console.log(PLUGIN_NAME + '-init: No source content for "' + sourceMap.source + '". Trying to load from file.');
                 sourceContent = fs.readFileSync(absPath).toString();
               } catch (e) {
-                console.warn(PLUGIN_NAME + '-init: source file not found:' + absPath);
+                console.warn(PLUGIN_NAME + '-init: source file not found: ' + absPath);
               }
             }
 
@@ -167,9 +168,10 @@ module.exports.write = function write(destPath, options) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
+            console.log(PLUGIN_NAME + '-write: No source content for "' + sourceMap.sources[i] + '". Trying to load from file.');
             sourceMap.sourcesContent[i] = fs.readFileSync(sourcePath).toString();
           } catch (e) {
-            console.warn(PLUGIN_NAME + '-write: source file not found:' + sourcePath);
+            console.warn(PLUGIN_NAME + '-write: source file not found: ' + sourcePath);
           }
         }
       }
