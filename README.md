@@ -76,6 +76,9 @@ gulp.task('javascript', function() {
     - source map files referenced by a `sourceMappingURL=` comment
     - source map files with the same name (plus .map) in the same directory
 
+- `debug`
+  Set this to `true` to output debug messages (e.g. about missing source content).
+
 ### Write Options
 
 - `addComment`
@@ -152,6 +155,10 @@ gulp.task('javascript', function() {
   ```
 
   This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
+
+- `debug`
+
+  Set this to `true` to output debug messages (e.g. about missing source content).
 
 ### Plugin developers only: How to add source map support to plugins
 

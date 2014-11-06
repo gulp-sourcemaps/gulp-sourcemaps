@@ -6,6 +6,7 @@ var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
 var path = require('path');
 var fs = require('fs');
+var recordConsole = require('./consolerecorder.js');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 
@@ -273,6 +274,22 @@ test('init: should not load source content if the path is a url', function(t) {
             t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'http://example2.com/test1.js'], 'should have right sources');
             t.deepEqual(data.sourceMap.sourcesContent, [null, null]);
             t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+
+    var hConsole = recordConsole();
+    var pipeline = sourcemaps.init({loadMaps: true, debug: true});
+    pipeline
+        .on('data', function(data) {
+            hConsole.restore();
+            t.equal(hConsole.history.log[0], 'gulp-sourcemap-init: No source content for "missingfile". Loading from file.', 'should log missing source content');
+            t.equal(hConsole.history.warn[0], 'gulp-sourcemap-init: source file not found: /Users/florianreiterer/Arbeit/gulp/gulp-sourcemaps/test/assets/missingfile', 'should warn about missing file');
             t.end();
         })
         .write(file);
