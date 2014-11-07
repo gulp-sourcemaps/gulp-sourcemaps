@@ -278,7 +278,7 @@ test('write: should output an error message if debug option is set and sourceCon
         .on('data', function(data) {
             hConsole.restore();
             t.equal(hConsole.history.log[0], 'gulp-sourcemap-write: No source content for "helloworld.js.invalid". Loading from file.', 'should log missing source content');
-            t.equal(hConsole.history.warn[0], 'gulp-sourcemap-write: source file not found: /Users/florianreiterer/Arbeit/gulp/gulp-sourcemaps/test/assets/helloworld.js.invalid', 'should warn about missing file');
+            t.ok(hConsole.history.warn[0].indexOf('gulp-sourcemap-write: source file not found: ') === 0, 'should warn about missing file');
             t.end();
         })
         .write(file);

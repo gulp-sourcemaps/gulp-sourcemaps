@@ -289,7 +289,7 @@ test('init: should output an error message if debug option is set and sourceCont
         .on('data', function(data) {
             hConsole.restore();
             t.equal(hConsole.history.log[0], 'gulp-sourcemap-init: No source content for "missingfile". Loading from file.', 'should log missing source content');
-            t.equal(hConsole.history.warn[0], 'gulp-sourcemap-init: source file not found: /Users/florianreiterer/Arbeit/gulp/gulp-sourcemaps/test/assets/missingfile', 'should warn about missing file');
+            t.ok(hConsole.history.warn[0].indexOf('gulp-sourcemap-init: source file not found: ') === 0, 'should warn about missing file');
             t.end();
         })
         .write(file);
