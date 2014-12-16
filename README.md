@@ -79,6 +79,10 @@ gulp.task('javascript', function() {
 - `debug`
   Set this to `true` to output debug messages (e.g. about missing source content).
 
+- `relativeTo`
+  Set this to `__dirname` to make your files paths relative to your gulpfile
+
+
 ### Write Options
 
 - `addComment`
