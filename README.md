@@ -154,6 +154,22 @@ gulp.task('javascript', function() {
   });
   ```
 
+  Example (using a function):
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: function(file) {
+          return 'https://asset-host.example.com/assets'
+        }
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
+
   This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
 
 - `debug`

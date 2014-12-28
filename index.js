@@ -169,7 +169,6 @@ module.exports.write = function write(destPath, options) {
       } else {
         sourceMap.sourceRoot = options.sourceRoot;
       }
-
     }
 
     if (options.includeContent) {
@@ -226,6 +225,9 @@ module.exports.write = function write(destPath, options) {
       comment = commentFormatter(unixStylePath(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map'));
 
       if (options.sourceMappingURLPrefix) {
+        if (typeof options.sourceMappingURLPrefix === 'function') {
+          options.sourceMappingURLPrefix = options.sourceMappingURLPrefix(file);
+        }
         comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + options.sourceMappingURLPrefix);
       }
     }

@@ -267,6 +267,22 @@ test('write: should accept a sourceMappingURLPrefix', function(t) {
       .write(file);
 });
 
+test('write: should accept a sourceMappingURLPrefix, as a function', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: function(file) { return 'https://asset-host.example.com'; }
+    });
+    pipeline
+      .on('data', function(data) {
+        if (/helloworld\.js$/.test(data.path)) {
+          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map');
+          t.end();
+        }
+      })
+      .write(file);
+});
+
 test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
     var file = makeFile();
     file.sourceMap.sources[0] += '.invalid';
