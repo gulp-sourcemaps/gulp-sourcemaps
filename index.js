@@ -103,19 +103,25 @@ module.exports.init = function init(options) {
       }
     }
 
+
+    var filePath = file.relative;
+    if (options && options.relativeTo) {
+      filePath = path.relative(options.relativeTo, file.path);
+    }
+
     if (!sourceMap) {
       // Make an empty source map
       sourceMap = {
         version : 3,
-        file: unixStylePath(file.relative),
+        file: unixStylePath(filePath),
         names: [],
         mappings: '',
-        sources: [unixStylePath(file.relative)],
+        sources: [unixStylePath(filePath)],
         sourcesContent: [fileContent]
       };
     }
 
-    sourceMap.file = file.relative;
+    sourceMap.file = filePath;
     file.sourceMap = sourceMap;
 
     this.push(file);
