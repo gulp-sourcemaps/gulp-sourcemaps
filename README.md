@@ -2,8 +2,8 @@
 
 ### Usage
 
-#### Inline maps
-Inline maps are embedded in the source file.
+#### Write inline source maps
+Inline source maps are embedded in the source file.
 
 Example:
 ```javascript
@@ -25,7 +25,7 @@ gulp.task('javascript', function() {
 All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to have support for `gulp-sourcemaps`. You can find a list of such plugins in the [wiki](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
 
 
-#### External source map files
+#### Write external source map files
 
 To write external source map files, pass a path relative to the destination to `sourcemaps.write()`.
 
@@ -66,6 +66,28 @@ gulp.task('javascript', function() {
     .pipe(gulp.dest('dist'));
 });
 ```
+
+#### Handle source files from different directories
+
+Use the `base` option on `gulp.src` to make sure all files are relative to a common base directory.
+
+Example:
+```javascript
+var gulp = require('gulp');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
+var sourcemaps = require('gulp-sourcemaps');
+
+gulp.task('javascript', function() {
+gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
+    .pipe(sourcemaps.init())
+      .pipe(plugin1())
+      .pipe(plugin2())
+    .pipe(sourcemaps.write('../maps'))
+    .pipe(gulp.dest('dist'));
+});
+```
+
 
 
 ### Init Options
