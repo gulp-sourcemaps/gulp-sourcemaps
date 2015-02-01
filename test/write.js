@@ -36,6 +36,17 @@ function makeFile() {
     return file;
 }
 
+function makeNestedFile(){
+	var file = new File({
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'dir1', 'dir2', 'helloworld.js'),
+        contents: new Buffer(sourceContent)
+    });
+    file.sourceMap = makeSourceMap();
+    return file;
+}
+
 function makeStreamFile() {
     var file = new File({
         cwd: __dirname,
@@ -168,6 +179,34 @@ test('write: should write external map files', function(t) {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
                         t.equal(data.path, path.join(__dirname, 'maps/helloworld.js.map'));
                         t.deepEqual(JSON.parse(data.contents), sourceMap, 'should have the file\'s source map as content');
+                    }
+                });
+                t.end();
+            }
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(file);
+});
+
+test('write: should create shortest path to map in file comment', function(t) {
+    var file = makeNestedFile();
+    var pipeline = sourcemaps.write('dir1/maps');
+    var fileCount = 0;
+    var outFiles = [];
+    var sourceMap;
+    pipeline
+        .on('data', function(data) {
+            outFiles.push(data);
+            fileCount++;
+            if (fileCount == 2) {
+                outFiles.reverse().map(function(data) {
+                    if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
+                        t.equal(String(data.contents),
+                            sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map',
+                            'should add a comment referencing the source map file');
                     }
                 });
                 t.end();

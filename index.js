@@ -213,23 +213,29 @@ module.exports.write = function write(destPath, options) {
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
       comment = commentFormatter('data:application/json;base64,' + base64Map);
     } else {
+      var source_map_path = path.join(file.base, destPath, file.relative) + '.map';
       // add new source map file to stream
       var sourceMapFile = new File({
         cwd: file.cwd,
         base: file.base,
-        path: path.join(file.base, destPath, file.relative) + '.map',
+        path: source_map_path,
         contents: new Buffer(JSON.stringify(sourceMap))
       });
       this.push(sourceMapFile);
 
-      comment = commentFormatter(unixStylePath(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map'));
+      var source_map_path_relative = path.relative(path.dirname(file.path), source_map_path);
 
+      var prefix = '';
       if (options.sourceMappingURLPrefix) {
         if (typeof options.sourceMappingURLPrefix === 'function') {
-          options.sourceMappingURLPrefix = options.sourceMappingURLPrefix(file);
+          prefix = options.sourceMappingURLPrefix(file);
+        } else {
+          prefix = options.sourceMappingURLPrefix;
         }
-        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + options.sourceMappingURLPrefix);
+        source_map_path_relative = prefix+path.join('/', source_map_path_relative);
       }
+      comment = commentFormatter(unixStylePath(source_map_path_relative));
+
     }
 
     // append source map comment
