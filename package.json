@@ -9,9 +9,9 @@
   ],
   "scripts": {
     "test": "jshint *.js test/*.js && faucet test/*.js",
-    "tap": "node node_modules/argg test/*.js",
-    "cover": "istanbul cover --dir reports/coverage node_modules/argg test/*.js",
-    "coveralls": "istanbul cover node_modules/argg test/*.js --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
+    "tap": "tape test/*.js",
+    "cover": "istanbul cover tape test/*.js",
+    "coveralls": "istanbul cover tape test/*.js --report lcovonly && istanbul-coveralls"
   },
   "keywords": [
     "gulpplugin",
