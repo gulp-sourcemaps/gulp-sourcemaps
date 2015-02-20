@@ -4,7 +4,9 @@
   "description": "Source map support for Gulp.js",
   "homepage": "http://github.com/floridoo/gulp-sourcemaps",
   "repository": "git://github.com/floridoo/gulp-sourcemaps.git",
-  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "test": "jshint *.js test/*.js && faucet test/*.js",
     "tap": "node node_modules/argg test/*.js",
