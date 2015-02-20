@@ -2,21 +2,21 @@
 
 ### Usage
 
-#### Inline maps
-Inline maps are embedded in the source file.
+#### Write inline source maps
+Inline source maps are embedded in the source file.
 
 Example:
 ```javascript
 var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('javascript', function() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
-      .pipe(concat('all.js'))
-      .pipe(uglify())
+      .pipe(plugin1())
+      .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
@@ -25,22 +25,22 @@ gulp.task('javascript', function() {
 All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to have support for `gulp-sourcemaps`. You can find a list of such plugins in the [wiki](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
 
 
-#### External source map files
+#### Write external source map files
 
 To write external source map files, pass a path relative to the destination to `sourcemaps.write()`.
 
 Example:
 ```javascript
 var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('javascript', function() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
-      .pipe(concat('all.js'))
-      .pipe(uglify())
+      .pipe(plugin1())
+      .pipe(plugin2())
     .pipe(sourcemaps.write('../maps'))
     .pipe(gulp.dest('dist'));
 });
@@ -53,19 +53,41 @@ To load existing source maps, pass the option `loadMaps: true` to `sourcemaps.in
 Example:
 ```javascript
 var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('javascript', function() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(concat('all.js'))
-      .pipe(uglify())
+      .pipe(plugin1())
+      .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
 ```
+
+#### Handle source files from different directories
+
+Use the `base` option on `gulp.src` to make sure all files are relative to a common base directory.
+
+Example:
+```javascript
+var gulp = require('gulp');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
+var sourcemaps = require('gulp-sourcemaps');
+
+gulp.task('javascript', function() {
+gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
+    .pipe(sourcemaps.init())
+      .pipe(plugin1())
+      .pipe(plugin2())
+    .pipe(sourcemaps.write('../maps'))
+    .pipe(gulp.dest('dist'));
+});
+```
+
 
 
 ### Init Options
@@ -75,6 +97,9 @@ gulp.task('javascript', function() {
     - inline source maps
     - source map files referenced by a `sourceMappingURL=` comment
     - source map files with the same name (plus .map) in the same directory
+
+- `debug`
+  Set this to `true` to output debug messages (e.g. about missing source content).
 
 ### Write Options
 
@@ -87,8 +112,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {addComment: false}))
       .pipe(gulp.dest('dist'));
   });
@@ -109,8 +134,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write({includeContent: false, sourceRoot: '/src'}))
       .pipe(gulp.dest('dist'));
   });
@@ -121,8 +146,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write({
         includeContent: false,
         sourceRoot: function(file) {
@@ -142,8 +167,8 @@ gulp.task('javascript', function() {
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
-        .pipe(concat('all.js'))
-        .pipe(uglify())
+        .pipe(plugin1())
+        .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {
         sourceMappingURLPrefix: 'https://asset-host.example.com/assets'
       }))
@@ -151,7 +176,27 @@ gulp.task('javascript', function() {
   });
   ```
 
+  Example (using a function):
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: function(file) {
+          return 'https://asset-host.example.com/assets'
+        }
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
+
   This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
+
+- `debug`
+
+  Set this to `true` to output debug messages (e.g. about missing source content).
 
 ### Plugin developers only: How to add source map support to plugins
 

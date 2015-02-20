@@ -6,6 +6,7 @@ var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
 var path = require('path');
 var fs = require('fs');
+var recordConsole = require('./consolerecorder.js');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 
@@ -264,4 +265,37 @@ test('write: should accept a sourceMappingURLPrefix', function(t) {
         }
       })
       .write(file);
+});
+
+test('write: should accept a sourceMappingURLPrefix, as a function', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: function(file) { return 'https://asset-host.example.com'; }
+    });
+    pipeline
+      .on('data', function(data) {
+        if (/helloworld\.js$/.test(data.path)) {
+          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map');
+          t.end();
+        }
+      })
+      .write(file);
+});
+
+test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
+    var file = makeFile();
+    file.sourceMap.sources[0] += '.invalid';
+    delete file.sourceMap.sourcesContent;
+
+    var hConsole = recordConsole();
+    var pipeline = sourcemaps.write({debug: true});
+    pipeline
+        .on('data', function(data) {
+            hConsole.restore();
+            t.equal(hConsole.history.log[0], 'gulp-sourcemap-write: No source content for "helloworld.js.invalid". Loading from file.', 'should log missing source content');
+            t.ok(hConsole.history.warn[0].indexOf('gulp-sourcemap-write: source file not found: ') === 0, 'should warn about missing file');
+            t.end();
+        })
+        .write(file);
 });

@@ -6,6 +6,7 @@ var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
 var path = require('path');
 var fs = require('fs');
+var recordConsole = require('./consolerecorder.js');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 
@@ -212,23 +213,6 @@ test('init: should load external source map and add sourceContent if missing', f
         .write(file);
 });
 
-test('init: should load external source map and add sourceContent if missing', function(t) {
-    var file = makeFile();
-    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
-
-    var pipeline = sourcemaps.init({loadMaps: true});
-    pipeline
-        .on('data', function(data) {
-            t.ok(data.sourceMap, 'should add a source map object');
-            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
-            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'test1.js'], 'should have right sources');
-            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
-            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
-            t.end();
-        })
-        .write(file);
-});
-
 test('init: should not throw when source file for sourceContent not found', function(t) {
     var file = makeFile();
     file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
@@ -255,6 +239,57 @@ test('init: should use unix style paths in sourcemap', function(t) {
         .on('data', function(data) {
             t.equal(data.sourceMap.file, 'assets/helloworld.js', 'should have right file');
             t.deepEqual(data.sourceMap.sources, ['assets/helloworld.js'], 'should have right sources');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should use sourceRoot when resolving path to sources', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['../helloworld.js', '../test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [file.contents.toString(), 'test1\n'], 'should have right sourcesContent');
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.equal(data.sourceMap.sourceRoot, 'test', 'should have right sourceRoot');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should not load source content if the path is a url', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
+
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.deepEqual(data.sourceMap.sources, ['helloworld.js', 'http://example2.com/test1.js'], 'should have right sources');
+            t.deepEqual(data.sourceMap.sourcesContent, [null, null]);
+            t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+            t.end();
+        })
+        .write(file);
+});
+
+test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+
+    var hConsole = recordConsole();
+    var pipeline = sourcemaps.init({loadMaps: true, debug: true});
+    pipeline
+        .on('data', function(data) {
+            hConsole.restore();
+            t.equal(hConsole.history.log[0], 'gulp-sourcemap-init: No source content for "missingfile". Loading from file.', 'should log missing source content');
+            t.ok(hConsole.history.warn[0].indexOf('gulp-sourcemap-init: source file not found: ') === 0, 'should warn about missing file');
             t.end();
         })
         .write(file);
