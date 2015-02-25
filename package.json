@@ -7,9 +7,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jshint *.js test/*.js && faucet test/*.js",
-    "tap": "node node_modules/argg test/*.js",
-    "cover": "istanbul cover --dir reports/coverage node_modules/argg test/*.js",
-    "coveralls": "istanbul cover node_modules/argg test/*.js --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
+    "tap": "tape test/*.js",
+    "cover": "istanbul cover --dir reports/coverage tape test/*.js",
+    "coveralls": "istanbul cover tape test/*.js --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
   },
   "keywords": [
     "gulpplugin",
@@ -27,7 +27,6 @@
   "devDependencies": {
     "jshint": "^2.6.0",
     "tape": "^3.5.0",
-    "argg": "0.0.1",
     "istanbul": "^0.3.6",
     "faucet": "0.0.1",
     "coveralls": "^2.11.2"
