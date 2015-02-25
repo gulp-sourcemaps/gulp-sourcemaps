@@ -107,7 +107,6 @@ module.exports.init = function init(options) {
       // Make an empty source map
       sourceMap = {
         version : 3,
-        file: unixStylePath(file.relative),
         names: [],
         mappings: '',
         sources: [unixStylePath(file.relative)],
@@ -115,7 +114,7 @@ module.exports.init = function init(options) {
       };
     }
 
-    sourceMap.file = file.relative;
+    sourceMap.file = unixStylePath(file.relative);
     file.sourceMap = sourceMap;
 
     this.push(file);
