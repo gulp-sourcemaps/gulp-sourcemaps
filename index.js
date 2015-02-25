@@ -171,13 +171,12 @@ module.exports.write = function write(destPath, options) {
     }
 
     if (options.includeContent) {
-      sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
 
       // load missing source content
       for (var i = 0; i < file.sourceMap.sources.length; i++) {
         if (!sourceMap.sourcesContent[i]) {
-          var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
+          var sourcePath = path.resolve(sourceMap.sourceRoot || file.base, sourceMap.sources[i]);
           try {
             if (options.debug)
               console.log(PLUGIN_NAME + '-write: No source content for "' + sourceMap.sources[i] + '". Loading from file.');
@@ -188,6 +187,7 @@ module.exports.write = function write(destPath, options) {
           }
         }
       }
+      sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
     } else {
       delete sourceMap.sourcesContent;
     }
