@@ -31,5 +31,11 @@
     "istanbul": "^0.3.0",
     "faucet": "0.0.1",
     "coveralls": "^2.11.1"
-  }
+  },
+  "files": [
+    "index.js",
+    "package.json",
+    "README.md",
+    "LICENSE.md"
+  ]
 }
