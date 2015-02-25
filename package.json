@@ -32,9 +32,6 @@
     "coveralls": "^2.11.2"
   },
   "files": [
-    "index.js",
-    "package.json",
-    "README.md",
-    "LICENSE.md"
+    "index.js"
   ]
 }
