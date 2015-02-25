@@ -1,9 +1,11 @@
 'use strict';
 var through = require('through2');
-var fs = require('fs');
+var fs = require('graceful-fs');
+var readJsonSync = require('read-json-sync');
 var path = require('path');
 var File = require('vinyl');
 var convert = require('convert-source-map');
+var stripBom = require('strip-bom');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
 var urlRegex = /^https?:\/\//;
@@ -16,12 +18,13 @@ module.exports.init = function init(options) {
     /*jshint validthis:true */
 
     if (file.isNull()) {
-      this.push(file);
-      return callback();
+      callback(null, file);
+      return;
     }
 
     if (file.isStream()) {
-      return callback(new Error(PLUGIN_NAME + '-init: Streaming not supported'));
+      callback(new Error(PLUGIN_NAME + '-init: Streaming not supported'));
+      return;
     }
 
     var fileContent = file.contents.toString();
@@ -54,7 +57,7 @@ module.exports.init = function init(options) {
         sourcePath = path.dirname(mapFile);
 
         try {
-          sourceMap = JSON.parse(fs.readFileSync(mapFile).toString());
+          sourceMap = readJsonSync(mapFile);
         } catch(e) {}
       }
 
@@ -88,7 +91,7 @@ module.exports.init = function init(options) {
               try {
                 if (options.debug)
                   console.log(PLUGIN_NAME + '-init: No source content for "' + source + '". Loading from file.');
-                sourceContent = fs.readFileSync(absPath).toString();
+                sourceContent = stripBom(fs.readFileSync(absPath, 'utf8'));
               } catch (e) {
                 if (options.debug)
                   console.warn(PLUGIN_NAME + '-init: source file not found: ' + absPath);
@@ -180,7 +183,7 @@ module.exports.write = function write(destPath, options) {
           try {
             if (options.debug)
               console.log(PLUGIN_NAME + '-write: No source content for "' + sourceMap.sources[i] + '". Loading from file.');
-            sourceMap.sourcesContent[i] = fs.readFileSync(sourcePath).toString();
+            sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
           } catch (e) {
             if (options.debug)
               console.warn(PLUGIN_NAME + '-write: source file not found: ' + sourcePath);
@@ -197,13 +200,13 @@ module.exports.write = function write(destPath, options) {
 
     switch (extension) {
       case 'css':
-        commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */"; };
+        commentFormatter = function(url) { return '\n/*# sourceMappingURL=' + url + ' */'; };
         break;
       case 'js':
-        commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url; };
+        commentFormatter = function(url) { return '\n//# sourceMappingURL=' + url; };
         break;
       default:
-        commentFormatter = function(url) { return ""; };
+        commentFormatter = function(url) { return ''; };
     }
 
     var comment;

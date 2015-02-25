@@ -4,12 +4,14 @@
   "description": "Source map support for Gulp.js",
   "homepage": "http://github.com/floridoo/gulp-sourcemaps",
   "repository": "git://github.com/floridoo/gulp-sourcemaps.git",
-  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "test": "jshint *.js test/*.js && faucet test/*.js",
-    "tap": "node node_modules/argg test/*.js",
-    "cover": "istanbul cover --dir reports/coverage node_modules/argg test/*.js",
-    "coveralls": "istanbul cover node_modules/argg test/*.js --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage"
+    "tap": "tape test/*.js",
+    "cover": "istanbul cover tape test/*.js",
+    "coveralls": "istanbul cover tape test/*.js --report lcovonly && istanbul-coveralls"
   },
   "keywords": [
     "gulpplugin",
@@ -20,16 +22,18 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
+    "convert-source-map": "^0.5.0",
+    "graceful-fs": "^3.0.5",
+    "read-json-sync": "^1.0.0",
+    "strip-bom": "^1.0.0",
     "through2": "^0.6.1",
-    "vinyl": "^0.4.2",
-    "convert-source-map": "^0.4.1"
+    "vinyl": "^0.4.2"
   },
   "devDependencies": {
-    "jshint": "^2.5.2",
-    "tape": "^2.13.3",
-    "argg": "0.0.1",
-    "istanbul": "^0.3.0",
     "faucet": "0.0.1",
-    "coveralls": "^2.11.1"
+    "istanbul": "^0.3.0",
+    "istanbul-coveralls": "^1.0.1",
+    "jshint": "^2.5.2",
+    "tape": "^3.5.0"
   }
 }
