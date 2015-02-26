@@ -238,9 +238,9 @@ module.exports = function(options) {
 };
 ```
 
-[npm-image]: https://img.shields.io/npm/v/gulp-sourcemaps.svg?style=flat
-[npm-url]: https://npmjs.org/package/gulp-sourcemaps
-[travis-image]: https://img.shields.io/travis/floridoo/gulp-sourcemaps.svg?style=flat
+[npm-image]: https://img.shields.io/npm/v/gulp-sourcemaps.svg
+[npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
+[travis-image]: https://img.shields.io/travis/floridoo/gulp-sourcemaps.svg
 [travis-url]: https://travis-ci.org/floridoo/gulp-sourcemaps
-[coveralls-image]: https://img.shields.io/coveralls/floridoo/gulp-sourcemaps.svg?style=flat
+[coveralls-image]: https://img.shields.io/coveralls/floridoo/gulp-sourcemaps.svg
 [coveralls-url]: https://coveralls.io/r/floridoo/gulp-sourcemaps?branch=master
