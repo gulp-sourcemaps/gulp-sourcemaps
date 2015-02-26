@@ -159,7 +159,7 @@ module.exports.write = function write(destPath, options) {
     // fix paths if Windows style paths
     sourceMap.file = unixStylePath(file.relative);
     sourceMap.sources = sourceMap.sources.map(function(filePath) {
-      return unixStylePath(filePath);
+      return unixStylePath(filePath.replace(unixStylePath(file.base), ""));
     });
 
     if (options.sourceRoot) {
