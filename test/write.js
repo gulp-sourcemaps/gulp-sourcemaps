@@ -299,3 +299,17 @@ test('write: should output an error message if debug option is set and sourceCon
         })
         .write(file);
 });
+
+test('write: should allow specifying a file name for source maps', function (t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../maps', { sourceMapName: function (name) { return "__source_map__" + name; } });
+    pipeline
+        .on('data', function (data) {
+            if (/helloworld\.js$/.test(data.path)) {
+                t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
+                    'sourceMappingURL=../maps/__source_map__helloworld.js.map');
+                t.end();
+            }
+        })
+        .write(file);
+});

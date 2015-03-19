@@ -143,6 +143,8 @@ module.exports.write = function write(destPath, options) {
     options.includeContent = true;
   if (options.addComment === undefined)
     options.addComment = true;
+  if (options.sourceMapName === undefined)
+    options.sourceMapName = function (x) { return x; };
 
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
@@ -213,16 +215,20 @@ module.exports.write = function write(destPath, options) {
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
       comment = commentFormatter('data:application/json;base64,' + base64Map);
     } else {
+      var relativeDirName = path.dirname(file.relative);
+      var mapExtension = '.map';
+      var mapName = options.sourceMapName(path.basename(file.relative, mapExtension));
+
       // add new source map file to stream
       var sourceMapFile = new File({
         cwd: file.cwd,
         base: file.base,
-        path: path.join(file.base, destPath, file.relative) + '.map',
+        path: path.join(file.base, destPath, relativeDirName, mapName) + mapExtension,
         contents: new Buffer(JSON.stringify(sourceMap))
       });
       this.push(sourceMapFile);
 
-      comment = commentFormatter(unixStylePath(path.join(path.relative(path.dirname(file.path), file.base), destPath, file.relative) + '.map'));
+      comment = commentFormatter(unixStylePath(path.join(path.relative(path.dirname(file.path), file.base), destPath, relativeDirName, mapName) + mapExtension));
 
       if (options.sourceMappingURLPrefix) {
         if (typeof options.sourceMappingURLPrefix === 'function') {

@@ -194,6 +194,24 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
   This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
 
+- `soureMapName`
+
+  Specify a function to map the name of the source map to be written.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('../maps', {
+        sourceMapName: function (fileName) { return "XYZ" + fileName; }
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
+
 - `debug`
 
   Set this to `true` to output debug messages (e.g. about missing source content).
