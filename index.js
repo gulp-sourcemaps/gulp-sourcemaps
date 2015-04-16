@@ -207,7 +207,7 @@ module.exports.write = function write(destPath, options) {
         commentFormatter = function(url) { return ""; };
     }
 
-    var comment;
+    var comment, sourceMappingURLPrefix;
     if (!destPath) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
@@ -226,9 +226,11 @@ module.exports.write = function write(destPath, options) {
 
       if (options.sourceMappingURLPrefix) {
         if (typeof options.sourceMappingURLPrefix === 'function') {
-          options.sourceMappingURLPrefix = options.sourceMappingURLPrefix(file);
+          sourceMappingURLPrefix = options.sourceMappingURLPrefix(file);
+        } else {
+          sourceMappingURLPrefix = options.sourceMappingURLPrefix;
         }
-        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + options.sourceMappingURLPrefix);
+        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + sourceMappingURLPrefix);
       }
     }
 
