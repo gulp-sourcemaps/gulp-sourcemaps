@@ -230,7 +230,19 @@ module.exports.write = function write(destPath, options) {
         } else {
           sourceMappingURLPrefix = options.sourceMappingURLPrefix;
         }
-        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + sourceMappingURLPrefix);
+        
+        var stripPathRegExpFragment;
+        var stripPath = options.sourceMappingURLPrefixStripPath;
+        if (typeof stripPath === 'string') {
+            // escape strip path characters for use in a regular expression
+            stripPathRegExpFragment = stripPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        } else {
+            // default behaviour to remove leading dots
+            stripPathRegExpFragment = '\\.*';
+        }
+        
+        var replacementRegExp = new RegExp('sourceMappingURL=' + stripPathRegExpFragment);
+        comment = comment.replace(replacementRegExp, 'sourceMappingURL=' + sourceMappingURLPrefix);
       }
     }
 
