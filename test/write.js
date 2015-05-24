@@ -304,6 +304,40 @@ test('write: should invoke sourceMappingURLPrefix every time', function(t) {
       .write(makeFile());
 });
 
+test('write: should accept a sourceMappingURLPrefixStripPath', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../path/to/maps', { 
+        sourceMappingURLPrefix: 'https://asset-host.example.com',
+        sourceMappingURLPrefixStripPath: '../path/to'
+    });
+    pipeline
+      .on('data', function(data) {
+        if (/helloworld\.js$/.test(data.path)) {
+          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map');
+          t.end();
+        }
+      })
+      .write(file);
+});
+
+test('write: should accept an empty string sourceMappingURLPrefixStripPath', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../path/to/maps', { 
+        sourceMappingURLPrefix: 'https://asset-host.example.com/nested/',
+        sourceMappingURLPrefixStripPath: ''
+    });
+    pipeline
+      .on('data', function(data) {
+        if (/helloworld\.js$/.test(data.path)) {
+          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/nested/../path/to/maps/helloworld.js.map');
+          t.end();
+        }
+      })
+      .write(file);
+});
+
 test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
     var file = makeFile();
     file.sourceMap.sources[0] += '.invalid';

@@ -194,6 +194,27 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
   This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
 
+- `sourceMappingURLPrefixStripPath`
+
+  Use in conjunction with `sourceMappingURLPrefix` to specify a precise path to strip from the source mapping URL before prepending the prefix.
+  
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('../path/to/maps', {
+        sourceMappingURLPrefix: 'https://asset-host.example.com/assets',
+        sourceMappingURLPrefixStripPath: '../path/to'
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
+  
+  This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
+
 - `debug`
 
   Set this to `true` to output debug messages (e.g. about missing source content).
