@@ -230,7 +230,7 @@ module.exports.write = function write(destPath, options) {
         } else {
           sourceMappingURLPrefix = options.sourceMappingURLPrefix;
         }
-        comment = comment.replace(/sourceMappingURL=\.*/, 'sourceMappingURL=' + sourceMappingURLPrefix);
+        comment = comment.replace(/sourceMappingURL=(\.\.\/)*(\.\.)/, 'sourceMappingURL=' + sourceMappingURLPrefix);
       }
     }
 
