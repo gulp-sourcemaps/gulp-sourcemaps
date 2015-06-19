@@ -238,6 +238,9 @@ module.exports.write = function write(destPath, options) {
     if (options.addComment)
       file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
 
+    if (!options.noClean)
+      delete file.sourceMap;
+
     this.push(file);
     callback();
   }

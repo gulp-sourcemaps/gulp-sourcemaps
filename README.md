@@ -125,6 +125,16 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
   Including the content is the recommended way, because it "just works". When setting this to `false` you have to host the source files and set the correct `sourceRoot`.
 
+- `noClean`
+
+  Prevents the cleanup of the `sourceMap` property from source files passing
+  through the pipe.
+
+  Warning: this can result in plugins re-writing sourcemaps *after* write has
+  been called. Available to restore previous behavior of not cleaning up. Mostly
+  for testing.
+
+
 - `sourceRoot`
 
   Set the path where the source files are hosted (use this when `includeContent` is set to `false`). This is an URL (or subpath) relative to the source map, not a local file system path. If you have sources in different subpaths, an absolute path (from the domain root) pointing to the source file root is recommended, or define it with a function.

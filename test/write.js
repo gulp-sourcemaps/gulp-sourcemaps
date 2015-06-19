@@ -101,7 +101,7 @@ test('write: should emit an error if file content is a stream', function(t) {
 
 test('write: should write an inline source map', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write();
+    var pipeline = sourcemaps.write({noClean: true});
     pipeline
         .on('data', function(data) {
             t.ok(data, 'should pass something through');
@@ -122,7 +122,7 @@ test('write: should write an inline source map', function(t) {
 test('write: should use CSS comments if CSS file', function(t) {
     var file = makeFile();
     file.path = file.path.replace('.js', '.css');
-    var pipeline = sourcemaps.write();
+    var pipeline = sourcemaps.write({noClean: true});
     pipeline
         .on('data', function(data) {
             t.equal(String(data.contents),
@@ -147,7 +147,7 @@ test('write: should write no comment if not JS or CSS file', function(t) {
 
 test('write: should write external map files', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write('../maps');
+    var pipeline = sourcemaps.write('../maps', { noClean: true });
     var fileCount = 0;
     var outFiles = [];
     var sourceMap;
@@ -193,7 +193,7 @@ test('write: should write no comment with option addComment=false', function(t) 
 
 test('write: should not include source content with option includeContent=false', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write({includeContent: false});
+    var pipeline = sourcemaps.write({includeContent: false, noClean: true});
     pipeline
         .on('data', function(data) {
             t.equal(data.sourceMap.sourcesContent, undefined, 'should not have source content');
@@ -205,7 +205,7 @@ test('write: should not include source content with option includeContent=false'
 test('write: should fetch missing sourceContent', function(t) {
     var file = makeFile();
     delete file.sourceMap.sourcesContent;
-    var pipeline = sourcemaps.write();
+    var pipeline = sourcemaps.write({noClean: true});
     pipeline
         .on('data', function(data) {
             t.notEqual(data.sourceMap.sourcesContent, undefined, 'should have source content');
@@ -219,7 +219,7 @@ test('write: should not throw when unable to fetch missing sourceContent', funct
     var file = makeFile();
     file.sourceMap.sources[0] += '.invalid';
     delete file.sourceMap.sourcesContent;
-    var pipeline = sourcemaps.write();
+    var pipeline = sourcemaps.write({noClean: true});
     pipeline
         .on('data', function(data) {
             t.notEqual(data.sourceMap.sourcesContent, undefined, 'should have source content');
@@ -231,7 +231,7 @@ test('write: should not throw when unable to fetch missing sourceContent', funct
 
 test('write: should set the sourceRoot by option sourceRoot', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot'});
+    var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot', noClean: true});
     pipeline
         .on('data', function(data) {
             t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
@@ -243,7 +243,8 @@ test('write: should set the sourceRoot by option sourceRoot', function(t) {
 test('write: should set the sourceRoot by option sourceRoot, as a function', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write({
-      sourceRoot: function(file) { return '/testSourceRoot'; }
+      sourceRoot: function(file) { return '/testSourceRoot'; },
+      noClean: true
     });
     pipeline
         .on('data', function(data) {
@@ -319,4 +320,19 @@ test('write: should output an error message if debug option is set and sourceCon
             t.end();
         })
         .write(file);
+});
+
+test('write: should remove the sourceMap property from files that passthrough by default', function(t) {
+    var times = 0;
+    var file = makeFile();
+    var pipeline = sourcemaps.write();
+
+    pipeline
+      .on('data', function(data) {
+        if (data.sourceMap) {
+          t.fail('did not clean up file.sourceMap');
+        }
+        t.end();
+      })
+      .write(file);
 });
