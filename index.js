@@ -7,7 +7,7 @@ var convert = require('convert-source-map');
 var stripBom = require('strip-bom');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
-var urlRegex = /^https?:\/\//;
+var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
 
 /**
  * Initialize source mapping chain
