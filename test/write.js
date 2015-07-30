@@ -320,3 +320,31 @@ test('write: should output an error message if debug option is set and sourceCon
         })
         .write(file);
 });
+
+test('write: should not add source root with option omitSourceRootIfUndefined=true and sourceRoot=undefined', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({
+        sourceRoot: undefined,
+        omitSourceRootIfUndefined: true
+    });
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.sourceRoot, undefined, 'should not have source root');
+            t.end();
+        })
+        .write(file);
+});
+
+test('write: should add source root with option omitSourceRootIfUndefined=true and sourceRoot=*not undefined*', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({
+        sourceRoot: 'blah',
+        omitSourceRootIfUndefined: true
+    });
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.sourceRoot, 'blah', 'should have source root');
+            t.end();
+        })
+        .write(file);
+});
