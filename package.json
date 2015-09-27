@@ -20,18 +20,18 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "convert-source-map": "^1.0.0",
-    "graceful-fs": "^3.0.5",
-    "strip-bom": "^1.0.0",
-    "through2": "^0.6.3",
-    "vinyl": "^0.4.6"
+    "convert-source-map": "^1.1.1",
+    "graceful-fs": "^4.1.2",
+    "strip-bom": "^2.0.0",
+    "through2": "^2.0.0",
+    "vinyl": "^1.0.0"
   },
   "devDependencies": {
-    "jshint": "^2.6.0",
-    "tape": "^3.5.0",
-    "istanbul": "^0.3.6",
+    "jshint": "^2.8.0",
+    "tape": "^4.2.0",
+    "istanbul": "^0.3.21",
     "faucet": "0.0.1",
-    "coveralls": "^2.11.2"
+    "coveralls": "^2.11.4"
   },
   "files": [
     "index.js",
