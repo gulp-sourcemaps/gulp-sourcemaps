@@ -186,10 +186,10 @@ module.exports.write = function write(destPath, options) {
           }
         }
       }
-      if (sourceMap.sourceRoot === null) {
+      if (sourceMap.sourceRoot === undefined) {
+        sourceMap.sourceRoot = '/source/';
+      } else if (sourceMap.sourceRoot === null) {
         sourceMap.sourceRoot = undefined;
-      } else {
-        sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
       }
     } else {
       delete sourceMap.sourcesContent;

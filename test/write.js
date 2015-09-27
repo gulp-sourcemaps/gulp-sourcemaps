@@ -383,3 +383,14 @@ test('write: function returning null as sourceRoot should not set the sourceRoot
         })
         .write(file);
 });
+
+test('write: empty string as sourceRoot should be kept', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({sourceRoot: ''});
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.sourceRoot, '', 'should keep empty string as sourceRoot');
+            t.end();
+        })
+        .write(file);
+});
