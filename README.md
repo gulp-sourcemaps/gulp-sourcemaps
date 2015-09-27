@@ -158,6 +158,38 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   });
   ```
 
+- `omitSourceRootIfUndefined`
+
+  Omits `sourceRoot` value from the generated source map if `includeContent` is set to `true` and `sourceRoot` is set to (or if the `sourceRoot` function returns) `undefined` or `null`. This omission will cause the source root to be seen as the same directory containing the source map.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write({omitSourceRootIfUndefined: true}))
+      .pipe(gulp.dest('dist'));
+  });
+  ```
+
+  Example (using a function for `sourceRoot`):
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write({
+        sourceRoot: function(file) {
+          return undefined;
+        }
+       }))
+      .pipe(gulp.dest('dist'));
+  });
+  ```
+
 - `sourceMappingURLPrefix`
 
   Specify a prefix to be prepended onto the source map URL when writing external source maps. Relative paths will have their leading dots stripped.

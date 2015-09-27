@@ -141,6 +141,8 @@ module.exports.write = function write(destPath, options) {
   // set defaults for options if unset
   if (options.includeContent === undefined)
     options.includeContent = true;
+  if (options.omitSourceRootIfUndefined === undefined)
+    options.omitSourceRootIfUndefined = false;
   if (options.addComment === undefined)
     options.addComment = true;
 
@@ -188,7 +190,9 @@ module.exports.write = function write(destPath, options) {
           }
         }
       }
-      sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
+      if (!options.omitSourceRootIfUndefined) {
+        sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
+      }
     } else {
       delete sourceMap.sourcesContent;
     }
