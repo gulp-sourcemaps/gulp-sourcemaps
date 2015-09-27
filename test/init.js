@@ -294,3 +294,30 @@ test('init: should output an error message if debug option is set and sourceCont
         })
         .write(file);
 });
+
+test('init: should pass through when file already has a source map', function(t) {
+    var sourceMap = {
+      version : 3,
+      names: [],
+      mappings: '',
+      sources: ['test.js'],
+      sourcesContent: ['testContent'],
+    };
+
+    var file = makeFile();
+    file.sourceMap = sourceMap;
+    var pipeline = sourcemaps.init({loadMaps: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data, 'should pass something through');
+            t.ok(data instanceof File, 'should pass a vinyl file through');
+            t.equal(data.sourceMap, sourceMap, 'should not change the source map');
+            t.deepEqual(data, file, 'should not change file');
+            t.end();
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(file);
+});

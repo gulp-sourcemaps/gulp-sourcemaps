@@ -16,7 +16,8 @@ module.exports.init = function init(options) {
   function sourceMapInit(file, encoding, callback) {
     /*jshint validthis:true */
 
-    if (file.isNull()) {
+    // pass through if file is null or already has a source map
+    if (file.isNull() || file.sourceMap) {
       this.push(file);
       return callback();
     }
