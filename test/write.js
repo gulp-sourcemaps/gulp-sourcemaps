@@ -359,3 +359,27 @@ test('write: should output an error message if debug option is set and sourceCon
         })
         .write(file);
 });
+
+test('write: null as sourceRoot should not set the sourceRoot', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({sourceRoot: null});
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.sourceRoot, undefined, 'should not set sourceRoot');
+            t.end();
+        })
+        .write(file);
+});
+
+test('write: function returning null as sourceRoot should not set the sourceRoot', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({
+      sourceRoot: function(file) { return null; }
+    });
+    pipeline
+        .on('data', function(data) {
+            t.equal(data.sourceMap.sourceRoot, undefined, 'should set sourceRoot');
+            t.end();
+        })
+        .write(file);
+});

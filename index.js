@@ -163,12 +163,10 @@ module.exports.write = function write(destPath, options) {
       return unixStylePath(filePath);
     });
 
-    if (options.sourceRoot) {
-      if (typeof options.sourceRoot === 'function') {
-        sourceMap.sourceRoot = options.sourceRoot(file);
-      } else {
-        sourceMap.sourceRoot = options.sourceRoot;
-      }
+    if (typeof options.sourceRoot === 'function') {
+      sourceMap.sourceRoot = options.sourceRoot(file);
+    } else {
+      sourceMap.sourceRoot = options.sourceRoot;
     }
 
     if (options.includeContent) {
@@ -188,7 +186,11 @@ module.exports.write = function write(destPath, options) {
           }
         }
       }
-      sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
+      if (sourceMap.sourceRoot === null) {
+        sourceMap.sourceRoot = undefined;
+      } else {
+        sourceMap.sourceRoot = sourceMap.sourceRoot || '/source/';
+      }
     } else {
       delete sourceMap.sourcesContent;
     }
