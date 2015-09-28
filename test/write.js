@@ -119,7 +119,7 @@ test('write: should write an inline source map', function(t) {
             t.ok(data instanceof File, 'should pass a vinyl file through');
             t.deepEqual(data, file, 'should not change file');
             t.equal(String(data.contents),
-                sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap),
+                sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n',
                 'should add source map as comment');
             t.end();
         })
@@ -137,7 +137,7 @@ test('write: should use CSS comments if CSS file', function(t) {
     pipeline
         .on('data', function(data) {
             t.equal(String(data.contents),
-                sourceContent + '\n/*# sourceMappingURL=' + base64JSON(data.sourceMap) + ' */',
+                sourceContent + '\n/*# sourceMappingURL=' + base64JSON(data.sourceMap) + ' */\n',
                 'should add source map with CSS comment');
             t.end();
         })
@@ -173,7 +173,7 @@ test('write: should write external map files', function(t) {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
                         t.deepEqual(data, file, 'should not change file');
                         t.equal(String(data.contents),
-                            sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map',
+                            sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map\n',
                             'should add a comment referencing the source map file');
                     } else {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
@@ -205,7 +205,7 @@ test('write: should create shortest path to map in file comment', function(t) {
                 outFiles.reverse().map(function(data) {
                     if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
                         t.equal(String(data.contents),
-                            sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map',
+                            sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map\n',
                             'should add a comment referencing the source map file');
                     }
                 });
@@ -298,8 +298,8 @@ test('write: should accept a sourceMappingURLPrefix', function(t) {
     pipeline
       .on('data', function(data) {
         if (/helloworld\.js$/.test(data.path)) {
-          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
-            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map');
+          t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
           t.end();
         }
       })
@@ -314,8 +314,8 @@ test('write: should accept a sourceMappingURLPrefix, as a function', function(t)
     pipeline
       .on('data', function(data) {
         if (/helloworld\.js$/.test(data.path)) {
-          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
-            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map');
+          t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0],
+            'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
           t.end();
         }
       })
@@ -331,8 +331,8 @@ test('write: should invoke sourceMappingURLPrefix every time', function(t) {
     pipeline
       .on('data', function(data) {
         if (/helloworld\.js$/.test(data.path)) {
-          t.equal(String(data.contents).match(/sourceMappingURL.*$/)[0],
-                  'sourceMappingURL=https://asset-host.example.com/'+ times + '/maps/helloworld.js.map');
+          t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0],
+                  'sourceMappingURL=https://asset-host.example.com/'+ times + '/maps/helloworld.js.map\n');
           if (times >= 3) {
             t.end();
             return;
@@ -406,7 +406,7 @@ test('write: should be able to fully control sourceMappingURL by the option sour
         .on('data', function(data) {
             if (/helloworld\.js$/.test(data.path)) {
                 t.equal(String(data.contents),
-                    sourceContent + '\n//# sourceMappingURL=http://maps.example.com/dir1/dir2/helloworld.js.map',
+                    sourceContent + '\n//# sourceMappingURL=http://maps.example.com/dir1/dir2/helloworld.js.map\n',
                     'should add source map comment with custom url');
                 t.end();
             }
