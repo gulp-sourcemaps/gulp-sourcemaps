@@ -176,7 +176,13 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   });
   ```
 
-  Example (using a function):
+  This will result in a source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
+
+- `sourceMappingURL`
+
+  If you need full control over the source map URL you can pass a function to this option. The output of the function must be the full URL to the source map (in function of the output file).
+
+  Example:
   ```javascript
   gulp.task('javascript', function() {
     var stream = gulp.src('src/**/*.js')
@@ -184,15 +190,15 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
         .pipe(plugin1())
         .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {
-        sourceMappingURLPrefix: function(file) {
-          return 'https://asset-host.example.com/assets'
+        sourceMappingURL: function(file) {
+          return 'https://asset-host.example.com/' + file.relative + '.map';
         }
       }))
       .pipe(gulp.dest('public/scripts'));
   });
   ```
 
-  This will result in source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
+  This will result in a source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/helloworld.js.map`.
 
 - `debug`
 

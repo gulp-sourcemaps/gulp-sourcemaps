@@ -394,3 +394,22 @@ test('write: empty string as sourceRoot should be kept', function(t) {
         })
         .write(file);
 });
+
+test('write: should be able to fully control sourceMappingURL by the option sourceMappingURL', function(t) {
+    var file = makeNestedFile();
+    var pipeline = sourcemaps.write('../aaa/bbb/', {
+      sourceMappingURL: function(file) {
+        return 'http://maps.example.com/' + file.relative + '.map';
+      }
+    });
+    pipeline
+        .on('data', function(data) {
+            if (/helloworld\.js$/.test(data.path)) {
+                t.equal(String(data.contents),
+                    sourceContent + '\n//# sourceMappingURL=http://maps.example.com/dir1/dir2/helloworld.js.map',
+                    'should add source map comment with custom url');
+                t.end();
+            }
+        })
+        .write(file);
+});

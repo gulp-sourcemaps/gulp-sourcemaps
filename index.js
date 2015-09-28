@@ -237,8 +237,8 @@ module.exports.write = function write(destPath, options) {
 
       var sourceMapPathRelative = path.relative(path.dirname(file.path), sourceMapPath);
 
-      var prefix = '';
       if (options.sourceMappingURLPrefix) {
+        var prefix = '';
         if (typeof options.sourceMappingURLPrefix === 'function') {
           prefix = options.sourceMappingURLPrefix(file);
         } else {
@@ -248,6 +248,9 @@ module.exports.write = function write(destPath, options) {
       }
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
+      if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
+        comment = commentFormatter(options.sourceMappingURL(file));
+      }
     }
 
     // append source map comment
