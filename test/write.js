@@ -156,6 +156,26 @@ test('write: should write no comment if not JS or CSS file', function(t) {
         .write(file);
 });
 
+test('write: should detect whether a file uses \\n or \\r\\n and follow the existing style', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(file.contents.toString().replace(/\n/g, '\r\n'));
+    var pipeline = sourcemaps.write();
+    pipeline
+        .on('data', function(data) {
+            t.ok(data, 'should pass something through');
+            t.equal(String(data.contents),
+                sourceContent.replace(/\n/g, '\r\n') +
+                '\r\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\r\n',
+                'should add source map as comment');
+            t.end();
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(file);
+});
+
 test('write: should write external map files', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write('../maps');

@@ -5,6 +5,7 @@ var path = require('path');
 var File = require('vinyl');
 var convert = require('convert-source-map');
 var stripBom = require('strip-bom');
+var detectNewline = require('detect-newline');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
 var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
@@ -197,14 +198,19 @@ module.exports.write = function write(destPath, options) {
     }
 
     var extension = file.relative.split('.').pop();
+    var newline = detectNewline(file.contents.toString());
     var commentFormatter;
 
     switch (extension) {
       case 'css':
-        commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */\n"; };
+        commentFormatter = function(url) {
+          return newline + "/*# sourceMappingURL=" + url + " */" + newline;
+        };
         break;
       case 'js':
-        commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url + "\n"; };
+        commentFormatter = function(url) {
+          return newline + "//# sourceMappingURL=" + url + newline;
+        };
         break;
       default:
         commentFormatter = function(url) { return ""; };
