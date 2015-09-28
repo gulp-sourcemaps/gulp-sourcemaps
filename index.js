@@ -201,10 +201,10 @@ module.exports.write = function write(destPath, options) {
 
     switch (extension) {
       case 'css':
-        commentFormatter = function(url) { return "\n/*# sourceMappingURL=" + url + " */"; };
+        commentFormatter = function(url) { return "\n/*@ sourceMappingURL=" + url + " */"; };
         break;
       case 'js':
-        commentFormatter = function(url) { return "\n//# sourceMappingURL=" + url; };
+        commentFormatter = function(url) { return "\n//@ sourceMappingURL=" + url; };
         break;
       default:
         commentFormatter = function(url) { return ""; };
