@@ -216,12 +216,12 @@ module.exports.write = function write(destPath, options) {
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
       comment = commentFormatter('data:application/json;base64,' + base64Map);
     } else {
-      var source_map_path = path.join(file.base, destPath, file.relative) + '.map';
+      var sourceMapPath = path.join(file.base, destPath, file.relative) + '.map';
       // add new source map file to stream
       var sourceMapFile = new File({
         cwd: file.cwd,
         base: file.base,
-        path: source_map_path,
+        path: sourceMapPath,
         contents: new Buffer(JSON.stringify(sourceMap)),
         stat: {
           isFile: function () { return true; },
@@ -235,7 +235,7 @@ module.exports.write = function write(destPath, options) {
       });
       this.push(sourceMapFile);
 
-      var source_map_path_relative = path.relative(path.dirname(file.path), source_map_path);
+      var sourceMapPathRelative = path.relative(path.dirname(file.path), sourceMapPath);
 
       var prefix = '';
       if (options.sourceMappingURLPrefix) {
@@ -244,9 +244,9 @@ module.exports.write = function write(destPath, options) {
         } else {
           prefix = options.sourceMappingURLPrefix;
         }
-        source_map_path_relative = prefix+path.join('/', source_map_path_relative);
+        sourceMapPathRelative = prefix+path.join('/', sourceMapPathRelative);
       }
-      comment = commentFormatter(unixStylePath(source_map_path_relative));
+      comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
     }
 
