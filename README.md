@@ -203,6 +203,15 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 - `debug`
 
   Set this to `true` to output debug messages (e.g. about missing source content).
+  
+- `defaultSourceRoot`
+
+  Default value: `/source/`.
+  
+  Set this to modify the folder that your mapped sources appear under when inspecting in your browser's developer mode.
+  This is useful when generating multiple sourcemaps for different resource types. (ex: js vs sass).
+  
+  ![]()
 
 ### Plugin developers only: How to add source map support to plugins
 
