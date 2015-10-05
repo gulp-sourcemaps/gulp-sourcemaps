@@ -144,6 +144,8 @@ module.exports.write = function write(destPath, options) {
     options.includeContent = true;
   if (options.addComment === undefined)
     options.addComment = true;
+  if (options.defaultSourceRoot === undefined)
+    options.defaultSourceRoot = '/source/';
 
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
@@ -188,7 +190,7 @@ module.exports.write = function write(destPath, options) {
         }
       }
       if (sourceMap.sourceRoot === undefined) {
-        sourceMap.sourceRoot = '/source/';
+        sourceMap.sourceRoot = options.defaultSourceRoot;
       } else if (sourceMap.sourceRoot === null) {
         sourceMap.sourceRoot = undefined;
       }
