@@ -209,9 +209,35 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   Default value: `/source/`.
   
   Set this to modify the folder that your mapped sources appear under when inspecting in your browser's developer mode.
-  This is useful when generating multiple sourcemaps for different resource types. (ex: js vs sass).
+  This is useful when generating multiple sourcemaps for different resource types.
   
-  ![]()
+  Before:
+  ![Before](/defaultSourceRootBefore.png)
+  
+  Example:
+  
+  ```javascript
+gulp.src('js/**/*.js')
+    .pipe(sourcemaps.init())
+    .pipe(jspm({
+        selfExecutingBundle: true
+    }))
+    .pipe(sourcemaps.write('.', {
+        defaultSourceRoot: '/source/js/'
+    }))
+    .pipe(gulp.dest('dist/js'));
+      
+gulp.src('sass/**/*.scss')
+    .pipe(sourcemaps.init())
+    .pipe(sass().on('error', sass.logError))
+    .pipe(sourcemaps.write('.', {
+        defaultSourceRoot: '/source/sass/'
+    }))
+    .pipe(gulp.dest('dist/css');
+  ```
+  
+  After:
+  ![After](/defaultSourceRootAfter.png)
 
 ### Plugin developers only: How to add source map support to plugins
 
