@@ -241,6 +241,18 @@ test('write: should not include source content with option includeContent=false'
         .write(file);
 });
 
+test('write: should calculate sources base on option#relativeToSourcePath if it is defined', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write({relativeToSourcePath: "build/some/path/that/has/seven/layers"});
+
+    pipeline
+        .on('data', function(data) {
+            t.deepEqual(data.sourceMap.sources, ["../../../../../../../test/assets/helloworld.js"], 'should have same sources');
+            t.end();
+        })
+        .write(file);
+});
+
 test('write: should fetch missing sourceContent', function(t) {
     var file = makeFile();
     delete file.sourceMap.sourcesContent;
