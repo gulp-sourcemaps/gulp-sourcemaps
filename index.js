@@ -163,8 +163,7 @@ module.exports.write = function write(destPath, options) {
       sourceMap.file = path.basename(file.relative);
     } else {
       // when not inlining source map, file should be the relative path to the dest file
-      var sourceMapPath = path.join(destPath, path.dirname(file.relative));
-      var relativeToFile = path.relative(sourceMapPath, path.dirname(file.relative));
+      var relativeToFile = path.relative(path.join(destPath, path.dirname(file.relative)), path.dirname(file.relative));
       sourceMap.file = unixStylePath(path.join(relativeToFile, path.basename(file.relative)));
     }
 
