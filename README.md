@@ -169,7 +169,10 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
       .pipe(sourcemaps.init())
         .pipe(plugin1())
         .pipe(plugin2())
-      .pipe(sourcemaps.write({relativeToSourcePath: 'dist/build'}))
+      .pipe(sourcemaps.write('.', {
+        includeContent: false,
+        relativeToSourcePath: 'dist/build'
+      }))
       .pipe(gulp.dest('dist/build'));
   });
   ```
