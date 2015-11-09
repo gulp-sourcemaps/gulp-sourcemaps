@@ -164,7 +164,7 @@ module.exports.write = function write(destPath, options) {
       // calculate the file path relative to the source path
       if (options.relativeToSourcePath !== undefined) {
         var inputFileFullPath = path.join(file.base, filePath);
-        var outputFileFullPath = path.dirname(path.join(process.cwd(), options.relativeToSourcePath, file.relative));
+        var outputFileFullPath = path.dirname(path.join(process.cwd(), options.relativeToSourcePath, destPath, file.relative));
         filePath = path.relative(outputFileFullPath, inputFileFullPath);
       }
 
