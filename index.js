@@ -17,7 +17,7 @@ module.exports.init = function init(options) {
     /*jshint validthis:true */
 
     // pass through if file is null or already has a source map
-    if (file.isNull() || file.sourceMap) {
+    if (file.sourceMap) {
       this.push(file);
       return callback();
     }
@@ -26,10 +26,10 @@ module.exports.init = function init(options) {
       return callback(new Error(PLUGIN_NAME + '-init: Streaming not supported'));
     }
 
-    var fileContent = file.contents.toString();
+    var fileContent = file.contents && file.contents.toString();
     var sourceMap;
 
-    if (options && options.loadMaps) {
+    if (fileContent && options && options.loadMaps) {
       var sourcePath = ''; //root path for the sources in the map
 
       // Try to read inline source map
@@ -112,7 +112,7 @@ module.exports.init = function init(options) {
         names: [],
         mappings: '',
         sources: [unixStylePath(file.relative)],
-        sourcesContent: [fileContent]
+        sourcesContent: fileContent ? [fileContent] : []
       };
     }
 
