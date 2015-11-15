@@ -19,6 +19,14 @@ function makeFile() {
     });
 }
 
+function makeNullFile() {
+    return new File({
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'helloworld.js')
+    });
+}
+
 function makeStreamFile() {
     return new File({
         cwd: __dirname,
@@ -37,14 +45,14 @@ function makeFileWithInlineSourceMap() {
     });
 }
 
-test('init: should pass through when file is null', function(t) {
-    var file = new File();
+test('init: should add a sourcemap when file is null', function(t) {
+    var file = makeNullFile();
     var pipeline = sourcemaps.init();
     pipeline
         .on('data', function(data) {
             t.ok(data, 'should pass something through');
             t.ok(data instanceof File, 'should pass a vinyl file through');
-            t.ok(!data.sourceMap, 'should not add a source map object');
+            t.ok(data.sourceMap, 'should add a source map object');
             t.deepEqual(data, file, 'should not change file');
             t.end();
         })
