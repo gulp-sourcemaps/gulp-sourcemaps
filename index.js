@@ -159,8 +159,15 @@ module.exports.write = function write(destPath, options) {
     }
 
     var sourceMap = file.sourceMap;
-    // fix paths if Windows style paths
-    sourceMap.file = unixStylePath(file.relative);
+    if (!destPath) {
+      // when inlining source map, file should just be the file name
+      sourceMap.file = path.basename(file.relative);
+    } else {
+      // when not inlining source map, file should be the relative path to the dest file
+      var relativeToFile = path.relative(path.join(destPath, path.dirname(file.relative)), path.dirname(file.relative));
+      sourceMap.file = unixStylePath(path.join(relativeToFile, path.basename(file.relative)));
+    }
+
     sourceMap.sources = sourceMap.sources.map(function(filePath) {
       return unixStylePath(filePath);
     });
