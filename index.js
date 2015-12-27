@@ -217,7 +217,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var comment, sourceMappingURLPrefix;
-    if (!destPath) {
+    if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
       comment = commentFormatter('data:application/json;base64,' + base64Map);
