@@ -162,6 +162,13 @@ module.exports.write = function write(destPath, options) {
     // fix paths if Windows style paths
     sourceMap.file = unixStylePath(file.relative);
     sourceMap.sources = sourceMap.sources.map(function(filePath) {
+      // calculate the file path relative to the source path
+      if (destPath && options.relativeToSourcePath !== undefined) {
+        var inputFileFullPath = path.join(file.base, filePath);
+        var outputFileFullPath = path.dirname(path.join(process.cwd(), options.relativeToSourcePath, destPath, file.relative));
+        filePath = path.relative(outputFileFullPath, inputFileFullPath);
+      }
+
       return unixStylePath(filePath);
     });
 

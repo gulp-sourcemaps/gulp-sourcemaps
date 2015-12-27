@@ -158,6 +158,25 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   });
   ```
 
+- `relativeToSourcePath`
+
+  Set the relative path to where the source files are located. This will be used to generate links to the source files. This should match the dest path.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('.', {
+        includeContent: false,
+        relativeToSourcePath: 'dist/build'
+      }))
+      .pipe(gulp.dest('dist/build'));
+  });
+  ```
+
 - `sourceMappingURLPrefix`
 
   Specify a prefix to be prepended onto the source map URL when writing external source maps. Relative paths will have their leading dots stripped.
