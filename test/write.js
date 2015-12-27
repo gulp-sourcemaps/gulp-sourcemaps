@@ -22,7 +22,7 @@ function makeSourceMap() {
 }
 
 function base64JSON(object) {
-    return 'data:application/json;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
+    return 'data:application/json;charset=utf8;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
 }
 
 function makeFile() {

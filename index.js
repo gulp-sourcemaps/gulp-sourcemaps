@@ -145,6 +145,8 @@ module.exports.write = function write(destPath, options) {
     options.includeContent = true;
   if (options.addComment === undefined)
     options.addComment = true;
+  if (options.charset === undefined)
+    options.charset = "utf8";
 
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
@@ -220,7 +222,7 @@ module.exports.write = function write(destPath, options) {
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
-      comment = commentFormatter('data:application/json;base64,' + base64Map);
+      comment = commentFormatter('data:application/json;charset=' + options.charset + ';base64,' + base64Map);
     } else {
       var sourceMapPath = path.join(file.base, destPath, file.relative) + '.map';
       // add new source map file to stream

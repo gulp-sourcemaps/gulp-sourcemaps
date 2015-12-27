@@ -204,6 +204,10 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
   Set this to `true` to output debug messages (e.g. about missing source content).
 
+- `charset`
+
+  Sets the charset for inline source maps. Default: `utf8`
+
 ### Plugin developers only: How to add source map support to plugins
 
 - Generate a source map for the transformation the plugin is applying
