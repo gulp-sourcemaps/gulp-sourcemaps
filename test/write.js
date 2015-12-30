@@ -178,7 +178,7 @@ test('write: should detect whether a file uses \\n or \\r\\n and follow the exis
 
 test('write: should write external map files', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write('../maps');
+    var pipeline = sourcemaps.write('../maps', {destPath: 'dist'});
     var fileCount = 0;
     var outFiles = [];
     var sourceMap;
@@ -195,7 +195,7 @@ test('write: should write external map files', function(t) {
                         t.equal(String(data.contents),
                             sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map\n',
                             'should add a comment referencing the source map file');
-                        t.equal(sourceMap.file, '../assets/helloworld.js');
+                        t.equal(sourceMap.file, '../dist/helloworld.js');
                     } else {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
                         t.equal(data.path, path.join(__dirname, 'maps/helloworld.js.map'));
@@ -223,7 +223,7 @@ test('write: should allow to rename map file', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write('../maps', {mapFile: function(mapFile) {
         return mapFile.replace('.js.map', '.map');
-    }});
+    }, destPath: 'dist'});
     var fileCount = 0;
     var outFiles = [];
     var sourceMap;
@@ -240,7 +240,7 @@ test('write: should allow to rename map file', function(t) {
                         t.equal(String(data.contents),
                             sourceContent + '\n//# sourceMappingURL=../maps/helloworld.map\n',
                             'should add a comment referencing the source map file');
-                        t.equal(sourceMap.file, '../assets/helloworld.js');
+                        t.equal(sourceMap.file, '../dist/helloworld.js');
                     } else {
                         t.ok(data instanceof File, 'should pass a vinyl file through');
                         t.equal(data.path, path.join(__dirname, 'maps/helloworld.map'));
@@ -358,6 +358,35 @@ test('write: should set the sourceRoot by option sourceRoot, as a function', fun
         .write(file);
 });
 
+test('write: should automatically determine sourceRoot if destPath is set', function(t) {
+    var file = makeNestedFile();
+    var pipeline = sourcemaps.write('.', {destPath: 'dist', includeContent: false});
+    var fileCount = 0;
+    var outFiles = [];
+    var sourceMap;
+    pipeline
+        .on('data', function(data) {
+            outFiles.push(data);
+            fileCount++;
+            if (fileCount == 2) {
+                outFiles.reverse().map(function(data) {
+                    if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
+                        t.equal(data.sourceMap.sourceRoot, '../../../assets', 'should set correct sourceRoot');
+                        t.equal(data.sourceMap.file, 'helloworld.js');
+                    } else {
+                        t.equal(data.path, path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
+                    }
+                });
+                t.end();
+            }
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(file);
+});
+
 test('write: should interpret relative path in sourceRoot as relative to destination', function(t) {
     var file = makeNestedFile();
     var pipeline = sourcemaps.write('.', {sourceRoot: '../src'});
@@ -433,6 +462,35 @@ test('write: should interpret relative path in sourceRoot as relative to destina
                         t.equal(data.sourceMap.file, '../../../dir1/dir2/helloworld.js');
                     } else {
                         t.equal(data.path, path.join(__dirname, 'assets/maps/dir1/dir2/helloworld.js.map'));
+                    }
+                });
+                t.end();
+            }
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(file);
+});
+
+test('write: should interpret relative path in sourceRoot as relative to destination (part 4)', function(t) {
+    var file = makeNestedFile();
+    var pipeline = sourcemaps.write('../maps', {sourceRoot: '../src', destPath: 'dist'});
+    var fileCount = 0;
+    var outFiles = [];
+    var sourceMap;
+    pipeline
+        .on('data', function(data) {
+            outFiles.push(data);
+            fileCount++;
+            if (fileCount == 2) {
+                outFiles.reverse().map(function(data) {
+                    if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
+                        t.equal(data.sourceMap.sourceRoot, '../../../src', 'should set relative sourceRoot');
+                        t.equal(data.sourceMap.file, '../../../dist/dir1/dir2/helloworld.js');
+                    } else {
+                        t.equal(data.path, path.join(__dirname, 'maps/dir1/dir2/helloworld.js.map'));
                     }
                 });
                 t.end();

@@ -238,6 +238,9 @@ module.exports.write = function write(destPath, options) {
     } else {
       sourceMap.sourceRoot = options.sourceRoot;
     }
+    if (sourceMap.sourceRoot === null) {
+        sourceMap.sourceRoot = undefined;
+    }
 
     if (options.includeContent) {
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
@@ -255,11 +258,6 @@ module.exports.write = function write(destPath, options) {
               console.warn(PLUGIN_NAME + '-write: source file not found: ' + sourcePath);
           }
         }
-      }
-      if (sourceMap.sourceRoot === undefined) {
-        sourceMap.sourceRoot = '/source/';
-      } else if (sourceMap.sourceRoot === null) {
-        sourceMap.sourceRoot = undefined;
       }
     } else {
       delete sourceMap.sourcesContent;
@@ -297,11 +295,23 @@ module.exports.write = function write(destPath, options) {
       }
 
       var sourceMapPath = path.join(file.base, mapFile);
-      sourceMap.file = unixStylePath(path.relative(path.dirname(sourceMapPath), file.path));
 
-      // if sourceRoot is a relative path
-      if (sourceMap.sourceRoot === '' || (sourceMap.sourceRoot && sourceMap.sourceRoot[0] === '.')) {
-        sourceMap.sourceRoot = unixStylePath(path.join(path.relative(path.dirname(sourceMapPath), file.base), sourceMap.sourceRoot));
+      // if explicit destination path is set
+      if (options.destPath) {
+        var destSourceMapPath = path.join(file.cwd, options.destPath, mapFile);
+        var destFilePath = path.join(file.cwd, options.destPath, file.relative);
+        sourceMap.file = unixStylePath(path.relative(path.dirname(destSourceMapPath), destFilePath));
+        if (sourceMap.sourceRoot === undefined) {
+          sourceMap.sourceRoot = unixStylePath(path.relative(path.dirname(destSourceMapPath), file.base));
+        } else if (sourceMap.sourceRoot === '' || (sourceMap.sourceRoot && sourceMap.sourceRoot[0] === '.')) {
+          sourceMap.sourceRoot = unixStylePath(path.join(path.relative(path.dirname(destSourceMapPath), file.base), sourceMap.sourceRoot));
+        }
+      } else {
+        // best effort, can be incorrect if options.destPath not set
+        sourceMap.file = unixStylePath(path.relative(path.dirname(sourceMapPath), file.path));
+        if (sourceMap.sourceRoot === '' || (sourceMap.sourceRoot && sourceMap.sourceRoot[0] === '.')) {
+          sourceMap.sourceRoot = unixStylePath(path.join(path.relative(path.dirname(sourceMapPath), file.base), sourceMap.sourceRoot));
+        }
       }
 
       // add new source map file to stream
