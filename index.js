@@ -222,6 +222,13 @@ module.exports.write = function write(destPath, options) {
     var sourceMap = file.sourceMap;
     // fix paths if Windows style paths
     sourceMap.file = unixStylePath(file.relative);
+
+    if (options.mapSources && typeof options.mapSources === 'function') {
+      sourceMap.sources = sourceMap.sources.map(function(filePath) {
+        return options.mapSources(filePath);
+      });
+    }
+
     sourceMap.sources = sourceMap.sources.map(function(filePath) {
       return unixStylePath(filePath);
     });
@@ -283,7 +290,20 @@ module.exports.write = function write(destPath, options) {
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
       comment = commentFormatter('data:application/json;charset=' + options.charset + ';base64,' + base64Map);
     } else {
-      var sourceMapPath = path.join(file.base, destPath, file.relative) + '.map';
+      var mapFile = path.join(destPath, file.relative) + '.map';
+      // custom map file name
+      if (options.mapFile && typeof options.mapFile === 'function') {
+        mapFile = options.mapFile(mapFile);
+      }
+
+      var sourceMapPath = path.join(file.base, mapFile);
+      sourceMap.file = unixStylePath(path.relative(path.dirname(sourceMapPath), file.path));
+
+      // if sourceRoot is a relative path
+      if (sourceMap.sourceRoot === '' || (sourceMap.sourceRoot && sourceMap.sourceRoot[0] === '.')) {
+        sourceMap.sourceRoot = unixStylePath(path.join(path.relative(path.dirname(sourceMapPath), file.base), sourceMap.sourceRoot));
+      }
+
       // add new source map file to stream
       var sourceMapFile = new File({
         cwd: file.cwd,
