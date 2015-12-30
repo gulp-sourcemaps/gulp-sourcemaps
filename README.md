@@ -93,12 +93,21 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 ### Init Options
 
 - `loadMaps`
+
   Set to true to load existing maps for source files. Supports the following:
     - inline source maps
     - source map files referenced by a `sourceMappingURL=` comment
     - source map files with the same name (plus .map) in the same directory
 
+
+- `identityMap`
+
+  Set to true to generate a full valid source map encoding no changes (slower, only
+  for Javascript and CSS) instead of the default empty source map (no mappings, fast).
+  Use this option if you get missing or incorrect mappings, e.g. when debugging.
+
 - `debug`
+
   Set this to `true` to output debug messages (e.g. about missing source content).
 
 ### Write Options
@@ -127,7 +136,9 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
 - `sourceRoot`
 
-  Set the path where the source files are hosted (use this when `includeContent` is set to `false`). This is an URL (or subpath) relative to the source map, not a local file system path. If you have sources in different subpaths, an absolute path (from the domain root) pointing to the source file root is recommended, or define it with a function.
+  Set the location where the source files are hosted (use this when `includeContent` is set to `false`). This is usually a URL (or an absolute URL path), not a local file system path.
+  By default the source root is '' or in case `destPath` is set, the relative path from the source map to the source base directory (this should work for many dev environments).
+  If a relative path is used (empty string or one starting with a `.`), it is interpreted as a path relative to the destination. The plugin rewrites it to a path relative to each source map.
 
   Example:
   ```javascript
@@ -157,6 +168,24 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
       .pipe(gulp.dest('dist'));
   });
   ```
+
+  Example (relative path):
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: '../src'}))
+      .pipe(gulp.dest('dist'));
+  });
+  ```
+  In this case for a file written to `dist/subdir/example.js`, the source map is written to `dist/subdir/example.js.map` and the sourceRoot will be `../../src` (resulting in the full source path `../../src/subdir/example.js`).
+
+- `destPath`
+
+  Set the destination path (the same you pass to `gulp.dest()`). If the source map destination path is not a subpath of the destination path, this is needed to get the correct path in the `file` property of the source map.
+  In addition, it allows to automatically set a relative `sourceRoot` if none is set explicitly.
 
 - `sourceMappingURLPrefix`
 
@@ -199,6 +228,48 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   ```
 
   This will result in a source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/helloworld.js.map`.
+
+- `mapFile`
+
+  This option allows to rename the map file. It takes a function that is called for every map and receives the default map path as a parameter.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('../maps', {
+        mapFile: function(mapFilePath) {
+          // source map files are named *.map instead of *.js.map
+          return mapFile.replace('.js.map', '.map');
+        }
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
+
+- `mapSources`
+
+  This option gives full control over the source paths. It takes a function that is called for every source and receives the default source path as a parameter.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+    var stream = gulp.src('src/**/*.js')
+      .pipe(sourcemaps.init())
+        .pipe(plugin1())
+        .pipe(plugin2())
+      .pipe(sourcemaps.write('../maps', {
+        mapSources: function(sourcePath) {
+          // source paths are prefixed with '../src/'
+          return '../src/' + sourcePath;
+        }
+      }))
+      .pipe(gulp.dest('public/scripts'));
+  });
+  ```
 
 - `debug`
 
