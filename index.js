@@ -6,6 +6,9 @@ var File = require('vinyl');
 var convert = require('convert-source-map');
 var stripBom = require('strip-bom');
 var detectNewline = require('detect-newline');
+var acorn = require('acorn');
+var SourceMapGenerator = require('source-map').SourceMapGenerator;
+var css = require('css');
 
 var PLUGIN_NAME = 'gulp-sourcemap';
 var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
@@ -27,10 +30,14 @@ module.exports.init = function init(options) {
       return callback(new Error(PLUGIN_NAME + '-init: Streaming not supported'));
     }
 
+    if (options === undefined) {
+        options = {};
+    }
+
     var fileContent = file.contents.toString();
     var sourceMap;
 
-    if (options && options.loadMaps) {
+    if (options.loadMaps) {
       var sourcePath = ''; //root path for the sources in the map
 
       // Try to read inline source map
@@ -103,6 +110,58 @@ module.exports.init = function init(options) {
 
         // remove source map comment from source
         file.contents = new Buffer(fileContent, 'utf8');
+      }
+    }
+
+    if (!sourceMap && options.identityMap) {
+      var fileType = path.extname(file.path);
+      var source = unixStylePath(file.relative);
+      var generator = new SourceMapGenerator({file: source});
+
+      if (fileType === '.js') {
+        var tokenizer = acorn.tokenizer(fileContent, {locations: true});
+        while (true) {
+          var token = tokenizer.getToken();
+          if (token.type.label === "eof")
+            break;
+          var mapping = {
+            original: token.loc.start,
+            generated: token.loc.start,
+            source: source,
+          };
+          if (token.type.label === 'name') {
+            mapping.name = token.value;
+          }
+          generator.addMapping(mapping);
+        }
+        generator.setSourceContent(source, fileContent);
+        sourceMap = generator.toJSON();
+
+      } else if (fileType === '.css') {
+        var ast = css.parse(fileContent, {silent: true});
+        var registerTokens = function(ast) {
+          if (ast.position) {
+            generator.addMapping({
+              original: ast.position.start,
+              generated: ast.position.start,
+              source: source,
+            });
+          }
+          for (var key in ast) {
+            if (key !== "position") {
+              if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
+                registerTokens(ast[key]);
+              } else if (ast[key].constructor === Array) {
+                for (var i = 0; i < ast[key].length; i++) {
+                  registerTokens(ast[key][i]);
+                }
+              }
+            }
+          }
+        };
+        registerTokens(ast);
+        generator.setSourceContent(source, fileContent);
+        sourceMap = generator.toJSON();
       }
     }
 

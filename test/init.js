@@ -9,6 +9,7 @@ var fs = require('fs');
 var recordConsole = require('./consolerecorder.js');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
+var sourceContentCSS = fs.readFileSync(path.join(__dirname, 'assets/test.css')).toString();
 
 function makeFile() {
     return new File({
@@ -34,6 +35,15 @@ function makeFileWithInlineSourceMap() {
         base: path.join(__dirname, 'assets'),
         path: path.join(__dirname, 'assets', 'all.js'),
         contents: new Buffer('console.log("line 1.1"),console.log("line 1.2"),console.log("line 2.1"),console.log("line 2.2");\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYWxsLmpzIiwic291cmNlcyI6WyJ0ZXN0MS5qcyIsInRlc3QyLmpzIl0sIm5hbWVzIjpbImNvbnNvbGUiLCJsb2ciXSwibWFwcGluZ3MiOiJBQUFBQSxRQUFBQyxJQUFBLFlBQ0FELFFBQUFDLElBQUEsWUNEQUQsUUFBQUMsSUFBQSxZQUNBRCxRQUFBQyxJQUFBIiwic291cmNlc0NvbnRlbnQiOlsiY29uc29sZS5sb2coJ2xpbmUgMS4xJyk7XG5jb25zb2xlLmxvZygnbGluZSAxLjInKTtcbiIsImNvbnNvbGUubG9nKCdsaW5lIDIuMScpO1xuY29uc29sZS5sb2coJ2xpbmUgMi4yJyk7Il0sInNvdXJjZVJvb3QiOiIvc291cmNlLyJ9')
+    });
+}
+
+function makeFileCSS() {
+    return new File({
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'test.css'),
+        contents: new Buffer(sourceContentCSS)
     });
 }
 
@@ -69,7 +79,7 @@ test('init: should emit an error if file content is a stream', function(t) {
         .write(makeStreamFile());
 });
 
-test('init: should add a valid source map', function(t) {
+test('init: should add an empty source map', function(t) {
     var pipeline = sourcemaps.init();
     pipeline
         .on('data', function(data) {
@@ -79,6 +89,7 @@ test('init: should add a valid source map', function(t) {
             t.equal(String(data.sourceMap.version), '3', 'should have version 3');
             t.equal(data.sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
             t.equal(data.sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
+            t.deepEqual(data.sourceMap.names, [], 'should add empty names');
             t.equal(data.sourceMap.mappings, '', 'should add empty mappings');
             t.end();
         })
@@ -87,6 +98,48 @@ test('init: should add a valid source map', function(t) {
             t.end();
         })
         .write(makeFile());
+});
+
+test('init: should add a valid source map if wished', function(t) {
+    var pipeline = sourcemaps.init({identityMap: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data, 'should pass something through');
+            t.ok(data instanceof File, 'should pass a vinyl file through');
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.equal(data.sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
+            t.equal(data.sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
+            t.deepEqual(data.sourceMap.names, ['helloWorld', 'console', 'log'], 'should add correct names');
+            t.equal(data.sourceMap.mappings, 'AAAA,YAAY;;AAEZ,SAASA,UAAU,CAAC,EAAE;IAClBC,OAAO,CAACC,GAAG,CAAC,cAAc,CAAC;AAC/B', 'should add correct mappings');
+            t.end();
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(makeFile());
+});
+
+test('init: should add a valid source map for css if wished', function(t) {
+    var pipeline = sourcemaps.init({identityMap: true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data, 'should pass something through');
+            t.ok(data instanceof File, 'should pass a vinyl file through');
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.equal(data.sourceMap.sources[0], 'test.css', 'should add file to sources');
+            t.equal(data.sourceMap.sourcesContent[0], sourceContentCSS, 'should add file content to sourcesContent');
+            t.deepEqual(data.sourceMap.names, [], 'should add correct names');
+            t.equal(data.sourceMap.mappings, 'CAAC;GACE;GACA', 'should add correct mappings');
+            t.end();
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(makeFileCSS());
 });
 
 test('init: should import an existing inline source map', function(t) {
