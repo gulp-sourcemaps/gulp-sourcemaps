@@ -67,6 +67,27 @@ gulp.task('javascript', function() {
 });
 ```
 
+#### Handle large files
+
+To handle large files, pass the option `largeFile: true` to `sourcemaps.init()`.
+
+Example:
+```javascript
+var gulp = require('gulp');
+var plugin1 = require('gulp-plugin1');
+var plugin2 = require('gulp-plugin2');
+var sourcemaps = require('gulp-sourcemaps');
+
+gulp.task('javascript', function() {
+  gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init({largeFile: true}))
+      .pipe(plugin1())
+      .pipe(plugin2())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('dist'));
+});
+```
+
 #### Handle source files from different directories
 
 Use the `base` option on `gulp.src` to make sure all files are relative to a common base directory.

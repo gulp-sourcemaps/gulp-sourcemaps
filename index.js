@@ -41,12 +41,14 @@ module.exports.init = function init(options) {
       var sourcePath = ''; //root path for the sources in the map
 
       // Try to read inline source map
-      sourceMap = convert.fromSource(fileContent);
+      sourceMap = convert.fromSource(fileContent, options.largeFile);
       if (sourceMap) {
         sourceMap = sourceMap.toObject();
         // sources in map are relative to the source file
         sourcePath = path.dirname(file.path);
-        fileContent = convert.removeComments(fileContent);
+        if (!options.largeFile) {
+          fileContent = convert.removeComments(fileContent);
+        }
       } else {
         // look for source map comment referencing a source map file
         var mapComment = convert.mapFileCommentRegex.exec(fileContent);
