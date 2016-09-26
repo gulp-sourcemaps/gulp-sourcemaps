@@ -20,10 +20,10 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "acorn": "^2.6.4",
+    "acorn": "^4.0.3",
     "convert-source-map": "^1.1.1",
     "css": "^2.2.1",
-    "detect-newline": "^1.0.3",
+    "detect-newline": "^2.1.0",
     "graceful-fs": "^4.1.2",
     "source-map": "^0.5.3",
     "strip-bom": "^2.0.0",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "jshint": "^2.8.0",
     "tape": "^4.2.0",
-    "istanbul": "^0.3.21",
+    "istanbul": "^0.4.5",
     "faucet": "0.0.1",
     "coveralls": "^2.11.4"
   },
