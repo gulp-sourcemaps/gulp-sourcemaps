@@ -300,45 +300,68 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
   Sets the charset for inline source maps. Default: `utf8`
 
-### Plugin developers only: How to add source map support to plugins
+### Plugin developers only:
 
-- Generate a source map for the transformation the plugin is applying
-- **Important**: Make sure the paths in the generated source map (`file` and `sources`) are relative to `file.base` (e.g. use `file.relative`).
-- Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/floridoo/vinyl-sourcemaps-apply).
-  This combines the source map of this plugin with the source maps coming from plugins further up the chain.
-- Add your plugin to the [wiki page](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support)
+- **How to add source map support to plugins**
 
-#### Example:
+  - Generate a source map for the transformation the plugin is applying
+  - **Important**: Make sure the paths in the generated source map (`file` and `sources`) are relative to `file.base` (e.g. use `file.relative`).
+  - Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/floridoo/vinyl-sourcemaps-apply).
+    This combines the source map of this plugin with the source maps coming from plugins further up the chain.
+  - Add your plugin to the [wiki page](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support)
 
-```javascript
-var through = require('through2');
-var applySourceMap = require('vinyl-sourcemaps-apply');
-var myTransform = require('myTransform');
+  #### Example:
 
-module.exports = function(options) {
+  ```js
+  var through = require('through2');
+  var applySourceMap = require('vinyl-sourcemaps-apply');
+  var myTransform = require('myTransform');
 
-  function transform(file, encoding, callback) {
-    // generate source maps if plugin source-map present
-    if (file.sourceMap) {
-      options.makeSourceMaps = true;
+  module.exports = function(options) {
+
+    function transform(file, encoding, callback) {
+      // generate source maps if plugin source-map present
+      if (file.sourceMap) {
+        options.makeSourceMaps = true;
+      }
+
+      // do normal plugin logic
+      var result = myTransform(file.contents, options);
+      file.contents = new Buffer(result.code);
+
+      // apply source map to the chain
+      if (file.sourceMap) {
+        applySourceMap(file, result.map);
+      }
+
+      this.push(file);
+      callback();
     }
 
-    // do normal plugin logic
-    var result = myTransform(file.contents, options);
-    file.contents = new Buffer(result.code);
+    return through.obj(transform);
+  };
+  ```
 
-    // apply source map to the chain
-    if (file.sourceMap) {
-      applySourceMap(file, result.map);
-    }
+  - **Very sourcemaps is working**
 
-    this.push(file);
-    callback();
-  }
+    See example below or refer to [test/write.js](./test/write.js)
 
-  return through.obj(transform);
-};
-```
+  #### Example:
+  ```js
+  var stream = plugin();
+  var init = sourcemaps.init();
+  var write = sourcemaps.write();
+
+  init.pipe(stream).pipe(write);
+
+  write.on('data', function (file) {
+    assert(...);
+    cb();
+  });
+
+  init.write(new gutil.File(...));
+  init.end();
+  ```
 
 [npm-image]: https://img.shields.io/npm/v/gulp-sourcemaps.svg
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
