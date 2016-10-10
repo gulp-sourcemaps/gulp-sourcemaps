@@ -26,7 +26,7 @@
     "detect-newline": "2.X",
     "graceful-fs": "4.X",
     "source-map": "0.X",
-    "strip-bom": "3.X",
+    "strip-bom": "2.X",
     "through2": "2.X",
     "vinyl": "1.X"
   },
