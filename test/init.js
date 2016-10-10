@@ -283,6 +283,8 @@ test('init: should not throw when source file for sourceContent not found', func
         .write(file);
 });
 
+// vinyl 2.X breaks this spec, exactly sure why but it is due to this commit
+// https://github.com/gulpjs/vinyl/commit/ece4abf212c83aa3e2613c57a4a0fe96171d5755
 test('init: should use unix style paths in sourcemap', function(t) {
     var file = makeFile();
     file.base = file.cwd;
