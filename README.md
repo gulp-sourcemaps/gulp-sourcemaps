@@ -264,7 +264,7 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
       .pipe(sourcemaps.write('../maps', {
         mapFile: function(mapFilePath) {
           // source map files are named *.map instead of *.js.map
-          return mapFile.replace('.js.map', '.map');
+          return mapFilePath.replace('.js.map', '.map');
         }
       }))
       .pipe(gulp.dest('public/scripts'));
