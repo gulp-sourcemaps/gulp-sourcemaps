@@ -17,6 +17,8 @@ var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
  * Initialize source mapping chain
  */
 module.exports.init = function init(options) {
+  var debug = require('debug')('gulp-sourcemaps:init');
+
   function sourceMapInit(file, encoding, callback) {
     /*jshint validthis:true */
 
@@ -33,11 +35,13 @@ module.exports.init = function init(options) {
     if (options === undefined) {
         options = {};
     }
+    debug(options);
 
     var fileContent = file.contents.toString();
     var sourceMap;
 
     if (options.loadMaps) {
+      debug('loadMaps');
       var sourcePath = ''; //root path for the sources in the map
 
       // Try to read inline source map
@@ -116,6 +120,7 @@ module.exports.init = function init(options) {
     }
 
     if (!sourceMap && options.identityMap) {
+      debug('identityMap');
       var fileType = path.extname(file.path);
       var source = unixStylePath(file.relative);
       var generator = new SourceMapGenerator({file: source});
@@ -140,7 +145,9 @@ module.exports.init = function init(options) {
         sourceMap = generator.toJSON();
 
       } else if (fileType === '.css') {
+        debug('css');
         var ast = css.parse(fileContent, {silent: true});
+        debug(ast);
         var registerTokens = function(ast) {
           if (ast.position) {
             generator.addMapping({
@@ -150,10 +157,13 @@ module.exports.init = function init(options) {
             });
           }
           for (var key in ast) {
+            debug('key: ' + key);
+            debug(ast[key]);
             if (key !== "position") {
               if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
                 registerTokens(ast[key]);
-              } else if (ast[key].constructor === Array) {
+              } else if (Array.isArray(ast[key])) {
+                debug("@@@@ ast[key] isArray @@@@");
                 for (var i = 0; i < ast[key].length; i++) {
                   registerTokens(ast[key][i]);
                 }
@@ -195,6 +205,8 @@ module.exports.init = function init(options) {
  *
  */
 module.exports.write = function write(destPath, options) {
+  var debug = require('debug')('gulp-sourcemaps:write');
+
   if (options === undefined && Object.prototype.toString.call(destPath) === '[object Object]') {
     options = destPath;
     destPath = undefined;

@@ -23,6 +23,7 @@
     "acorn": "4.X",
     "convert-source-map": "1.X",
     "css": "2.X",
+    "debug": "2.X",
     "detect-newline": "2.X",
     "graceful-fs": "4.X",
     "source-map": "0.X",
