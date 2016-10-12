@@ -266,7 +266,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var extension = file.relative.split('.').pop();
-    var newline = detectNewline(file.contents.toString());
+    var newline = detectNewline.graceful(file.contents.toString());
     var commentFormatter;
 
     switch (extension) {
