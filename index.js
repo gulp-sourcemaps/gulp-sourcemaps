@@ -17,7 +17,7 @@ var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
  * Initialize source mapping chain
  */
 module.exports.init = function init(options) {
-  var debug = require('debug')('gulp-sourcemaps:init');
+  var debug = require('debug-fabulous')()(PLUGIN_NAME + ':init');
 
   function sourceMapInit(file, encoding, callback) {
     /*jshint validthis:true */
@@ -35,7 +35,7 @@ module.exports.init = function init(options) {
     if (options === undefined) {
         options = {};
     }
-    debug(options);
+    debug(() => {return options;});
 
     var fileContent = file.contents.toString();
     var sourceMap;
@@ -103,11 +103,11 @@ module.exports.init = function init(options) {
             } else {
               try {
                 if (options.debug)
-                  console.log(PLUGIN_NAME + '-init: No source content for "' + source + '". Loading from file.');
+                  debug('No source content for "' + source + '". Loading from file.');
                 sourceContent = stripBom(fs.readFileSync(absPath, 'utf8'));
               } catch (e) {
                 if (options.debug)
-                  console.warn(PLUGIN_NAME + '-init: source file not found: ' + absPath);
+                  debug('warn: source file not found: ' + absPath);
               }
             }
             sourceMap.sourcesContent[i] = sourceContent;
@@ -120,7 +120,7 @@ module.exports.init = function init(options) {
     }
 
     if (!sourceMap && options.identityMap) {
-      debug('identityMap');
+      debug(() => { return 'identityMap'; });
       var fileType = path.extname(file.path);
       var source = unixStylePath(file.relative);
       var generator = new SourceMapGenerator({file: source});
@@ -147,7 +147,7 @@ module.exports.init = function init(options) {
       } else if (fileType === '.css') {
         debug('css');
         var ast = css.parse(fileContent, {silent: true});
-        debug(ast);
+        debug(() => { return ast;});
         var registerTokens = function(ast) {
           if (ast.position) {
             generator.addMapping({
@@ -156,14 +156,19 @@ module.exports.init = function init(options) {
               source: source,
             });
           }
+
+          function logAst(key, ast) {
+            debug(() => { return 'key: ' + key;});
+            debug(() => { return ast[key];});
+          }
+
           for (var key in ast) {
-            debug('key: ' + key);
-            debug(ast[key]);
+            logAst(key, ast);
             if (key !== "position") {
               if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
                 registerTokens(ast[key]);
               } else if (Array.isArray(ast[key])) {
-                debug("@@@@ ast[key] isArray @@@@");
+                debug(() => { return "@@@@ ast[key] isArray @@@@";});
                 for (var i = 0; i < ast[key].length; i++) {
                   registerTokens(ast[key][i]);
                 }
@@ -205,7 +210,7 @@ module.exports.init = function init(options) {
  *
  */
 module.exports.write = function write(destPath, options) {
-  var debug = require('debug')('gulp-sourcemaps:write');
+  var debug = require('debug-fabulous')()(PLUGIN_NAME + ':write');
 
   if (options === undefined && Object.prototype.toString.call(destPath) === '[object Object]') {
     options = destPath;
@@ -221,6 +226,7 @@ module.exports.write = function write(destPath, options) {
   if (options.charset === undefined)
     options.charset = "utf8";
 
+  debug(()=> {return options;});
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
 
@@ -265,11 +271,11 @@ module.exports.write = function write(destPath, options) {
           var sourcePath = path.resolve(sourceMap.sourceRoot || file.base, sourceMap.sources[i]);
           try {
             if (options.debug)
-              console.log(PLUGIN_NAME + '-write: No source content for "' + sourceMap.sources[i] + '". Loading from file.');
+              debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
             sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
           } catch (e) {
             if (options.debug)
-              console.warn(PLUGIN_NAME + '-write: source file not found: ' + sourcePath);
+              debug('source file not found: ' + sourcePath);
           }
         }
       }
@@ -278,7 +284,7 @@ module.exports.write = function write(destPath, options) {
     }
 
     var extension = file.relative.split('.').pop();
-    var newline = detectNewline(file.contents.toString());
+    var newline = detectNewline.graceful(file.contents.toString());
     var commentFormatter;
 
     switch (extension) {

@@ -6,7 +6,8 @@ var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
 var path = require('path');
 var fs = require('fs');
-var recordConsole = require('./consolerecorder.js');
+var hookStd = require('hook-std');
+var debug = require('debug-fabulous')();
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 var sourceContentCSS = fs.readFileSync(path.join(__dirname, 'assets/test.css')).toString();
@@ -17,6 +18,20 @@ function makeFile() {
         base: path.join(__dirname, 'assets'),
         path: path.join(__dirname, 'assets', 'helloworld.js'),
         contents: new Buffer(sourceContent)
+    });
+}
+
+function makeNullFile() {
+    var junkBuffer = new Buffer([]);
+    junkBuffer.toString = function(){
+      return null;
+    };
+
+    return new File({
+        cwd: __dirname,
+        base: path.join(__dirname, 'assets'),
+        path: path.join(__dirname, 'assets', 'helloworld.js'),
+        contents: junkBuffer
     });
 }
 
@@ -334,22 +349,6 @@ test('init: should not load source content if the path is a url', function(t) {
         .write(file);
 });
 
-test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
-    var file = makeFile();
-    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
-
-    var hConsole = recordConsole();
-    var pipeline = sourcemaps.init({loadMaps: true, debug: true});
-    pipeline
-        .on('data', function(data) {
-            hConsole.restore();
-            t.equal(hConsole.history.log[0], 'gulp-sourcemap-init: No source content for "missingfile". Loading from file.', 'should log missing source content');
-            t.ok(hConsole.history.warn[0].indexOf('gulp-sourcemap-init: source file not found: ') === 0, 'should warn about missing file');
-            t.end();
-        })
-        .write(file);
-});
-
 test('init: should pass through when file already has a source map', function(t) {
     var sourceMap = {
       version : 3,
@@ -375,4 +374,52 @@ test('init: should pass through when file already has a source map', function(t)
             t.end();
         })
         .write(file);
+});
+
+
+test('init: handle null contents', function(t) {
+    var pipeline = sourcemaps.init({addComment:true});
+    pipeline
+        .on('data', function(data) {
+            t.ok(data, 'should pass something through');
+            t.ok(data instanceof File, 'should pass a vinyl file through');
+            t.ok(data.sourceMap, 'should add a source map object');
+            t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+            t.equal(data.sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
+            t.equal(data.sourceMap.sourcesContent[0], null, 'should add file content to sourcesContent');
+            t.deepEqual(data.sourceMap.names, [], 'should add empty names');
+            t.equal(data.sourceMap.mappings, '', 'should add empty mappings');
+            t.end();
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(makeNullFile());
+});
+
+//should always be last as disabling a debug namespace does not work
+test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
+    debug.save('gulp-sourcemap:init');
+    debug.enable(debug.load());
+
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+
+    var history = [];
+    console.log('HOOKING');
+    var unhook = hookStd.stderr((s) => history.push(s));
+    var pipeline = sourcemaps.init({loadMaps: true, debug: true});
+
+    pipeline
+        .on('data', function() {
+            unhook();
+            debug.save(null);
+            t.ok(history.length == 4, 'history len');
+            t.ok(history[2].match(/No source content for \"missingfile\". Loading from file./), 'should log missing source content');
+            t.ok(history[3].match(/source file not found: /), 'should warn about missing file');
+            t.end();
+        })
+        .write(file);
+
 });
