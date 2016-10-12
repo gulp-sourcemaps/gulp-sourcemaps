@@ -149,6 +149,22 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   });
   ```
 
+- `sourcePathBase`
+
+  Set a base path for each individual source entry.
+
+  Example:
+  ```javascript
+  gulp.task('javascript', function() {
+  var stream = gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init())
+      .pipe(plugin1())
+      .pipe(plugin2())
+    .pipe(sourcemaps.write({includeContent: false, sourcePathBase: '/src'}))
+    .pipe(gulp.dest('dist'));
+  });
+  ```
+
 - `includeContent`
 
   By default the source maps include the source code. Pass `false` to use the original files.

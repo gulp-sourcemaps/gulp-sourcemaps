@@ -232,6 +232,9 @@ module.exports.write = function write(destPath, options) {
     }
 
     sourceMap.sources = sourceMap.sources.map(function(filePath) {
+      if (options.sourcePathBase) {
+        filePath = path.join(options.sourcePathBase, filePath);
+      }
       return unixStylePath(filePath);
     });
 
