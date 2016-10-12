@@ -408,7 +408,7 @@ test('init: should output an error message if debug option is set and sourceCont
 
     var history = [];
     console.log('HOOKING');
-    var unhook = hookStd.stderr((s) => history.push(s));
+    var unhook = hookStd.stderr(function (s) {history.push(s);});
     var pipeline = sourcemaps.init({loadMaps: true, debug: true});
 
     pipeline

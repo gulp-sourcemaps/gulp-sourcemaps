@@ -635,7 +635,7 @@ test('write: should output an error message if debug option is set and sourceCon
     delete file.sourceMap.sourcesContent;
 
     var history = [];
-    var unhook = hookStd.stderr(s => history.push(s));
+    var unhook = hookStd.stderr(function(s) {history.push(s);});
     var pipeline = sourcemaps.write({debug: true});
     pipeline
         .on('data', function(data) {

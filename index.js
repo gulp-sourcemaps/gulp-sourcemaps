@@ -35,7 +35,7 @@ module.exports.init = function init(options) {
     if (options === undefined) {
         options = {};
     }
-    debug(() => {return options;});
+    debug(function () {return options;});
 
     var fileContent = file.contents.toString();
     var sourceMap;
@@ -120,7 +120,7 @@ module.exports.init = function init(options) {
     }
 
     if (!sourceMap && options.identityMap) {
-      debug(() => { return 'identityMap'; });
+      debug(function () { return 'identityMap'; });
       var fileType = path.extname(file.path);
       var source = unixStylePath(file.relative);
       var generator = new SourceMapGenerator({file: source});
@@ -147,7 +147,7 @@ module.exports.init = function init(options) {
       } else if (fileType === '.css') {
         debug('css');
         var ast = css.parse(fileContent, {silent: true});
-        debug(() => { return ast;});
+        debug(function () { return ast;});
         var registerTokens = function(ast) {
           if (ast.position) {
             generator.addMapping({
@@ -158,8 +158,8 @@ module.exports.init = function init(options) {
           }
 
           function logAst(key, ast) {
-            debug(() => { return 'key: ' + key;});
-            debug(() => { return ast[key];});
+            debug(function () { return 'key: ' + key;});
+            debug(function () { return ast[key];});
           }
 
           for (var key in ast) {
@@ -168,7 +168,7 @@ module.exports.init = function init(options) {
               if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
                 registerTokens(ast[key]);
               } else if (Array.isArray(ast[key])) {
-                debug(() => { return "@@@@ ast[key] isArray @@@@";});
+                debug(function () { return "@@@@ ast[key] isArray @@@@";});
                 for (var i = 0; i < ast[key].length; i++) {
                   registerTokens(ast[key][i]);
                 }
@@ -226,7 +226,7 @@ module.exports.write = function write(destPath, options) {
   if (options.charset === undefined)
     options.charset = "utf8";
 
-  debug(()=> {return options;});
+  debug(function() {return options;});
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
 
