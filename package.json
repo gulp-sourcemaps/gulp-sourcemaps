@@ -23,6 +23,7 @@
     "acorn": "4.X",
     "convert-source-map": "1.X",
     "css": "2.X",
+    "debug-fabulous": "0.0.X",
     "detect-newline": "2.X",
     "graceful-fs": "4.X",
     "source-map": "0.X",
@@ -31,11 +32,12 @@
     "vinyl": "1.X"
   },
   "devDependencies": {
-    "jshint": "2.X",
-    "tape": "4.X",
-    "istanbul": "0.X",
+    "coveralls": "2.X",
     "faucet": "0.0.X",
-    "coveralls": "2.X"
+    "hook-std": "0.2.X",
+    "istanbul": "0.X",
+    "jshint": "2.X",
+    "tape": "4.X"
   },
   "files": [
     "index.js"
