@@ -9,7 +9,6 @@ var utils = require('./utils'),
   stripBom = require('strip-bom'),
   detectNewline = require('detect-newline');
 
-
 /**
  * Write the source map
  *
@@ -19,7 +18,7 @@ var utils = require('./utils'),
 function write(destPath, options) {
   var debug = require('debug-fabulous')()(PLUGIN_NAME + ':write');
 
-  if (options === undefined && Object.prototype.toString.call(destPath) === '[object Object]') {
+  if (options === undefined && typeof destPath !== 'string') {
     options = destPath;
     destPath = undefined;
   }
@@ -33,7 +32,10 @@ function write(destPath, options) {
   if (options.charset === undefined)
     options.charset = "utf8";
 
-  debug(function() {return options;});
+  debug(function() {
+    return options;
+  });
+
   function sourceMapWrite(file, encoding, callback) {
     /*jshint validthis:true */
 
@@ -66,7 +68,7 @@ function write(destPath, options) {
       sourceMap.sourceRoot = options.sourceRoot;
     }
     if (sourceMap.sourceRoot === null) {
-        sourceMap.sourceRoot = undefined;
+      sourceMap.sourceRoot = undefined;
     }
 
     if (options.includeContent) {
@@ -83,8 +85,8 @@ function write(destPath, options) {
           } catch (e) {
             if (options.debug)
               debug('source file not found: ' + sourcePath);
+            }
           }
-        }
       }
     } else {
       delete sourceMap.sourcesContent;
@@ -106,10 +108,15 @@ function write(destPath, options) {
         };
         break;
       default:
-        commentFormatter = function(url) { return ""; };
+        /* jshint ignore:start */
+        commentFormatter = function(url) {
+          return "";
+        };
+        /* jshint ignore:end */
     }
 
-    var comment, sourceMappingURLPrefix;
+    var comment;
+
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
@@ -148,13 +155,27 @@ function write(destPath, options) {
         path: sourceMapPath,
         contents: new Buffer(JSON.stringify(sourceMap)),
         stat: {
-          isFile: function () { return true; },
-          isDirectory: function () { return false; },
-          isBlockDevice: function () { return false; },
-          isCharacterDevice: function () { return false; },
-          isSymbolicLink: function () { return false; },
-          isFIFO: function () { return false; },
-          isSocket: function () { return false; }
+          isFile: function() {
+            return true;
+          },
+          isDirectory: function() {
+            return false;
+          },
+          isBlockDevice: function() {
+            return false;
+          },
+          isCharacterDevice: function() {
+            return false;
+          },
+          isSymbolicLink: function() {
+            return false;
+          },
+          isFIFO: function() {
+            return false;
+          },
+          isSocket: function() {
+            return false;
+          }
         }
       });
       this.push(sourceMapFile);
@@ -168,7 +189,7 @@ function write(destPath, options) {
         } else {
           prefix = options.sourceMappingURLPrefix;
         }
-        sourceMapPathRelative = prefix+path.join('/', sourceMapPathRelative);
+        sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
