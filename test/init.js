@@ -83,7 +83,7 @@ test('init: should pass through when file is null', function(t) {
 test('init: should emit an error if file content is a stream', function(t) {
     var pipeline = sourcemaps.init();
     pipeline
-        .on('data', function(data) {
+        .on('data', function() {
             t.fail('should emit an error');
             t.end();
         })
@@ -400,7 +400,7 @@ test('init: handle null contents', function(t) {
 
 //should always be last as disabling a debug namespace does not work
 test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
-    debug.save('gulp-sourcemap:init');
+    debug.save('gulp-sourcemaps:init');
     debug.enable(debug.load());
 
     var file = makeFile();
