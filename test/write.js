@@ -100,7 +100,7 @@ test('write: should pass through when file has no source map', function(t) {
 test('write: should emit an error if file content is a stream', function(t) {
     var pipeline = sourcemaps.write();
     pipeline
-        .on('data', function(data) {
+        .on('data', function() {
             t.fail('should emit an error');
             t.end();
         })
@@ -263,7 +263,6 @@ test('write: should create shortest path to map in file comment', function(t) {
     var pipeline = sourcemaps.write('dir1/maps');
     var fileCount = 0;
     var outFiles = [];
-    var sourceMap;
     pipeline
         .on('data', function(data) {
             outFiles.push(data);
@@ -349,7 +348,7 @@ test('write: should set the sourceRoot by option sourceRoot', function(t) {
 test('write: should set the sourceRoot by option sourceRoot, as a function', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write({
-      sourceRoot: function(file) { return '/testSourceRoot'; }
+      sourceRoot: function() { return '/testSourceRoot'; }
     });
     pipeline
         .on('data', function(data) {
@@ -364,7 +363,7 @@ test('write: should automatically determine sourceRoot if destPath is set', func
     var pipeline = sourcemaps.write('.', {destPath: 'dist', includeContent: false});
     var fileCount = 0;
     var outFiles = [];
-    var sourceMap;
+
     pipeline
         .on('data', function(data) {
             outFiles.push(data);
@@ -393,7 +392,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
     var pipeline = sourcemaps.write('.', {sourceRoot: '../src'});
     var fileCount = 0;
     var outFiles = [];
-    var sourceMap;
+
     pipeline
         .on('data', function(data) {
             outFiles.push(data);
@@ -422,7 +421,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
     var pipeline = sourcemaps.write('.', {sourceRoot: ''});
     var fileCount = 0;
     var outFiles = [];
-    var sourceMap;
+
     pipeline
         .on('data', function(data) {
             outFiles.push(data);
@@ -451,7 +450,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
     var pipeline = sourcemaps.write('maps', {sourceRoot: '../src'});
     var fileCount = 0;
     var outFiles = [];
-    var sourceMap;
+
     pipeline
         .on('data', function(data) {
             outFiles.push(data);
@@ -480,7 +479,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
     var pipeline = sourcemaps.write('../maps', {sourceRoot: '../src', destPath: 'dist'});
     var fileCount = 0;
     var outFiles = [];
-    var sourceMap;
+    
     pipeline
         .on('data', function(data) {
             outFiles.push(data);
@@ -521,7 +520,7 @@ test('write: should accept a sourceMappingURLPrefix', function(t) {
 test('write: should accept a sourceMappingURLPrefix, as a function', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write('../maps', {
-        sourceMappingURLPrefix: function(file) { return 'https://asset-host.example.com'; }
+        sourceMappingURLPrefix: function() { return 'https://asset-host.example.com'; }
     });
     pipeline
       .on('data', function(data) {
@@ -537,7 +536,7 @@ test('write: should accept a sourceMappingURLPrefix, as a function', function(t)
 test('write: should invoke sourceMappingURLPrefix every time', function(t) {
     var times = 0;
     var pipeline = sourcemaps.write('../maps', {
-        sourceMappingURLPrefix: function(file) { ++times; return 'https://asset-host.example.com/' + times; }
+        sourceMappingURLPrefix: function() { ++times; return 'https://asset-host.example.com/' + times; }
     });
 
     pipeline
@@ -569,7 +568,7 @@ test('write: null as sourceRoot should not set the sourceRoot', function(t) {
 test('write: function returning null as sourceRoot should not set the sourceRoot', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write({
-      sourceRoot: function(file) { return null; }
+      sourceRoot: function() { return null; }
     });
     pipeline
         .on('data', function(data) {
@@ -638,7 +637,7 @@ test('write: should output an error message if debug option is set and sourceCon
     var unhook = hookStd.stderr(function(s) {history.push(s);});
     var pipeline = sourcemaps.write({debug: true});
     pipeline
-        .on('data', function(data) {
+        .on('data', function() {
             unhook();
             debug.save(null);
             // console.log(JSON.stringify(history))

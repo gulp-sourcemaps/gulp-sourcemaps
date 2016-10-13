@@ -83,7 +83,7 @@ test('init: should pass through when file is null', function(t) {
 test('init: should emit an error if file content is a stream', function(t) {
     var pipeline = sourcemaps.init();
     pipeline
-        .on('data', function(data) {
+        .on('data', function() {
             t.fail('should emit an error');
             t.end();
         })
