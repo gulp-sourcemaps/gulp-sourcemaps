@@ -628,7 +628,7 @@ test('write: should allow to change sources', function(t) {
 
 //should always be last as disabling a debug namespace does not work
 test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
-    debug.save('gulp-sourcemap:write');
+    debug.save('gulp-sourcemaps:write');
     debug.enable(debug.load());
     var file = makeFile();
     file.sourceMap.sources[0] += '.invalid';
