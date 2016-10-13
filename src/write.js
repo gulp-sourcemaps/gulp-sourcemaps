@@ -19,7 +19,7 @@ var utils = require('./utils'),
 function write(destPath, options) {
   var debug = require('debug-fabulous')()(PLUGIN_NAME + ':write');
 
-  if (options === undefined && Object.prototype.toString.call(destPath) === '[object Object]') {
+  if (options === undefined && typeof destPath !== 'string') {
     options = destPath;
     destPath = undefined;
   }
@@ -106,10 +106,13 @@ function write(destPath, options) {
         };
         break;
       default:
+        /* jshint ignore:start */
         commentFormatter = function(url) { return ""; };
+        /* jshint ignore:end */
     }
 
-    var comment, sourceMappingURLPrefix;
+    var comment;
+
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
