@@ -12,7 +12,6 @@ var utils = require('./utils'),
   SourceMapGenerator = require('source-map').SourceMapGenerator,
   css = require('css');
 
-
 /**
  * Initialize source mapping chain
  */
@@ -33,9 +32,11 @@ function init(options) {
     }
 
     if (options === undefined) {
-        options = {};
+      options = {};
     }
-    debug(function () {return options;});
+    debug(function() {
+      return options;
+    });
 
     var fileContent = file.contents.toString();
     var sourceMap;
@@ -61,7 +62,7 @@ function init(options) {
         if (mapComment) {
           mapFile = path.resolve(path.dirname(file.path), mapComment[1] || mapComment[2]);
           fileContent = convert.removeMapFileComments(fileContent);
-        // if no comment try map file with same name as source file
+          // if no comment try map file with same name as source file
         } else {
           mapFile = file.path + '.map';
         }
@@ -71,7 +72,7 @@ function init(options) {
 
         try {
           sourceMap = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
-        } catch(e) {}
+        } catch (e) {}
       }
 
       // fix source paths and sourceContent for imported source map
@@ -99,7 +100,7 @@ function init(options) {
             if (absPath === file.path) {
               sourceContent = fileContent;
 
-            // else load content from file
+              // else load content from file
             } else {
               try {
                 if (options.debug)
@@ -108,8 +109,8 @@ function init(options) {
               } catch (e) {
                 if (options.debug)
                   debug('warn: source file not found: ' + absPath);
+                }
               }
-            }
             sourceMap.sourcesContent[i] = sourceContent;
           }
         });
@@ -120,7 +121,9 @@ function init(options) {
     }
 
     if (!sourceMap && options.identityMap) {
-      debug(function () { return 'identityMap'; });
+      debug(function() {
+        return 'identityMap';
+      });
       var fileType = path.extname(file.path);
       var source = unixStylePath(file.relative);
       var generator = new SourceMapGenerator({file: source});
@@ -134,7 +137,7 @@ function init(options) {
           var mapping = {
             original: token.loc.start,
             generated: token.loc.start,
-            source: source,
+            source: source
           };
           if (token.type.label === 'name') {
             mapping.name = token.value;
@@ -147,19 +150,21 @@ function init(options) {
       } else if (fileType === '.css') {
         debug('css');
         var ast = css.parse(fileContent, {silent: true});
-        debug(function () { return ast;});
+        debug(function() {
+          return ast;
+        });
         var registerTokens = function(ast) {
           if (ast.position) {
-            generator.addMapping({
-              original: ast.position.start,
-              generated: ast.position.start,
-              source: source,
-            });
+            generator.addMapping({original: ast.position.start, generated: ast.position.start, source: source});
           }
 
           function logAst(key, ast) {
-            debug(function () { return 'key: ' + key;});
-            debug(function () { return ast[key];});
+            debug(function() {
+              return 'key: ' + key;
+            });
+            debug(function() {
+              return ast[key];
+            });
           }
 
           for (var key in ast) {
@@ -168,7 +173,9 @@ function init(options) {
               if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
                 registerTokens(ast[key]);
               } else if (Array.isArray(ast[key])) {
-                debug(function () { return "@@@@ ast[key] isArray @@@@";});
+                debug(function() {
+                  return "@@@@ ast[key] isArray @@@@";
+                });
                 for (var i = 0; i < ast[key].length; i++) {
                   registerTokens(ast[key][i]);
                 }
@@ -185,7 +192,7 @@ function init(options) {
     if (!sourceMap) {
       // Make an empty source map
       sourceMap = {
-        version : 3,
+        version: 3,
         names: [],
         mappings: '',
         sources: [unixStylePath(file.relative)],
