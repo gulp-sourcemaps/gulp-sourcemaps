@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+mkdir -p ./tmp
+npm pack
+mv *.tgz ./tmp
+tar xvzf tmp/*.tgz -C ./tmp
+
+exit 0

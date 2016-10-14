@@ -63,6 +63,20 @@ function makeFileCSS() {
 }
 
 test('init: should pass through when file is null', function(t) {
+  // Begin inner conflict with self here..
+  // nmccready:
+  //
+  //
+  // bliss: Turning debug on here clutters the test output;
+  //    but, having debug off in portions results in not having 100% test coverage.
+  //
+  // touche: If we demand 100% coverage, then we need clutter logging :_(
+  //
+  // partial-bliss: The alternative is to have ignore cover statements on some of the logging.
+  // touche: However, those logging statements could potentially fail
+  debug.save('gulp-sourcemaps:init');
+  debug.enable(debug.load());
+  // end inner conflict
   var file = new File();
   var pipeline = sourcemaps.init();
   pipeline.on('data', function(data) {
@@ -373,8 +387,6 @@ test('init: handle null contents', function(t) {
 
 //should always be last as disabling a debug namespace does not work
 test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
-  debug.save('gulp-sourcemaps:init');
-  debug.enable(debug.load());
 
   var file = makeFile();
   file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
@@ -388,7 +400,7 @@ test('init: should output an error message if debug option is set and sourceCont
 
   pipeline.on('data', function() {
     unhook();
-    debug.save(null);
+    // debug.save(null);
     t.ok(history.length == 4, 'history len');
     t.ok(history[2].match(/No source content for \"missingfile\". Loading from file./), 'should log missing source content');
     t.ok(history[3].match(/source file not found: /), 'should warn about missing file');
