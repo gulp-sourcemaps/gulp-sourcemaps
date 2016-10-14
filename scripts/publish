@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+echo 'Testing Package for publishing...'
+./node_modules/.bin/tape ./test/publish.js
+
+echo 'Attempting npm publish...'
+npm publish
+
+echo 'Success'
+
+exit 0
