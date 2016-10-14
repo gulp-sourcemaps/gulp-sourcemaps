@@ -12,7 +12,7 @@ function makeTestPackage(cb) {
 }
 
 // with regards to averting npm publishing disasters https://github.com/floridoo/gulp-sourcemaps/issues/246
-test('can load a published version', function(t) {
+test('publish: can load a published version', function(t) {
   // return t.fail("mock fail");
   cleanUp(function() {
     makeTestPackage(function() {
