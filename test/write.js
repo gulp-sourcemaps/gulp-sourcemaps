@@ -219,6 +219,31 @@ test('write: should write external map files', function(t) {
         .write(file);
 });
 
+test('write: should keep original file history', function(t) {
+    var file = makeFile();
+    var pipeline = sourcemaps.write('../maps', {destPath: 'dist', clone: true});
+    var outFiles = [];
+    var fileCount = 0;
+    pipeline
+        .on('data', function(data) {
+            outFiles.push(data);
+            fileCount++;
+            if (fileCount == 2) {
+                outFiles.reverse().map(function (data) {
+                    if (data.path === path.join(__dirname, 'maps/helloworld.js.map')) {
+                        t.equal(data.history[0], path.join(__dirname, 'assets', 'helloworld.js'), 'should keep file history');
+                    }
+                });
+                t.end();
+            }
+        })
+        .on('error', function() {
+            t.fail('emitted error');
+            t.end();
+        })
+        .write(file);
+});
+
 test('write: should allow to rename map file', function(t) {
     var file = makeFile();
     var pipeline = sourcemaps.write('../maps', {mapFile: function(mapFile) {

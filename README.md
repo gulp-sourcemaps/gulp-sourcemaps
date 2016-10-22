@@ -279,6 +279,10 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
   Sets the charset for inline source maps. Default: `utf8`
 
+- `clone`
+
+  Clones the original file for creation of the map file. Could be important if file history is important. See [file.clone()](https://github.com/gulpjs/vinyl#filecloneoptions) for possible options. Default: `undefined`
+
 ### Plugin developers only: How to add source map support to plugins
 
 - Generate a source map for the transformation the plugin is applying

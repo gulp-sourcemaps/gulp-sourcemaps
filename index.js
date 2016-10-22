@@ -314,8 +314,16 @@ module.exports.write = function write(destPath, options) {
         }
       }
 
-      // add new source map file to stream, clone from original to keep file.history
-      var sourceMapFile = file.clone({ deep: true, contents: false });
+      var sourceMapFile;
+      if (options.clone !== undefined) {
+        // add new source map file to stream, clone from original to keep file.history
+        sourceMapFile = file.clone(options.clone);
+      } else {
+        sourceMapFile = new File({
+          cwd: file.cwd,
+          base: file.base
+        });
+      }
       sourceMapFile.path = sourceMapPath;
       sourceMapFile.contents = new Buffer(JSON.stringify(sourceMap));
       sourceMapFile.stat = {
