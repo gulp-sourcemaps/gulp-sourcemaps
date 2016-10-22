@@ -1,23 +1,11 @@
 sudo: false
-
 language: node_js
-
 node_js:
-  - 6
-  - 4
-  - 0.12
-
-cache:
-  directories:
-    - node_modules
-
-install:
-  - npm i -g npm@latest
-  - npm install
-
+  - stable
+  - '0.12'
+  - '0.10'
 after_script:
   - npm run coveralls
-
 branches:
   except:
     - /^v[0-9]/
