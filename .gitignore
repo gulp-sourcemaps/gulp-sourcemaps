@@ -2,3 +2,4 @@
 node_modules
 reports
 *.tgz
+.idea
