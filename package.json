@@ -1,6 +1,6 @@
 {
   "name": "gulp-sourcemaps",
-  "version": "2.0.0-alpha",
+  "version": "2.1.1",
   "description": "Source map support for Gulp.js",
   "homepage": "http://github.com/floridoo/gulp-sourcemaps",
   "repository": "git://github.com/floridoo/gulp-sourcemaps.git",
@@ -20,27 +20,27 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "acorn": "^2.6.4",
-    "convert-source-map": "^1.1.1",
-    "css": "^2.2.1",
-    "detect-newline": "^1.0.3",
-    "graceful-fs": "^4.1.2",
-    "source-map": "^0.5.3",
-    "strip-bom": "^2.0.0",
-    "through2": "^2.0.0",
-    "vinyl": "^1.0.0"
+    "acorn": "4.X",
+    "convert-source-map": "1.X",
+    "css": "2.X",
+    "debug-fabulous": "0.0.X",
+    "detect-newline": "2.X",
+    "graceful-fs": "4.X",
+    "source-map": "0.X",
+    "strip-bom": "3.X",
+    "through2": "2.X",
+    "vinyl": "1.X"
   },
   "devDependencies": {
-    "jshint": "^2.8.0",
-    "tape": "^4.2.0",
-    "istanbul": "^0.3.21",
-    "faucet": "0.0.1",
-    "coveralls": "^2.11.4"
+    "coveralls": "2.X",
+    "faucet": "0.0.X",
+    "hook-std": "0.2.X",
+    "istanbul": "0.X",
+    "jshint": "2.X",
+    "tape": "4.X"
   },
   "files": [
     "index.js",
-    "package.json",
-    "README.md",
-    "LICENSE.md"
+    "src"
   ]
 }
