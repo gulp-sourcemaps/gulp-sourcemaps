@@ -148,36 +148,28 @@ function write(destPath, options) {
         }
       }
 
-      // add new source map file to stream
-      var sourceMapFile = new File({
-        cwd: file.cwd,
-        base: file.base,
-        path: sourceMapPath,
-        contents: new Buffer(JSON.stringify(sourceMap)),
-        stat: {
-          isFile: function() {
-            return true;
-          },
-          isDirectory: function() {
-            return false;
-          },
-          isBlockDevice: function() {
-            return false;
-          },
-          isCharacterDevice: function() {
-            return false;
-          },
-          isSymbolicLink: function() {
-            return false;
-          },
-          isFIFO: function() {
-            return false;
-          },
-          isSocket: function() {
-            return false;
-          }
-        }
-      });
+      var sourceMapFile;
+      if (options.clone !== undefined) {
+        // add new source map file to stream, clone from original to keep file.history
+        sourceMapFile = file.clone(options.clone);
+      } else {
+        // add new source map file to stream
+        sourceMapFile = new File({
+          cwd: file.cwd,
+          base: file.base
+        });
+      }
+      sourceMapFile.path = sourceMapPath;
+      sourceMapFile.contents = new Buffer(JSON.stringify(sourceMap));
+      sourceMapFile.stat = {
+        isFile: function () { return true; },
+        isDirectory: function () { return false; },
+        isBlockDevice: function () { return false; },
+        isCharacterDevice: function () { return false; },
+        isSymbolicLink: function () { return false; },
+        isFIFO: function () { return false; },
+        isSocket: function () { return false; }
+      };
       this.push(sourceMapFile);
 
       var sourceMapPathRelative = path.relative(path.dirname(file.path), sourceMapPath);
