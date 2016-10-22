@@ -309,7 +309,7 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
 - `clone`
 
-  Clones the original file for creation of the map file. Could be important if file history is important. See [file.clone()](https://github.com/gulpjs/vinyl#filecloneoptions) for possible options. Default: `undefined`
+  Clones the original file for creation of the map file. Could be important if file history is important. See [file.clone()](https://github.com/gulpjs/vinyl#filecloneoptions) for possible options. Default: `{deep:false, contents:false}`
 
 ### Plugin developers only:
 

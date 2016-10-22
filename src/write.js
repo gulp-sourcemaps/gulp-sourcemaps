@@ -149,16 +149,7 @@ function write(destPath, options) {
       }
 
       var sourceMapFile;
-      if (options.clone !== undefined) {
-        // add new source map file to stream, clone from original to keep file.history
-        sourceMapFile = file.clone(options.clone);
-      } else {
-        // add new source map file to stream
-        sourceMapFile = new File({
-          cwd: file.cwd,
-          base: file.base
-        });
-      }
+      sourceMapFile = file.clone(options.clone || {deep:false, contents:false});
       sourceMapFile.path = sourceMapPath;
       sourceMapFile.contents = new Buffer(JSON.stringify(sourceMap));
       sourceMapFile.stat = {

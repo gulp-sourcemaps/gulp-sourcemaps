@@ -188,9 +188,9 @@ test('write: should write external map files', function(t) {
   }).write(file);
 });
 
-test('write: should keep original file history', function(t) {
+test('write:clone - should keep original file history', function(t) {
     var file = makeFile();
-    var pipeline = sourcemaps.write('../maps', {destPath: 'dist', clone: true});
+    var pipeline = sourcemaps.write('../maps', {destPath: 'dist'});
     var outFiles = [];
     var fileCount = 0;
     pipeline
