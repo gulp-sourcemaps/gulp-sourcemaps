@@ -6,8 +6,7 @@ var utils = require('./utils'),
   fs = require('graceful-fs'),
   path = require('path'),
   File = require('vinyl'),
-  stripBom = require('strip-bom'),
-  detectNewline = require('detect-newline');
+  stripBom = require('strip-bom');
 
 /**
  * Write the source map
@@ -93,8 +92,9 @@ function write(destPath, options) {
     }
 
     var extension = file.relative.split('.').pop();
-    var newline = detectNewline.graceful(file.contents.toString());
     var commentFormatter;
+    var newline = file.newline;
+    delete file.newline;
 
     switch (extension) {
       case 'css':
