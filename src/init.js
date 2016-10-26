@@ -42,7 +42,7 @@ function init(options) {
     var fileContent = file.contents.toString();
     var sourceMap;
 
-    file.newline = detectNewline.graceful(fileContent);
+    file.newline = detectNewline.graceful(fileContent || '');
 
     if (options.loadMaps) {
       debug('loadMaps');
