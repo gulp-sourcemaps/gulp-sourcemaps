@@ -10,7 +10,8 @@ var utils = require('./utils'),
   stripBom = require('strip-bom'),
   acorn = require('acorn'),
   SourceMapGenerator = require('source-map').SourceMapGenerator,
-  css = require('css');
+  css = require('css'),
+  detectNewline = require('detect-newline');
 
 /**
  * Initialize source mapping chain
@@ -40,6 +41,8 @@ function init(options) {
 
     var fileContent = file.contents.toString();
     var sourceMap;
+
+    file.newline = detectNewline.graceful(fileContent || '');
 
     if (options.loadMaps) {
       debug('loadMaps');

@@ -93,8 +93,9 @@ function write(destPath, options) {
     }
 
     var extension = file.relative.split('.').pop();
-    var newline = detectNewline.graceful(file.contents.toString());
     var commentFormatter;
+    var newline = file.newline || detectNewline.graceful(file.contents.toString());
+    delete file.newline;
 
     switch (extension) {
       case 'css':
