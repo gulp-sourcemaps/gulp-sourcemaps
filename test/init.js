@@ -164,6 +164,7 @@ test('init: should import an existing inline source map', function(t) {
     t.ok(data, 'should pass something through');
     t.ok(data instanceof File, 'should pass a vinyl file through');
     t.ok(data.sourceMap, 'should add a source map object');
+    t.notOk(/sourceMappingURL/.test(data.contents.toString()), 'should not have sourcemapping in data.contents');
     t.equal(String(data.sourceMap.version), '3', 'should have version 3');
     t.deepEqual(data.sourceMap.sources, [
       'test1.js', 'test2.js'
@@ -175,14 +176,6 @@ test('init: should import an existing inline source map', function(t) {
     t.end();
   }).on('error', function() {
     t.fail('emitted error');
-    t.end();
-  }).write(makeFileWithInlineSourceMap());
-});
-
-test('init: should remove inline sourcemap', function(t) {
-  var pipeline = sourcemaps.init({loadMaps: true});
-  pipeline.on('data', function(data) {
-    t.notOk(/sourceMappingURL/.test(data.contents.toString()), 'should not have sourcemapping');
     t.end();
   }).write(makeFileWithInlineSourceMap());
 });
@@ -400,10 +393,16 @@ test('init: should output an error message if debug option is set and sourceCont
 
   pipeline.on('data', function() {
     unhook();
-    // debug.save(null);
-    t.ok(history.length == 4, 'history len');
-    t.ok(history[2].match(/No source content for \"missingfile\". Loading from file./), 'should log missing source content');
-    t.ok(history[3].match(/source file not found: /), 'should warn about missing file');
+    var hasRegex =  function(regex){
+      return function(s){
+        return regex.test(s);
+      };
+    };
+    t.ok(
+      history.some(
+        hasRegex(/No source content for \"missingfile\". Loading from file./)),
+      'should log missing source content');
+    t.ok(history.some(hasRegex(/source file not found: /)), 'should warn about missing file');
     t.end();
   }).write(file);
 
