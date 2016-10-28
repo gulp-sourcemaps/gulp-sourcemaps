@@ -611,7 +611,11 @@ test('write: should work with rev plugin', function(t) {
   var pipeline = _rev.pipe(sourcemaps.write('../maps', {destPath: 'dist'}));
   pipeline.on('data', function(file) {
     if(path.extname(file.path) === '.map'){
-      t.ok(path.extname(file.path) === path.extname(file.revOrigPath), 'Have correct origin path');
+      if(file.revOrigPath){
+        t.ok(path.extname(file.path) === path.extname(file.revOrigPath), 'Have correct origin path');
+      } else {
+        t.ok('Not conflict origin path with source file');
+      }
       t.end();
     }
   }).on('error', function() {
