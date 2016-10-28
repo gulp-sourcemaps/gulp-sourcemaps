@@ -32,6 +32,7 @@
     "vinyl": "1.X"
   },
   "devDependencies": {
+    "gulp-rev":  "~7.1.2",
     "coveralls": "2.X",
     "faucet": "0.0.X",
     "hook-std": "0.2.X",
