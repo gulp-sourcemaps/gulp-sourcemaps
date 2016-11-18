@@ -13,14 +13,10 @@ var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
 var debug = require('debug-fabulous')()(PLUGIN_NAME + ':utils');
 
 /*
-TODO: DROP SUPPORT FOR node <= 0.12.X
-So reusing the same ref for a regex (with global (g))
-is a major bug in node 0.10.X apparently.
+So reusing the same ref for a regex (with global (g)) is from a poor decision in js.
 See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-when-do-global-search
 
-So we either need to use a new instance of a regex everywhere
-to make it compatible for all nodes 0.10.X + or drop support for 0.10.X.
-For now we will continue to support it I guess. But this sucks.
+So we either need to use a new instance of a regex everywhere.
 */
 var sourceMapUrlRegEx = function(){ return /\/\/\# sourceMappingURL\=.*/g;}
 
