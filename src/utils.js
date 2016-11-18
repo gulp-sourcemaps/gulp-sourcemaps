@@ -12,7 +12,17 @@ var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
 
 var debug = require('debug-fabulous')()(PLUGIN_NAME + ':utils');
 
-var sourceMapUrlRegEx = /\/\/\# sourceMappingURL\=.*/g
+/*
+TODO: DROP SUPPORT FOR node <= 0.12.X
+So reusing the same ref for a regex (with global (g))
+is a major bug in node 0.10.X apparently.
+See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-when-do-global-search
+
+So we either need to use a new instance of a regex everywhere
+to make it compatible for all nodes 0.10.X + or drop support for 0.10.X.
+For now we will continue to support it I guess. But this sucks.
+*/
+var sourceMapUrlRegEx = function(){ return /\/\/\# sourceMappingURL\=.*/g;}
 
 
 var getCommentFormatter = function (file) {
@@ -52,9 +62,9 @@ var getCommentFormatter = function (file) {
 }
 
 var getPreExisting = function(fileContent){
-  if(sourceMapUrlRegEx.test(fileContent)){
+  if(sourceMapUrlRegEx().test(fileContent)){
     debug('has preExisting');
-    return fileContent.match(sourceMapUrlRegEx)[0];
+    return fileContent.match(sourceMapUrlRegEx())[0];
   }
 }
 

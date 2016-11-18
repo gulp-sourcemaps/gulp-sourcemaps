@@ -161,13 +161,10 @@ function write(destPath, options) {
       }
     }
 
+    var preExisting = options.preExisting && utils.getPreExisting(String(file.contents));
     // append source map comment
-    if (options.addComment){
-      if(options.preExisting && utils.getPreExisting(String(file.contents))){
-        //normally the comment is pre-stripped but this option lets us know it is not
-      }
-      else
-        file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
+    if (options.addComment && !preExisting){
+      file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
     }
 
     this.push(file);
