@@ -40,6 +40,7 @@ function init(options) {
 
     var fileContent = file.contents.toString();
     var sourceMap;
+    var preExisting = utils.getPreExisting(fileContent);
 
     if (options.loadMaps) {
       debug('loadMaps');
@@ -113,11 +114,11 @@ function init(options) {
               }
             sourceMap.sourcesContent[i] = sourceContent;
           }
-        });
 
-        // remove source map comment from source
-        file.contents = new Buffer(fileContent, 'utf8');
+        });
       }
+      // remove source map comment from source
+      file.contents = new Buffer(fileContent, 'utf8');
     }
 
     if (!sourceMap && options.identityMap) {
@@ -199,6 +200,8 @@ function init(options) {
         sourcesContent: [fileContent]
       };
     }
+    else if(preExisting !== null && typeof preExisting !== 'undefined')
+      sourceMap.preExisting = preExisting
 
     sourceMap.file = unixStylePath(file.relative);
     file.sourceMap = sourceMap;

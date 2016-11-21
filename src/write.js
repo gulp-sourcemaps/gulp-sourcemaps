@@ -6,8 +6,7 @@ var utils = require('./utils'),
   fs = require('graceful-fs'),
   path = require('path'),
   File = require('vinyl'),
-  stripBom = require('strip-bom'),
-  detectNewline = require('detect-newline');
+  stripBom = require('strip-bom');
 
 /**
  * Write the source map
@@ -92,34 +91,13 @@ function write(destPath, options) {
       delete sourceMap.sourcesContent;
     }
 
-    var extension = file.relative.split('.').pop();
-    var newline = detectNewline.graceful(file.contents.toString());
-    var commentFormatter;
-
-    switch (extension) {
-      case 'css':
-        commentFormatter = function(url) {
-          return newline + "/*# sourceMappingURL=" + url + " */" + newline;
-        };
-        break;
-      case 'js':
-        commentFormatter = function(url) {
-          return newline + "//# sourceMappingURL=" + url + newline;
-        };
-        break;
-      default:
-        /* jshint ignore:start */
-        commentFormatter = function(url) {
-          return "";
-        };
-        /* jshint ignore:end */
-    }
-
-    var comment;
+    var comment,
+      commentFormatter = utils.getCommentFormatter(file);
 
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
+      debug("basic comment")
       comment = commentFormatter('data:application/json;charset=' + options.charset + ';base64,' + base64Map);
     } else {
       var mapFile = path.join(destPath, file.relative) + '.map';
@@ -174,16 +152,20 @@ function write(destPath, options) {
         }
         sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
+      debug("destPath comment")
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
       if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
+        debug("options.sourceMappingURL comment")
         comment = commentFormatter(options.sourceMappingURL(file));
       }
     }
 
+    var preExisting = options.preExisting && utils.getPreExisting(String(file.contents));
     // append source map comment
-    if (options.addComment)
+    if (options.addComment && !preExisting){
       file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
+    }
 
     this.push(file);
     callback();

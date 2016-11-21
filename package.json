@@ -34,9 +34,11 @@
   "devDependencies": {
     "coveralls": "2.X",
     "faucet": "0.0.X",
+    "gulp": "3.X",
     "hook-std": "0.2.X",
     "istanbul": "0.X",
     "jshint": "2.X",
+    "object-assign": "^4.1.0",
     "tape": "4.X"
   },
   "files": [
