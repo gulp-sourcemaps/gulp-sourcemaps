@@ -8,11 +8,14 @@ var path = require('path');
 var fs = require('fs');
 var hookStd = require('hook-std');
 var debug = require('debug-fabulous')();
+var assign = require('object-assign');
+var utils = require('../src/utils');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
+var mappedContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.map.js')).toString();
 
-function makeSourceMap() {
-  return {
+function makeSourceMap(custom) {
+  var obj = {
     version: 3,
     file: 'helloworld.js',
     names: [],
@@ -20,20 +23,36 @@ function makeSourceMap() {
     sources: ['helloworld.js'],
     sourcesContent: [sourceContent]
   };
+
+  if (custom)
+    assign(obj,custom);
+
+  return obj;
 }
 
 function base64JSON(object) {
   return 'data:application/json;charset=utf8;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
 }
 
-function makeFile() {
+function makeFile(custom) {
   var file = new File({
     cwd: __dirname,
     base: path.join(__dirname, 'assets'),
     path: path.join(__dirname, 'assets', 'helloworld.js'),
     contents: new Buffer(sourceContent)
   });
-  file.sourceMap = makeSourceMap();
+  file.sourceMap = makeSourceMap(custom);
+  return file;
+}
+
+function makeMappedFile() {
+  var file = new File({
+    cwd: __dirname,
+    base: path.join(__dirname, 'assets'),
+    path: path.join(__dirname, 'assets', 'helloworld.map.js'),
+    contents: new Buffer(mappedContent)
+  });
+  file.sourceMap = makeSourceMap({preExisting:utils.getPreExisting(mappedContent)});
   return file;
 }
 
@@ -148,6 +167,26 @@ test('write: should detect whether a file uses \\n or \\r\\n and follow the exis
     t.fail('emitted error');
     t.end();
   }).write(file);
+});
+
+test('write: preExisting', function(t) {
+  var file = makeMappedFile();
+  file.contents = new Buffer(file.contents.toString());
+
+  sourcemaps.write({preExisting:true})
+  .on('data', function(data) {
+    t.ok(data, 'should pass something through');
+    t.ok(!!data.sourceMap.preExisting, 'should mark as preExisting');
+    t.equal(
+      String(data.contents),
+      mappedContent,'should add source map as comment');
+    t.end();
+  })
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .write(file);
 });
 
 test('write: should write external map files', function(t) {
@@ -592,13 +631,18 @@ test('write: should output an error message if debug option is set and sourceCon
     history.push(s);
   });
   var pipeline = sourcemaps.write({debug: true});
+
+  var hasRegex =  function(regex){
+    return function(s){
+      return regex.test(s);
+    };
+  };
   pipeline.on('data', function() {
     unhook();
     debug.save(null);
     // console.log(JSON.stringify(history))
-    t.ok(history.length == 3, 'history len');
-    t.ok(history[1].match(/No source content for "helloworld.js.invalid". Loading from file./), 'should log missing source content');
-    t.ok(history[2].match(/source file not found: /), 'should warn about missing file');
+    t.ok(history.some(hasRegex(/No source content for "helloworld.js.invalid". Loading from file./)), 'should log missing source content');
+    t.ok(history.some(hasRegex(/source file not found: /)), 'should warn about missing file');
     t.end();
   }).write(file);
 });
