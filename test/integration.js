@@ -1,20 +1,28 @@
 'use strict';
 var gulp = require('gulp');
+var $ = require('gulp-load-plugins')();
 var test = require('tape');
-var $ = require('..');
+var sourcemaps = require('..');
 var PLUGIN_NAME = require('../src/utils').PLUGIN_NAME;
 var debug = require('debug-fabulous')()(PLUGIN_NAME + ':test:integration');
 var join = require('path').join;
 var fs = require('fs');
 var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toString();
 
+
+function moveHtml(dest, t){
+  return gulp.src(join(__dirname, './assets/*.html'))
+  .pipe(gulp.dest('tmp/' + dest))
+  .on('finish', t.end);
+}
+
 debug('running');
 
 test('creates inline mapping', function(t) {
 
   gulp.src(join(__dirname, './assets/helloworld.js'))
-  .pipe($.init())
-  .pipe($.write())
+  .pipe(sourcemaps.init())
+  .pipe(sourcemaps.write())
   // .pipe(gulp.dest('tmp'))
   .on('data', function(data) {
     t.ok(data.sourceMap, 'should add a source map object');
@@ -36,8 +44,8 @@ test('creates inline mapping', function(t) {
 
 test('creates re-uses existing mapping', function(t) {
   gulp.src(join(__dirname, './assets/helloworld.map.js'))
-  .pipe($.init({loadMaps:true}))
-  .pipe($.write())
+  .pipe(sourcemaps.init({loadMaps:true}))
+  .pipe(sourcemaps.write())
   // .pipe(gulp.dest('tmp'))
   .on('data', function(data) {
     t.ok(data.sourceMap, 'should add a source map object');
@@ -55,5 +63,62 @@ test('creates re-uses existing mapping', function(t) {
   })
   .on('close', function() {
     t.end();
+  });
+});
+
+
+test('combined mapped: concat files with final combined sourcemap file', function(t) {
+
+  gulp.src([
+    join(__dirname, './assets/*.js'),
+    '!' + join(__dirname, './assets/test*.js'),
+    '!' + join(__dirname, './assets/*map.js')]
+  )
+  .pipe(sourcemaps.init())
+  .pipe($.if("*.js",$.concat("index.js")))
+  .pipe(sourcemaps.write('.',{sourceRoot:'../../test/assets'}))
+  .pipe(gulp.dest('tmp/combined_map'))
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .on('data', function(data){
+    if(/index\.js$/.test(data.path)){
+      t.ok(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString()),
+        'concatenated file is mapped');
+      t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
+        'concatenated file is mapped once');
+    }
+  })
+  .on('finish', function(){
+    moveHtml('combined_map', t);
+  });
+});
+
+test('combined: inline concatenated file', function(t) {
+
+  gulp.src([
+    join(__dirname, './assets/*.js'),
+    '!' + join(__dirname, './assets/test*.js'),
+    '!' + join(__dirname, './assets/*map.js')]
+  )
+  .pipe(sourcemaps.init())
+  .pipe($.if("*.js",$.concat("index.js")))
+  .pipe(sourcemaps.write({sourceRoot:'../../test/assets'}))
+  .pipe(gulp.dest('tmp/combined_inline'))
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .on('data', function(data){
+    if(/index\.js$/.test(data.path)){
+      t.ok(/\/\/# sourceMappingURL=data:application.*/.test(data.contents.toString()),
+        'concatenated file is mapped');
+      t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
+        'concatenated file is mapped once');
+    }
+  })
+  .on('finish', function(){
+    moveHtml('combined_inline', t);
   });
 });
