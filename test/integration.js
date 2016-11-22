@@ -122,3 +122,62 @@ test('combined: inline concatenated file', function(t) {
     moveHtml('combined_inline', t);
   });
 });
+
+test('combined: mapped preExisting', function(t) {
+
+  gulp.src([
+    //picking a file with no existing sourcemap, if we use helloworld2 it will attempt to use helloworld2.js.map
+    join(__dirname, './assets/helloworld7.js'), //NO PRE-MAP at all
+    join(__dirname, './assets/helloworld.map.js') //INLINE PRE-MAp
+    ]
+  )
+  .pipe(sourcemaps.init({loadMaps:true}))
+  .pipe($.if("*.js",$.concat("index.js")))
+  .pipe(sourcemaps.write('.', {sourceRoot:'../../test/assets'}))
+  .pipe(gulp.dest('tmp/combined_map_preExisting'))
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .on('data', function(data){
+    if(/index\.js$/.test(data.path)){
+      t.ok(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString()),
+        'concatenated file is mapped');
+      t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
+        'concatenated file is mapped once');
+    }
+  })
+  .on('finish', function(){
+    moveHtml('combined_map_preExisting', t);
+  });
+});
+
+
+test('combined: inlined preExisting', function(t) {
+
+  gulp.src([
+    //picking a file with no existing sourcemap, if we use helloworld2 it will attempt to use helloworld2.js.map
+    join(__dirname, './assets/helloworld7.js'), //NO PRE-MAP at all
+    join(__dirname, './assets/helloworld.map.js') //INLINE PRE-MAp
+    ]
+  )
+  .pipe(sourcemaps.init({loadMaps:true}))
+  .pipe($.if("*.js",$.concat("index.js")))
+  .pipe(sourcemaps.write({sourceRoot:'../../test/assets'}))
+  .pipe(gulp.dest('tmp/combined_inline_preExisting'))
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .on('data', function(data){
+    if(/index\.js$/.test(data.path)){
+      t.ok(/\/\/# sourceMappingURL=data:application.*/.test(data.contents.toString()),
+        'concatenated file is mapped');
+      t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
+        'concatenated file is mapped once');
+    }
+  })
+  .on('finish', function(){
+    moveHtml('combined_inline_preExisting', t);
+  });
+});
