@@ -181,3 +181,29 @@ test('combined: inlined preExisting', function(t) {
     moveHtml('combined_inline_preExisting', t);
   });
 });
+
+
+test('combined: mapped preExisting with two tasks', function(t) {
+
+  gulp.src(join(__dirname, './assets/helloworld7.js'))
+  .pipe(sourcemaps.init())
+  .pipe($.if("*.js",$.concat("h7.js")))
+  .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest('tmp/combined_map_preExisting_two_task/tmp'))
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .on('finish', function(){
+    gulp.src([
+      './tmp/combined_map_preExisting_two_task/tmp/h7.js',
+      join(__dirname, './assets/helloworld.map.js')])
+    .pipe(sourcemaps.init({loadMaps:true}))
+    .pipe($.if("*.js",$.concat("index.js")))
+    .pipe(sourcemaps.write('.', {sourceRoot: '../../test/assets'}))
+    .pipe(gulp.dest('tmp/combined_map_preExisting_two_task'))
+    .on('finish', function(){
+      moveHtml('combined_map_preExisting_two_task', t);
+    });
+  });
+});
