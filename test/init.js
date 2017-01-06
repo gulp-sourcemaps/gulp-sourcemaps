@@ -1,13 +1,29 @@
 'use strict';
 
 var test = require('tape');
+//BEGIN PRE-HOOK of debug
+var debug = require('debug-fabulous')();
+// Begin inner conflict with self here..
+// nmccready:
+//
+//
+// bliss: Turning debug on here clutters the test output;
+//    but, having debug off in portions results in not having 100% test coverage.
+//
+// touche: If we demand 100% coverage, then we need clutter logging :_(
+//
+// partial-bliss: The alternative is to have ignore cover statements on some of the logging.
+// touche: However, those logging statements could potentially fail
+debug.save('gulp-sourcemaps:init');
+debug.save('gulp-sourcemaps:init:loadMaps');
+debug.enable(debug.load());
+//END PRE-HOOK of debug (must be loaded before our main module (sourcemaps))
 var sourcemaps = require('..');
 var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
 var path = require('path');
 var fs = require('fs');
 var hookStd = require('hook-std');
-var debug = require('debug-fabulous')();
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 var sourceContentCSS = fs.readFileSync(path.join(__dirname, 'assets/test.css')).toString();
@@ -63,19 +79,6 @@ function makeFileCSS() {
 }
 
 test('init: should pass through when file is null', function(t) {
-  // Begin inner conflict with self here..
-  // nmccready:
-  //
-  //
-  // bliss: Turning debug on here clutters the test output;
-  //    but, having debug off in portions results in not having 100% test coverage.
-  //
-  // touche: If we demand 100% coverage, then we need clutter logging :_(
-  //
-  // partial-bliss: The alternative is to have ignore cover statements on some of the logging.
-  // touche: However, those logging statements could potentially fail
-  debug.save('gulp-sourcemaps:init');
-  debug.enable(debug.load());
   // end inner conflict
   var file = new File();
   var pipeline = sourcemaps.init();
@@ -398,6 +401,7 @@ test('init: should output an error message if debug option is set and sourceCont
         return regex.test(s);
       };
     };
+    console.log(history);
     t.ok(
       history.some(
         hasRegex(/No source content for \"missingfile\". Loading from file./)),
