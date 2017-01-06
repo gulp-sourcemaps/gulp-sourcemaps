@@ -36,13 +36,13 @@ function init(options) {
     });
 
     var fileContent = file.contents.toString();
-    var sourceMap;
-    var preExisting = utils.getPreExisting(fileContent);
+    var sourceMap, preExistingComment;
 
     if (options.loadMaps) {
       var result = loadMaps({file:file, fileContent:fileContent}, options);
       sourceMap = result.map;
       fileContent = result.content;
+      preExistingComment = result.preExistingComment;
     }
 
     if (!sourceMap && options.identityMap) {
@@ -124,8 +124,8 @@ function init(options) {
         sourcesContent: [fileContent]
       };
     }
-    else if(preExisting !== null && typeof preExisting !== 'undefined')
-      sourceMap.preExisting = preExisting;
+    else if(preExistingComment !== null && typeof preExistingComment !== 'undefined')
+      sourceMap.preExistingComment = preExistingComment;
 
     sourceMap.file = unixStylePath(file.relative);
     file.sourceMap = sourceMap;

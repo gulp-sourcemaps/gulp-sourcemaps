@@ -10,6 +10,10 @@ var fs = require('fs');
 var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toString();
 
 
+function base64JSON(object) {
+  return 'data:application/json;charset=utf8;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
+}
+
 function moveHtml(dest, t){
   return gulp.src(join(__dirname, './assets/*.html'))
   .pipe(gulp.dest('tmp/' + dest))
@@ -18,7 +22,7 @@ function moveHtml(dest, t){
 
 debug('running');
 
-test('creates inline mapping', function(t) {
+test('combined: creates inline mapping', function(t) {
 
   gulp.src(join(__dirname, './assets/helloworld.js'))
   .pipe(sourcemaps.init())
@@ -42,17 +46,17 @@ test('creates inline mapping', function(t) {
   });
 });
 
-test('creates re-uses existing mapping', function(t) {
+test('combined: creates preExistingComment , no new previous line', function(t) {
   gulp.src(join(__dirname, './assets/helloworld.map.js'))
   .pipe(sourcemaps.init({loadMaps:true}))
   .pipe(sourcemaps.write())
   // .pipe(gulp.dest('tmp'))
   .on('data', function(data) {
     t.ok(data.sourceMap, 'should add a source map object');
-    t.ok(!!data.sourceMap.preExisting, 'should know the sourcemap pre-existed');
+    t.ok(!!data.sourceMap.preExistingComment, 'should know the sourcemap pre-existed');
     t.deepEqual(
       data.contents.toString(),
-      sourceContent + "\n//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiIiwic291cmNlcyI6WyJoZWxsb3dvcmxkLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIid1c2Ugc3RyaWN0JztcblxuZnVuY3Rpb24gaGVsbG9Xb3JsZCgpIHtcbiAgICBjb25zb2xlLmxvZygnSGVsbG8gd29ybGQhJyk7XG59XG4iXSwiZmlsZSI6ImhlbGxvd29ybGQuanMifQ==",
+      sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n',
       'file should be sourcemapped'
     );
     t.end();

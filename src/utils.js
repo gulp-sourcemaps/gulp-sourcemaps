@@ -18,7 +18,7 @@ See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-wh
 
 So we either need to use a new instance of a regex everywhere.
 */
-var sourceMapUrlRegEx = function(){ return /\/\/\# sourceMappingURL\=.*/g;}
+var sourceMapUrlRegEx = function(){ return /\/\/\# sourceMappingURL\=.*/g;};
 
 
 var getCommentFormatter = function (file) {
@@ -29,12 +29,12 @@ var getCommentFormatter = function (file) {
       return '';
     };
 
-  if (file.sourceMap.preExisting){
-    debug('preExisting commentFormatter');
+  if (file.sourceMap.preExistingComment){
+    debug('preExistingComment commentFormatter');
     commentFormatter = function(url) {
-      return file.sourceMap.preExisting;
+      return "//# sourceMappingURL=" + url + newline;
     };
-    return commentFormatter
+    return commentFormatter;
   }
 
   switch (extension) {
@@ -51,18 +51,18 @@ var getCommentFormatter = function (file) {
       };
       break;
     default:
-      debug('unknown commentFormatter')
+      debug('unknown commentFormatter');
   }
 
   return commentFormatter;
-}
+};
 
-var getPreExisting = function(fileContent){
+var getInlinePreExisting = function(fileContent){
   if(sourceMapUrlRegEx().test(fileContent)){
     debug('has preExisting');
     return fileContent.match(sourceMapUrlRegEx())[0];
   }
-}
+};
 
 module.exports = {
   unixStylePath: unixStylePath,
@@ -70,5 +70,5 @@ module.exports = {
   urlRegex: urlRegex,
   sourceMapUrlRegEx: sourceMapUrlRegEx,
   getCommentFormatter: getCommentFormatter,
-  getPreExisting: getPreExisting
+  getInlinePreExisting: getInlinePreExisting
 };

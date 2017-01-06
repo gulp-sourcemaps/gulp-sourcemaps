@@ -16,7 +16,7 @@ module.exports = function loadMaps (lOpts, options) {
   var fileContent = lOpts.fileContent;
   var file = lOpts.file;
 
-  var sources = { path: '', map: null , content: fileContent};
+  var sources = { path: '', map: null , content: fileContent, preExistingComment: null};
 
   _getInlineSources({sources:sources, file:file, options:options});
   if (!sources.map) // ahh not inline, so try file
@@ -82,6 +82,8 @@ function _getInlineSources(args) {
   var sources = args.sources,
   file = args.file,
   options = args.options;
+
+  sources.preExistingComment = utils.getInlinePreExisting(sources.content);
   // Try to read inline source map
   sources.map = convert.fromSource(sources.content, options.largeFile);
 
@@ -92,6 +94,7 @@ function _getInlineSources(args) {
   // sources in map are relative to the source file
   sources.path = path.dirname(file.path);
   if (!options.largeFile) {
+    debug('comment REMOVED');
     sources.content = convert.removeComments(sources.content);
   }
 }
@@ -104,7 +107,8 @@ function _getFileSources(args) {
 
   var mapFile;
   if (mapComment) {
-    mapFile = path.resolve(path.dirname(file.path), mapComment[1] || mapComment[2]);
+    sources.preExistingComment = mapComment[1] || mapComment[2];
+    mapFile = path.resolve(path.dirname(file.path), sources.preExistingComment);
     sources.content = convert.removeMapFileComments(sources.content);
     // if no comment try map file with same name as source file
   } else {
