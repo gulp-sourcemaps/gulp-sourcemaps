@@ -127,6 +127,24 @@ test('combined: inline concatenated file', function(t) {
   });
 });
 
+test('combined: less: inline concatenated file', {timeout: 1500}, function(t) {
+  // proves that gulp-less compilation is not slow
+  // https://github.com/floridoo/gulp-sourcemaps/issues/215
+
+  gulp.src(join(__dirname, './assets/*.less'))
+  .pipe(sourcemaps.init())
+  .pipe($.if("*.less",$.less()))
+  .pipe(sourcemaps.write({sourceRoot:'../../test/assets'}))
+  .pipe(gulp.dest('tmp/combined_inline_less'))
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  })
+  .on('finish', function(){
+    moveHtml('combined_inline_less', t);
+  });
+});
+
 test('combined: mapped preExisting', function(t) {
 
   gulp.src([
