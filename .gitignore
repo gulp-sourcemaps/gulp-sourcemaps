@@ -5,3 +5,4 @@ reports
 .idea
 *.lock
 tmp
+debug

@@ -10,6 +10,7 @@ var hookStd = require('hook-std');
 var debug = require('debug-fabulous')();
 var assign = require('object-assign');
 var utils = require('../src/utils');
+var convert =  require('convert-source-map');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 var mappedContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.map.js')).toString();
@@ -52,7 +53,7 @@ function makeMappedFile() {
     path: path.join(__dirname, 'assets', 'helloworld.map.js'),
     contents: new Buffer(mappedContent)
   });
-  file.sourceMap = makeSourceMap({preExisting:utils.getPreExisting(mappedContent)});
+  file.sourceMap = makeSourceMap({preExistingComment:utils.getInlinePreExisting(mappedContent)});
   return file;
 }
 
@@ -169,17 +170,17 @@ test('write: should detect whether a file uses \\n or \\r\\n and follow the exis
   }).write(file);
 });
 
-test('write: preExisting', function(t) {
+test('write: preExistingComment', function(t) {
   var file = makeMappedFile();
-  file.contents = new Buffer(file.contents.toString());
+  file.contents = new Buffer(convert.removeComments(file.contents.toString()));
 
-  sourcemaps.write({preExisting:true})
+  sourcemaps.write({preExistingComment:true})
   .on('data', function(data) {
     t.ok(data, 'should pass something through');
-    t.ok(!!data.sourceMap.preExisting, 'should mark as preExisting');
+    t.ok(!!data.sourceMap.preExistingComment, 'should mark as preExistingComment');
     t.equal(
       String(data.contents),
-      mappedContent,'should add source map as comment');
+      sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n' ,'should add source map as comment');
     t.end();
   })
   .on('error', function() {

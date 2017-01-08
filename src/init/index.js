@@ -1,16 +1,13 @@
 'use strict';
-var utils = require('./utils'),
+var utils = require('../utils'),
   unixStylePath = utils.unixStylePath,
   PLUGIN_NAME = utils.PLUGIN_NAME,
-  urlRegex = utils.urlRegex,
   through = require('through2'),
-  fs = require('graceful-fs'),
   path = require('path'),
-  convert = require('convert-source-map'),
-  stripBom = require('strip-bom'),
   acorn = require('acorn'),
   SourceMapGenerator = require('source-map').SourceMapGenerator,
-  css = require('css');
+  css = require('css'),
+  loadMaps = require('./loadMaps');
 
 /**
  * Initialize source mapping chain
@@ -39,86 +36,13 @@ function init(options) {
     });
 
     var fileContent = file.contents.toString();
-    var sourceMap;
-    var preExisting = utils.getPreExisting(fileContent);
+    var sourceMap, preExistingComment;
 
     if (options.loadMaps) {
-      debug('loadMaps');
-      var sourcePath = ''; //root path for the sources in the map
-
-      // Try to read inline source map
-      sourceMap = convert.fromSource(fileContent, options.largeFile);
-      if (sourceMap) {
-        sourceMap = sourceMap.toObject();
-        // sources in map are relative to the source file
-        sourcePath = path.dirname(file.path);
-        if (!options.largeFile) {
-          fileContent = convert.removeComments(fileContent);
-        }
-      } else {
-        // look for source map comment referencing a source map file
-        var mapComment = convert.mapFileCommentRegex.exec(fileContent);
-
-        var mapFile;
-        if (mapComment) {
-          mapFile = path.resolve(path.dirname(file.path), mapComment[1] || mapComment[2]);
-          fileContent = convert.removeMapFileComments(fileContent);
-          // if no comment try map file with same name as source file
-        } else {
-          mapFile = file.path + '.map';
-        }
-
-        // sources in external map are relative to map file
-        sourcePath = path.dirname(mapFile);
-
-        try {
-          sourceMap = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
-        } catch (e) {}
-      }
-
-      // fix source paths and sourceContent for imported source map
-      if (sourceMap) {
-        sourceMap.sourcesContent = sourceMap.sourcesContent || [];
-        sourceMap.sources.forEach(function(source, i) {
-          if (source.match(urlRegex)) {
-            sourceMap.sourcesContent[i] = sourceMap.sourcesContent[i] || null;
-            return;
-          }
-          var absPath = path.resolve(sourcePath, source);
-          sourceMap.sources[i] = unixStylePath(path.relative(file.base, absPath));
-
-          if (!sourceMap.sourcesContent[i]) {
-            var sourceContent = null;
-            if (sourceMap.sourceRoot) {
-              if (sourceMap.sourceRoot.match(urlRegex)) {
-                sourceMap.sourcesContent[i] = null;
-                return;
-              }
-              absPath = path.resolve(sourcePath, sourceMap.sourceRoot, source);
-            }
-
-            // if current file: use content
-            if (absPath === file.path) {
-              sourceContent = fileContent;
-
-              // else load content from file
-            } else {
-              try {
-                if (options.debug)
-                  debug('No source content for "' + source + '". Loading from file.');
-                sourceContent = stripBom(fs.readFileSync(absPath, 'utf8'));
-              } catch (e) {
-                if (options.debug)
-                  debug('warn: source file not found: ' + absPath);
-                }
-              }
-            sourceMap.sourcesContent[i] = sourceContent;
-          }
-
-        });
-      }
-      // remove source map comment from source
-      file.contents = new Buffer(fileContent, 'utf8');
+      var result = loadMaps({file:file, fileContent:fileContent}, options);
+      sourceMap = result.map;
+      fileContent = result.content;
+      preExistingComment = result.preExistingComment;
     }
 
     if (!sourceMap && options.identityMap) {
@@ -200,8 +124,8 @@ function init(options) {
         sourcesContent: [fileContent]
       };
     }
-    else if(preExisting !== null && typeof preExisting !== 'undefined')
-      sourceMap.preExisting = preExisting
+    else if(preExistingComment !== null && typeof preExistingComment !== 'undefined')
+      sourceMap.preExistingComment = preExistingComment;
 
     sourceMap.file = unixStylePath(file.relative);
     file.sourceMap = sourceMap;

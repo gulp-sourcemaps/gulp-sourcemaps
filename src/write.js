@@ -5,7 +5,6 @@ var utils = require('./utils'),
   through = require('through2'),
   fs = require('graceful-fs'),
   path = require('path'),
-  File = require('vinyl'),
   stripBom = require('strip-bom');
 
 /**
@@ -97,7 +96,7 @@ function write(destPath, options) {
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
-      debug("basic comment")
+      debug("basic comment");
       comment = commentFormatter('data:application/json;charset=' + options.charset + ';base64,' + base64Map);
     } else {
       var mapFile = path.join(destPath, file.relative) + '.map';
@@ -152,18 +151,17 @@ function write(destPath, options) {
         }
         sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
-      debug("destPath comment")
+      debug("destPath comment");
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
       if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
-        debug("options.sourceMappingURL comment")
+        debug("options.sourceMappingURL comment");
         comment = commentFormatter(options.sourceMappingURL(file));
       }
     }
 
-    var preExisting = options.preExisting && utils.getPreExisting(String(file.contents));
     // append source map comment
-    if (options.addComment && !preExisting){
+    if (options.addComment){
       file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
     }
 
