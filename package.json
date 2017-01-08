@@ -11,7 +11,7 @@
     "cover": "istanbul cover --dir reports/coverage tape \"test/*.js\"",
     "coveralls": "istanbul cover tape \"test/*.js\" --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
     "serve": "http-server",
-    "test:int":"rm -rf ./tmp && tape ./test/integration.js"
+    "test:int": "rm -rf ./tmp && tape ./test/integration.js"
   },
   "keywords": [
     "gulpplugin",
@@ -34,11 +34,13 @@
     "vinyl": "1.X"
   },
   "devDependencies": {
+    "bootstrap": "3.3.7",
     "coveralls": "2.X",
     "faucet": "0.0.X",
     "gulp": "3.X",
     "gulp-concat": "2.X",
     "gulp-if": "2.0.2",
+    "gulp-less": "3.3.0",
     "gulp-load-plugins": "1.X",
     "hook-std": "0.2.X",
     "http-server": "0.9.0",
