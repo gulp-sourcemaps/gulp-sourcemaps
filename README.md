@@ -134,9 +134,6 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   for Javascript and CSS) instead of the default empty source map (no mappings, fast).
   Use this option if you get missing or incorrect mappings, e.g. when debugging.
 
-- `debug`
-
-  Set this to `true` to output debug messages (e.g. about missing source content).
 
 ### Write Options
 
@@ -299,10 +296,6 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   });
   ```
 
-- `debug`
-
-  Set this to `true` to output debug messages (e.g. about missing source content).
-
 - `charset`
 
   Sets the charset for inline source maps. Default: `utf8`
@@ -373,6 +366,22 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
   init.write(new gutil.File(...));
   init.end();
   ```
+
+### Debugging
+
+All debugging output relys on [visionmedia/debug](https://github.com/visionmedia/debug). Fllow the directions to set the
+environment variable ``$DEBUG`.
+
+For a few examples of debug you could use:
+
+```sh
+  DEBUG='gulp-sourcemaps:*' #everything
+  DEBUG='gulp-sourcemaps:init' #init/index.js
+  DEBUG='gulp-sourcemaps:init:*' #init/index.internals.js
+  DEBUG='gulp-sourcemaps:write:' #write/index.js
+  DEBUG='gulp-sourcemaps:write:*' #write/index.internals.js
+  DEBUG='gulp-sourcemaps:write:,gulp-sourcemaps:init:**' #write/index.internals.js and init/index.internals.js
+```
 
 [npm-image]: https://img.shields.io/npm/v/gulp-sourcemaps.svg
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps

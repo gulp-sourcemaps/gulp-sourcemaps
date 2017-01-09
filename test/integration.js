@@ -32,7 +32,7 @@ test('combined: creates inline mapping', function(t) {
     t.ok(data.sourceMap, 'should add a source map object');
     t.deepEqual(
       data.contents.toString(),
-      sourceContent + "\n//# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiIiwic291cmNlcyI6WyJoZWxsb3dvcmxkLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIid1c2Ugc3RyaWN0JztcblxuZnVuY3Rpb24gaGVsbG9Xb3JsZCgpIHtcbiAgICBjb25zb2xlLmxvZygnSGVsbG8gd29ybGQhJyk7XG59XG4iXSwiZmlsZSI6ImhlbGxvd29ybGQuanMifQ==\n",
+      sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n',
       'file should be sourcemapped'
     );
     t.end();
