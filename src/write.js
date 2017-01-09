@@ -75,7 +75,7 @@ function write(destPath, options) {
       // load missing source content
       for (var i = 0; i < file.sourceMap.sources.length; i++) {
         if (!sourceMap.sourcesContent[i]) {
-          var sourcePath = path.resolve(sourceMap.sourceRoot || file.base, sourceMap.sources[i]);
+          var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
             if (options.debug)
               debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
