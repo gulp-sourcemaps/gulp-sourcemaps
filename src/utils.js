@@ -30,7 +30,7 @@ var getCommentFormatter = function (file) {
     };
 
   if (file.sourceMap.preExistingComment){
-    debug('preExistingComment commentFormatter');
+    debug(logCb('preExistingComment commentFormatter'));
     commentFormatter = function(url) {
       return "//# sourceMappingURL=" + url + newline;
     };
@@ -39,19 +39,19 @@ var getCommentFormatter = function (file) {
 
   switch (extension) {
     case 'css':
-      debug('css commentFormatter');
+      debug(logCb('css commentFormatter'));
       commentFormatter = function(url) {
         return newline + "/*# sourceMappingURL=" + url + " */" + newline;
       };
       break;
     case 'js':
-      debug('js commentFormatter');
+      debug(logCb('js commentFormatter'));
       commentFormatter = function(url) {
         return newline + "//# sourceMappingURL=" + url + newline;
       };
       break;
     default:
-      debug('unknown commentFormatter');
+      debug(logCb('unknown commentFormatter'));
   }
 
   return commentFormatter;
@@ -59,10 +59,16 @@ var getCommentFormatter = function (file) {
 
 var getInlinePreExisting = function(fileContent){
   if(sourceMapUrlRegEx().test(fileContent)){
-    debug('has preExisting');
+    debug(logCb('has preExisting'));
     return fileContent.match(sourceMapUrlRegEx())[0];
   }
 };
+
+function logCb(toLog){
+  return function() {
+    return toLog;
+  };
+}
 
 module.exports = {
   unixStylePath: unixStylePath,
@@ -70,5 +76,6 @@ module.exports = {
   urlRegex: urlRegex,
   sourceMapUrlRegEx: sourceMapUrlRegEx,
   getCommentFormatter: getCommentFormatter,
-  getInlinePreExisting: getInlinePreExisting
+  getInlinePreExisting: getInlinePreExisting,
+  logCb: logCb
 };

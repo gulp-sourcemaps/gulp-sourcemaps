@@ -1,94 +1,81 @@
 'use strict';
-var utils = require('./utils'),
-  unixStylePath = utils.unixStylePath,
-  PLUGIN_NAME = utils.PLUGIN_NAME,
-  through = require('through2'),
-  fs = require('graceful-fs'),
-  path = require('path'),
-  stripBom = require('strip-bom');
 
-/**
- * Write the source map
- *
- * @param options options to change the way the source map is written
- *
- */
-function write(destPath, options) {
-  var debug = require('debug-fabulous')()(PLUGIN_NAME + ':write');
+module.exports = function(destPath, options) {
 
-  if (options === undefined && typeof destPath !== 'string') {
-    options = destPath;
-    destPath = undefined;
-  }
-  options = options || {};
+  var utils = require('../utils'),
+    unixStylePath = utils.unixStylePath,
+    PLUGIN_NAME = utils.PLUGIN_NAME,
+    fs = require('graceful-fs'),
+    path = require('path'),
+    stripBom = require('strip-bom'),
+    makeDebug = require('debug-fabulous')();
 
-  // set defaults for options if unset
-  if (options.includeContent === undefined)
-    options.includeContent = true;
-  if (options.addComment === undefined)
-    options.addComment = true;
-  if (options.charset === undefined)
-    options.charset = "utf8";
-
-  debug(function() {
-    return options;
-  });
-
-  function sourceMapWrite(file, encoding, callback) {
-    /*jshint validthis:true */
-
-    if (file.isNull() || !file.sourceMap) {
-      this.push(file);
-      return callback();
-    }
-
-    if (file.isStream()) {
-      return callback(new Error(PLUGIN_NAME + '-write: Streaming not supported'));
-    }
+  function setSourceRoot(file) {
+    var debug = makeDebug(PLUGIN_NAME + ':write:internals:setSourceRoot');
 
     var sourceMap = file.sourceMap;
-    // fix paths if Windows style paths
-    sourceMap.file = unixStylePath(file.relative);
-
-    if (options.mapSources && typeof options.mapSources === 'function') {
-      sourceMap.sources = sourceMap.sources.map(function(filePath) {
-        return options.mapSources(filePath);
-      });
-    }
-
-    sourceMap.sources = sourceMap.sources.map(function(filePath) {
-      return unixStylePath(filePath);
-    });
-
     if (typeof options.sourceRoot === 'function') {
+      debug(utils.logCb('is function'));
       sourceMap.sourceRoot = options.sourceRoot(file);
     } else {
+      debug(utils.logCb('from options'));
       sourceMap.sourceRoot = options.sourceRoot;
     }
     if (sourceMap.sourceRoot === null) {
+      debug(utils.logCb('undefined'));
       sourceMap.sourceRoot = undefined;
     }
+  }
 
+  function mapSources(file) {
+    var debug = makeDebug(PLUGIN_NAME + ':write:internals:mapSources');
+
+    //NOTE: make sure source mapping happens after content has been loaded
+    if (options.mapSources && typeof options.mapSources === 'function') {
+      debug(utils.logCb('function'));
+      file.sourceMap.sources = file.sourceMap.sources.map(options.mapSources);
+      return;
+    }
+
+    file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
+      // keep the references files like ../node_modules within the sourceRoot
+      if (!file.dirname){
+        filePath = file.path.replace(file.cwd, '');
+      } else
+          filePath = path.resolve(file.dirname || '', filePath).replace(file.cwd, '');
+
+      return unixStylePath(filePath);
+    });
+  }
+
+  function loadContent(file) {
+    var debug = makeDebug(PLUGIN_NAME + ':write:internals:loadContent');
+
+    var sourceMap = file.sourceMap;
     if (options.includeContent) {
       sourceMap.sourcesContent = sourceMap.sourcesContent || [];
 
       // load missing source content
-      for (var i = 0; i < file.sourceMap.sources.length; i++) {
+      for (var i = 0; i < sourceMap.sources.length; i++) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
-            if (options.debug)
-              debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
+            debug(utils.logCb('No source content for "' + sourceMap.sources[i] + '". Loading from file.'));
             sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
-          } catch (e) {
-            if (options.debug)
-              debug('source file not found: ' + sourcePath);
-            }
           }
+          catch (e) {
+            debug(utils.logCb('source file not found: ' + sourcePath));
+          }
+        }
       }
     } else {
       delete sourceMap.sourcesContent;
     }
+  }
+
+  function  mapDestPath(file, stream) {
+    var debug = makeDebug(PLUGIN_NAME + ':write:internals:mapDestPath');
+    var sourceMap = file.sourceMap;
 
     var comment,
       commentFormatter = utils.getCommentFormatter(file);
@@ -96,7 +83,6 @@ function write(destPath, options) {
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
       var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
-      debug("basic comment");
       comment = commentFormatter('data:application/json;charset=' + options.charset + ';base64,' + base64Map);
     } else {
       var mapFile = path.join(destPath, file.relative) + '.map';
@@ -138,7 +124,7 @@ function write(destPath, options) {
         isFIFO: function () { return false; },
         isSocket: function () { return false; }
       };
-      this.push(sourceMapFile);
+      stream.push(sourceMapFile);
 
       var sourceMapPathRelative = path.relative(path.dirname(file.path), sourceMapPath);
 
@@ -151,11 +137,11 @@ function write(destPath, options) {
         }
         sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
-      debug("destPath comment");
+      debug(utils.logCb("destPath comment"));
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
       if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
-        debug("options.sourceMappingURL comment");
+        debug(utils.logCb("options.sourceMappingURL comment"));
         comment = commentFormatter(options.sourceMappingURL(file));
       }
     }
@@ -164,12 +150,12 @@ function write(destPath, options) {
     if (options.addComment){
       file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
     }
-
-    this.push(file);
-    callback();
   }
 
-  return through.obj(sourceMapWrite);
-}
-
-module.exports = write;
+  return {
+    setSourceRoot: setSourceRoot,
+    loadContent: loadContent,
+    mapSources: mapSources,
+    mapDestPath: mapDestPath
+  };
+};

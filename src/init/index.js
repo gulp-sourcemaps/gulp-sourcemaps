@@ -7,7 +7,7 @@ var utils = require('../utils'),
   acorn = require('acorn'),
   SourceMapGenerator = require('source-map').SourceMapGenerator,
   css = require('css'),
-  loadMaps = require('./loadMaps');
+  initInternals = require('./index.internals');
 
 /**
  * Initialize source mapping chain
@@ -37,9 +37,10 @@ function init(options) {
 
     var fileContent = file.contents.toString();
     var sourceMap, preExistingComment;
+    var internals = initInternals(options, file, fileContent);
 
     if (options.loadMaps) {
-      var result = loadMaps({file:file, fileContent:fileContent}, options);
+      var result = internals.loadMaps();
       sourceMap = result.map;
       fileContent = result.content;
       preExistingComment = result.preExistingComment;

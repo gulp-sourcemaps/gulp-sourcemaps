@@ -15,7 +15,7 @@ var debug = require('debug-fabulous')();
 // partial-bliss: The alternative is to have ignore cover statements on some of the logging.
 // touche: However, those logging statements could potentially fail
 debug.save('gulp-sourcemaps:init');
-debug.save('gulp-sourcemaps:init:loadMaps');
+debug.save('gulp-sourcemaps:init:*');
 debug.enable(debug.load());
 //END PRE-HOOK of debug (must be loaded before our main module (sourcemaps))
 var sourcemaps = require('..');
@@ -392,7 +392,7 @@ test('init: should output an error message if debug option is set and sourceCont
   var unhook = hookStd.stderr(function(s) {
     history.push(s);
   });
-  var pipeline = sourcemaps.init({loadMaps: true, debug: true});
+  var pipeline = sourcemaps.init({loadMaps: true});
 
   pipeline.on('data', function() {
     unhook();
@@ -404,9 +404,8 @@ test('init: should output an error message if debug option is set and sourceCont
     console.log(history);
     t.ok(
       history.some(
-        hasRegex(/No source content for \"missingfile\". Loading from file./)),
-      'should log missing source content');
-    t.ok(history.some(hasRegex(/source file not found: /)), 'should warn about missing file');
+        hasRegex(/No source content for "missingfile". Loading from file./g)), 'should log missing source content');
+    t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
     t.end();
   }).write(file);
 
