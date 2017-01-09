@@ -127,7 +127,7 @@ test('combined: inline concatenated file', function(t) {
   });
 });
 
-test('combined: less: inline concatenated file', {timeout: 1500}, function(t) {
+test('combined: less: inline concatenated file', {timeout: 3000}, function(t) { //note ~1000 ms is fine locally, travis needs more
   // proves that gulp-less compilation is not slow
   // https://github.com/floridoo/gulp-sourcemaps/issues/215
 
@@ -136,11 +136,11 @@ test('combined: less: inline concatenated file', {timeout: 1500}, function(t) {
   .pipe($.if("*.less",$.less()))
   .pipe(sourcemaps.write({sourceRoot:'../../test/assets'}))
   .pipe(gulp.dest('tmp/combined_inline_less'))
-  .on('error', function() {
+  .once('error', function() {
     t.fail('emitted error');
     t.end();
   })
-  .on('finish', function(){
+  .once('finish', function(){
     moveHtml('combined_inline_less', t);
   });
 });
@@ -157,7 +157,7 @@ test('combined: mapped preExisting', function(t) {
   .pipe($.if("*.js",$.concat("index.js")))
   .pipe(sourcemaps.write('.', {sourceRoot:'../../test/assets'}))
   .pipe(gulp.dest('tmp/combined_map_preExisting'))
-  .on('error', function() {
+  .once('error', function() {
     t.fail('emitted error');
     t.end();
   })
@@ -169,7 +169,7 @@ test('combined: mapped preExisting', function(t) {
         'concatenated file is mapped once');
     }
   })
-  .on('finish', function(){
+  .once('finish', function(){
     moveHtml('combined_map_preExisting', t);
   });
 });
