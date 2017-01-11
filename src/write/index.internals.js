@@ -39,10 +39,18 @@ module.exports = function(destPath, options) {
 
     file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
       // keep the references files like ../node_modules within the sourceRoot
+      debug(utils.logCb("filePath: " + filePath));
+      debug(utils.logCb("file.path: " + file.path));
+      debug(utils.logCb("file.cwd: " + file.cwd));
+      debug(utils.logCb("file.base: " + file.base));
+
       if (!file.dirname){
-        filePath = file.path.replace(file.cwd, '');
-      } else
-          filePath = path.resolve(file.dirname || '', filePath).replace(file.cwd, '');
+        debug(utils.logCb('!file.dirname'));
+        filePath = path.join(file.base, filePath).replace(file.cwd, '');
+      } else {
+          debug(utils.logCb('file.dirname: ' + file.dirname));
+          filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
+      }
 
       return unixStylePath(filePath);
     });
