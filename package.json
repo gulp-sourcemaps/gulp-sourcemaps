@@ -47,6 +47,7 @@
     "http-server": "0.9.0",
     "istanbul": "0.X",
     "jshint": "2.X",
+    "lodash": "4.17.4",
     "object-assign": "^4.1.0",
     "tape": "4.X"
   },
