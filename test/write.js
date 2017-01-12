@@ -1,5 +1,6 @@
 'use strict';
 
+var yargs = require('yargs').argv;
 var test = require('tape');
 var sourcemaps = require('..');
 var File = require('vinyl');
@@ -8,9 +9,11 @@ var path = require('path');
 var fs = require('fs');
 var hookStd = require('hook-std');
 var debug = require('debug-fabulous')();
-debug.save('gulp-sourcemaps:write');
-debug.save('gulp-sourcemaps:write:*');
-debug.enable(debug.load());
+
+if (!yargs.ignoreLogTests){
+  debug.save('gulp-sourcemaps:*');
+  debug.enable(debug.load());
+}
 var assign = require('object-assign');
 var utils = require('../src/utils');
 var convert =  require('convert-source-map');
@@ -359,6 +362,16 @@ test('write: should set the sourceRoot by option sourceRoot', function(t) {
   var file = makeFile();
   var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot'});
   pipeline.on('data', function(data) {
+    t.deepEqual(data.sourceMap.sources, ['helloworld.js'], 'should have the correct sources');
+    t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
+    t.end();
+  }).write(file);
+});
+
+test('write: should set the mapSourcesAbsolute by option mapSourcesAbsolute', function(t) {
+  var file = makeFile();
+  var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot', mapSourcesAbsolute: true});
+  pipeline.on('data', function(data) {
     t.deepEqual(data.sourceMap.sources, ['/assets/helloworld.js'], 'should have the correct sources');
     t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
     t.end();
@@ -623,28 +636,30 @@ test('write: should allow to change sources', function(t) {
   }).write(file);
 });
 
-//should always be last as disabling a debug namespace does not work
-test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
-  var file = makeFile();
-  file.sourceMap.sources[0] += '.invalid';
-  delete file.sourceMap.sourcesContent;
+if (!yargs.ignoreLogTests){
+  //should always be last as disabling a debug namespace does not work
+  test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
+    var file = makeFile();
+    file.sourceMap.sources[0] += '.invalid';
+    delete file.sourceMap.sourcesContent;
 
-  var history = [];
-  var unhook = hookStd.stderr(function(s) {
-    history.push(s);
-  });
-  var pipeline = sourcemaps.write();
+    var history = [];
+    var unhook = hookStd.stderr(function(s) {
+      history.push(s);
+    });
+    var pipeline = sourcemaps.write();
 
-  var hasRegex =  function(regex){
-    return function(s){
-      return regex.test(s);
+    var hasRegex =  function(regex){
+      return function(s){
+        return regex.test(s);
+      };
     };
-  };
-  pipeline.on('data', function() {
-    unhook();
-    console.log(JSON.stringify(history));
-    t.ok(history.some(hasRegex(/No source content for "helloworld.js.invalid". Loading from file./g)), 'should log missing source content');
-    t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
-    t.end();
-  }).write(file);
-});
+    pipeline.on('data', function() {
+      unhook();
+      console.log(JSON.stringify(history));
+      t.ok(history.some(hasRegex(/No source content for "helloworld.js.invalid". Loading from file./g)), 'should log missing source content');
+      t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
+      t.end();
+    }).write(file);
+  });
+}

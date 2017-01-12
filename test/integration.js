@@ -3,8 +3,12 @@ var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var test = require('tape');
 var sourcemaps = require('..');
-var PLUGIN_NAME = require('../src/utils').PLUGIN_NAME;
-var debug = require('debug-fabulous')()(PLUGIN_NAME + ':test:integration');
+var yargs = require('yargs').argv;
+var debug = require('debug-fabulous')();
+if (!yargs.ignoreLogTests){
+  debug.save('gulp-sourcemaps:*');
+  debug.enable(debug.load());
+}
 var join = require('path').join;
 var fs = require('fs');
 var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toString();
@@ -231,6 +235,7 @@ test('combined: mapped preExisting with two tasks', function(t) {
   });
 });
 
+
 // - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
 test('sources: is valid with concat', function(t) {
 
@@ -241,6 +246,34 @@ test('sources: is valid with concat', function(t) {
   .pipe(sourcemaps.init())
   .pipe($.concat("index.js"))
   .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest('tmp/sources_concat'))
+  .on('data', function(file) {
+    if (!/.*\.map/.test(file.path)) return;
+
+    var contents = JSON.parse(file.contents.toString());
+    _.each(contents.sources, function(s, i){
+      t.deepEqual(s, "test" + (i+3) + ".js", "source is correct, test" + (i+3) + ".js");
+    });
+  })
+  .on('error', function() {
+    t.fail('emitted error');
+    t.end();
+  }).on('finish', function(){
+    moveHtml('sources_concat', t);
+  });
+
+});
+
+// - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
+test('sources: mapSourcesAbsolute: is valid with concat', function(t) {
+
+  gulp.src([
+    join(__dirname, './assets/test3.js'),
+    join(__dirname, './assets/test4.js'),
+  ])
+  .pipe(sourcemaps.init())
+  .pipe($.concat("index.js"))
+  .pipe(sourcemaps.write('.', {mapSourcesAbsolute:true}))
   .pipe(gulp.dest('tmp/sources_concat'))
   .on('data', function(file) {
     if (!/.*\.map/.test(file.path)) return;

@@ -2,21 +2,13 @@
 
 var test = require('tape');
 //BEGIN PRE-HOOK of debug
+var yargs = require('yargs').argv;
 var debug = require('debug-fabulous')();
-// Begin inner conflict with self here..
-// nmccready:
-//
-//
-// bliss: Turning debug on here clutters the test output;
-//    but, having debug off in portions results in not having 100% test coverage.
-//
-// touche: If we demand 100% coverage, then we need clutter logging :_(
-//
-// partial-bliss: The alternative is to have ignore cover statements on some of the logging.
-// touche: However, those logging statements could potentially fail
-debug.save('gulp-sourcemaps:init');
-debug.save('gulp-sourcemaps:init:*');
-debug.enable(debug.load());
+
+if (!yargs.ignoreLogTests){
+  debug.save('gulp-sourcemaps:*');
+  debug.enable(debug.load());
+}
 //END PRE-HOOK of debug (must be loaded before our main module (sourcemaps))
 var sourcemaps = require('..');
 var File = require('vinyl');
@@ -381,32 +373,34 @@ test('init: handle null contents', function(t) {
   }).write(makeNullFile());
 });
 
-//should always be last as disabling a debug namespace does not work
-test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
+if (!yargs.ignoreLogTests){
+  //should always be last as disabling a debug namespace does not work
+  test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
 
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
 
-  var history = [];
-  console.log('HOOKING');
-  var unhook = hookStd.stderr(function(s) {
-    history.push(s);
-  });
-  var pipeline = sourcemaps.init({loadMaps: true});
+    var history = [];
+    console.log('HOOKING');
+    var unhook = hookStd.stderr(function(s) {
+      history.push(s);
+    });
+    var pipeline = sourcemaps.init({loadMaps: true});
 
-  pipeline.on('data', function() {
-    unhook();
-    var hasRegex =  function(regex){
-      return function(s){
-        return regex.test(s);
+    pipeline.on('data', function() {
+      unhook();
+      var hasRegex =  function(regex){
+        return function(s){
+          return regex.test(s);
+        };
       };
-    };
-    console.log(history);
-    t.ok(
-      history.some(
-        hasRegex(/No source content for "missingfile". Loading from file./g)), 'should log missing source content');
-    t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
-    t.end();
-  }).write(file);
+      console.log(history);
+      t.ok(
+        history.some(
+          hasRegex(/No source content for "missingfile". Loading from file./g)), 'should log missing source content');
+      t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
+      t.end();
+    }).write(file);
 
-});
+  });
+}

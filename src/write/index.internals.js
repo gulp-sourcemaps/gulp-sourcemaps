@@ -10,6 +10,10 @@ module.exports = function(destPath, options) {
     stripBom = require('strip-bom'),
     makeDebug = require('debug-fabulous')();
 
+  var rootDebug = makeDebug(PLUGIN_NAME + ':write:internals');
+  rootDebug(utils.logCb("options"));
+  rootDebug(utils.logCb(options));
+
   function setSourceRoot(file) {
     var debug = makeDebug(PLUGIN_NAME + ':write:internals:setSourceRoot');
 
@@ -37,21 +41,25 @@ module.exports = function(destPath, options) {
       return;
     }
 
+    debug(utils.logCb("file.path: " + file.path));
+    debug(utils.logCb("file.cwd: " + file.cwd));
+    debug(utils.logCb("file.base: " + file.base));
+
     file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
       // keep the references files like ../node_modules within the sourceRoot
       debug(utils.logCb("filePath: " + filePath));
-      debug(utils.logCb("file.path: " + file.path));
-      debug(utils.logCb("file.cwd: " + file.cwd));
-      debug(utils.logCb("file.base: " + file.base));
 
-      if (!file.dirname){
-        debug(utils.logCb('!file.dirname'));
-        filePath = path.join(file.base, filePath).replace(file.cwd, '');
-      } else {
-          debug(utils.logCb('file.dirname: ' + file.dirname));
-          filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
+      if (options.mapSourcesAbsolute === true){
+        debug(utils.logCb('mapSourcesAbsolute'));
+
+        if (!file.dirname){
+          debug(utils.logCb('!file.dirname'));
+          filePath = path.join(file.base, filePath).replace(file.cwd, '');
+        } else {
+            debug(utils.logCb('file.dirname: ' + file.dirname));
+            filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
+        }
       }
-
       return unixStylePath(filePath);
     });
   }
