@@ -14,6 +14,12 @@ var utils = require('../utils'),
 function write(destPath, options) {
   var debug = require('debug-fabulous')()(PLUGIN_NAME + ':write');
 
+  debug(utils.logCb("destPath"));
+  debug(utils.logCb(destPath));
+
+  debug(utils.logCb("original options"));
+  debug(utils.logCb(options));
+
   if (options === undefined && typeof destPath !== 'string') {
     options = destPath;
     destPath = undefined;
@@ -28,9 +34,8 @@ function write(destPath, options) {
   if (options.charset === undefined)
     options.charset = "utf8";
 
-  debug(function() {
-    return options;
-  });
+  debug(utils.logCb("derrived options"));
+  debug(utils.logCb(options));
 
   var internals = internalsInit(destPath, options);
 
