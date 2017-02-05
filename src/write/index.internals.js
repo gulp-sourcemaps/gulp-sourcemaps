@@ -37,7 +37,9 @@ module.exports = function(destPath, options) {
     //NOTE: make sure source mapping happens after content has been loaded
     if (options.mapSources && typeof options.mapSources === 'function') {
       debug(utils.logCb('function'));
-      file.sourceMap.sources = file.sourceMap.sources.map(options.mapSources);
+      file.sourceMap.sources = file.sourceMap.sources.map(function (filePath) {
+        return options.mapSources(filePath, file);
+      });
       return;
     }
 

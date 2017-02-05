@@ -277,7 +277,7 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
 - `mapSources`
 
-  This option gives full control over the source paths. It takes a function that is called for every source and receives the default source path as a parameter.
+  This option gives full control over the source paths. It takes a function that is called for every source and receives the default source path as a parameter and the original vinyl file.
 
   Example:
   ```javascript
@@ -287,7 +287,7 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
         .pipe(plugin1())
         .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {
-        mapSources: function(sourcePath) {
+        mapSources: function(sourcePath, file) {
           // source paths are prefixed with '../src/'
           return '../src/' + sourcePath;
         }
