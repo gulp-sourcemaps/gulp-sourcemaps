@@ -623,7 +623,8 @@ test('write: should be able to fully control sourceMappingURL by the option sour
 test('write: should allow to change sources', function(t) {
   var file = makeFile();
   var pipeline = sourcemaps.write({
-    mapSources: function(sourcePath) {
+    mapSources: function(sourcePath, f) {
+      t.equal(file,f, 'vinyl file gets passed');
       return '../src/' + sourcePath;
     }
   });
