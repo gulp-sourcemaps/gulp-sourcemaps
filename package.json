@@ -23,6 +23,7 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
+    "@gulp-sourcemaps/map-sources": "1.X",
     "acorn": "4.X",
     "convert-source-map": "1.X",
     "css": "2.X",
@@ -48,6 +49,7 @@
     "istanbul": "0.X",
     "jshint": "2.X",
     "lodash": "4.17.4",
+    "mississippi": "^1.3.0",
     "object-assign": "^4.1.0",
     "tape": "4.X",
     "yargs": "6.6.0"

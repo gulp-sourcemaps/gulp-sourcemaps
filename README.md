@@ -116,6 +116,27 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 });
 ```
 
+#### Alter `sources` property on sourcemaps
+
+The exported `mapSources` method gives full control over the source paths. It takes a function that is called for every source and receives the default source path as a parameter and the original vinyl file.
+
+Example:
+```javascript
+gulp.task('javascript', function() {
+  var stream = gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init())
+      .pipe(plugin1())
+      .pipe(plugin2())
+      // be careful with the sources returned otherwise contents might not be loaded properly
+      .pipe(sourcemaps.mapSources(function(sourcePath, file) {
+        // source paths are prefixed with '../src/'
+        return '../src/' + sourcePath;
+      }))
+    .pipe(sourcemaps.write('../maps')
+    .pipe(gulp.dest('public/scripts'));
+});
+```
+
 
 
 ### Init Options
@@ -277,24 +298,7 @@ gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
 
 - `mapSources`
 
-  This option gives full control over the source paths. It takes a function that is called for every source and receives the default source path as a parameter and the original vinyl file.
-
-  Example:
-  ```javascript
-  gulp.task('javascript', function() {
-    var stream = gulp.src('src/**/*.js')
-      .pipe(sourcemaps.init())
-        .pipe(plugin1())
-        .pipe(plugin2())
-      .pipe(sourcemaps.write('../maps', {
-        mapSources: function(sourcePath, file) {
-          // source paths are prefixed with '../src/'
-          return '../src/' + sourcePath;
-        }
-      }))
-      .pipe(gulp.dest('public/scripts'));
-  });
-  ```
+  __This option is deprecated. Upgrade to use our [`sourcemap.mapSources`](#alter-sources-property-on-sourcemaps) API.__
 
 - `charset`
 
