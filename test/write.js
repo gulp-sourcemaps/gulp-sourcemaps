@@ -9,6 +9,11 @@ var path = require('path');
 var fs = require('fs');
 var hookStd = require('hook-std');
 var debug = require('debug-fabulous')();
+var miss = require('mississippi');
+
+var from = miss.from;
+var pipe = miss.pipe;
+var concat = miss.concat;
 
 if (!yargs.ignoreLogTests){
   debug.save('gulp-sourcemaps:*');
@@ -635,6 +640,30 @@ test('write: should allow to change sources', function(t) {
     t.fail('emitted error');
     t.end();
   }).write(file);
+});
+
+test('write: can replace `mapSources` option with sourcemap.mapSources stream', function(t) {
+  var file = makeFile();
+
+  function assert(files) {
+    t.deepEqual(files[0].sourceMap.sources, ['../src/helloworld.js'], 'should have the correct sources');
+  }
+
+  pipe([
+    from.obj([file]),
+    sourcemaps.mapSources(function(sourcePath, f) {
+      t.equal(file,f, 'vinyl file gets passed');
+      return '../src/' + sourcePath;
+    }),
+    sourcemaps.write(),
+    concat(assert)
+  ], function(err) {
+    if (err) {
+      t.fail('emitted error');
+    }
+
+    t.end();
+  });
 });
 
 if (!yargs.ignoreLogTests){
