@@ -36,7 +36,9 @@ module.exports = function(destPath, options) {
 
     //NOTE: make sure source mapping happens after content has been loaded
     if (options.mapSources && typeof options.mapSources === 'function') {
+      debug(utils.logCb('**Option is deprecated, update to use sourcemap.mapSources stream**'));
       debug(utils.logCb('function'));
+
       file.sourceMap.sources = file.sourceMap.sources.map(function (filePath) {
         return options.mapSources(filePath, file);
       });
