@@ -1,6 +1,0 @@
-{
-	"node": true,
-	"strict": true,
-	"unused": "vars",
-  "undef": true
-}

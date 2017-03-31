@@ -1,8 +1,7 @@
 'use strict';
 
 var utils = require('../utils');
-var PLUGIN_NAME = utils.PLUGIN_NAME;
-var makeDebug = require('debug-fabulous')();
+var rootDebug = require('../debug');
 var convert = require('convert-source-map');
 var stripBom = require('strip-bom-string');
 var urlRegex = utils.urlRegex;
@@ -31,7 +30,7 @@ module.exports = function(options, file, fileContent) {
   }
 
   function _fixSources(sources) {
-    var debug = makeDebug(PLUGIN_NAME + ':init:internals:loadMaps:_fixSources');
+    var debug = rootDebug.spawn('init:internals:loadMaps:_fixSources');
 
     // fix source paths and sourceContent for imported source map
     if (sources.map) {
@@ -59,10 +58,10 @@ module.exports = function(options, file, fileContent) {
             sourceContent = sources.content;
           } else { //attempt load content from file
             try {
-              debug(utils.logCb('No source content for "' + source + '". Loading from file.'));
+              debug(function() { return 'No source content for "' + source + '". Loading from file.'; });
               sourceContent = stripBom(fs.readFileSync(absPath, 'utf8'));
             } catch (e) {
-              debug(utils.logCb('warn: source file not found: ' + absPath));
+              debug(function() { return 'warn: source file not found: ' + absPath; });
             }
           }
           sources.map.sourcesContent[i] = sourceContent;
@@ -76,7 +75,7 @@ module.exports = function(options, file, fileContent) {
   }
 
   function _getInlineSources(sources) {
-    var debug = makeDebug(PLUGIN_NAME + ':init:internals:loadMaps:_getInlineSources');
+    var debug = rootDebug.spawn('init:internals:loadMaps:_getInlineSources');
 
     sources.preExistingComment = utils.getInlinePreExisting(sources.content);
     // Try to read inline source map

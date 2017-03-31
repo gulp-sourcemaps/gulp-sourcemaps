@@ -1,19 +1,18 @@
 'use strict';
-var utils = require('../utils'),
-  unixStylePath = utils.unixStylePath,
-  PLUGIN_NAME = utils.PLUGIN_NAME,
-  through = require('through2'),
-  path = require('path'),
-  acorn = require('acorn'),
-  SourceMapGenerator = require('source-map').SourceMapGenerator,
-  css = require('css'),
-  initInternals = require('./index.internals');
+var utils = require('../utils');
+var unixStylePath = utils.unixStylePath;
+var through = require('through2');
+var path = require('path');
+var acorn = require('acorn');
+var SourceMapGenerator = require('source-map').SourceMapGenerator;
+var css = require('css');
+var initInternals = require('./index.internals');
 
 /**
  * Initialize source mapping chain
  */
 function init(options) {
-  var debug = require('debug-fabulous')()(PLUGIN_NAME + ':init');
+  var debug = require('../debug').spawn('init');
 
   function sourceMapInit(file, encoding, callback) {
     /*jshint validthis:true */
@@ -25,7 +24,7 @@ function init(options) {
     }
 
     if (file.isStream()) {
-      return callback(new Error(PLUGIN_NAME + '-init: Streaming not supported'));
+      return callback(new Error(utils.PLUGIN_NAME + '-init: Streaming not supported'));
     }
 
     if (options === undefined) {

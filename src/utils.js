@@ -10,8 +10,7 @@ var PLUGIN_NAME = require('../package.json').name;
 
 var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
 
-var debug = require('debug-fabulous')()(PLUGIN_NAME + ':utils');
-
+var debug = require('./debug').spawn('utils');
 /*
 So reusing the same ref for a regex (with global (g)) is from a poor decision in js.
 See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-when-do-global-search
@@ -30,7 +29,7 @@ var getCommentFormatter = function (file) {
     };
 
   if (file.sourceMap.preExistingComment){
-    debug(logCb('preExistingComment commentFormatter'));
+    debug(function() { return 'preExistingComment commentFormatter'; });
     commentFormatter = function(url) {
       return "//# sourceMappingURL=" + url + newline;
     };
@@ -39,19 +38,19 @@ var getCommentFormatter = function (file) {
 
   switch (extension) {
     case 'css':
-      debug(logCb('css commentFormatter'));
+      debug(function() { return 'css commentFormatter';});
       commentFormatter = function(url) {
         return newline + "/*# sourceMappingURL=" + url + " */" + newline;
       };
       break;
     case 'js':
-      debug(logCb('js commentFormatter'));
+      debug(function() { return 'js commentFormatter'; });
       commentFormatter = function(url) {
         return newline + "//# sourceMappingURL=" + url + newline;
       };
       break;
     default:
-      debug(logCb('unknown commentFormatter'));
+      debug(function() { return 'unknown commentFormatter'; });
   }
 
   return commentFormatter;
@@ -59,16 +58,11 @@ var getCommentFormatter = function (file) {
 
 var getInlinePreExisting = function(fileContent){
   if(sourceMapUrlRegEx().test(fileContent)){
-    debug(logCb('has preExisting'));
+    debug(function() { return 'has preExisting'; });
     return fileContent.match(sourceMapUrlRegEx())[0];
   }
 };
 
-function logCb(toLog){
-  return function() {
-    return toLog;
-  };
-}
 
 module.exports = {
   unixStylePath: unixStylePath,
@@ -76,6 +70,5 @@ module.exports = {
   urlRegex: urlRegex,
   sourceMapUrlRegEx: sourceMapUrlRegEx,
   getCommentFormatter: getCommentFormatter,
-  getInlinePreExisting: getInlinePreExisting,
-  logCb: logCb
+  getInlinePreExisting: getInlinePreExisting
 };

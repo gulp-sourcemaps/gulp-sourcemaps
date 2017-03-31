@@ -1,9 +1,8 @@
 'use strict';
-var utils = require('../utils'),
-  through = require('through2'),
-  unixStylePath = utils.unixStylePath,
-  PLUGIN_NAME = utils.PLUGIN_NAME,
-  internalsInit = require('./index.internals');
+var utils = require('../utils');
+var through = require('through2');
+var unixStylePath = utils.unixStylePath;
+var internalsInit = require('./index.internals');
 
 /**
  * Write the source map
@@ -12,13 +11,13 @@ var utils = require('../utils'),
  *
  */
 function write(destPath, options) {
-  var debug = require('debug-fabulous')()(PLUGIN_NAME + ':write');
+  var debug = require('../debug').spawn('write');
 
-  debug(utils.logCb("destPath"));
-  debug(utils.logCb(destPath));
+  debug(function() { return "destPath"; });
+  debug(function() { return destPath; });
 
-  debug(utils.logCb("original options"));
-  debug(utils.logCb(options));
+  debug(function() { return "original options";});
+  debug(function() { return options; });
 
   if (options === undefined && typeof destPath !== 'string') {
     options = destPath;
@@ -34,8 +33,8 @@ function write(destPath, options) {
   if (options.charset === undefined)
     options.charset = "utf8";
 
-  debug(utils.logCb("derrived options"));
-  debug(utils.logCb(options));
+  debug(function() { return "derrived options"; });
+  debug(function() { return options; });
 
   var internals = internalsInit(destPath, options);
 
@@ -48,7 +47,7 @@ function write(destPath, options) {
     }
 
     if (file.isStream()) {
-      return callback(new Error(PLUGIN_NAME + '-write: Streaming not supported'));
+      return callback(new Error(utils.PLUGIN_NAME + '-write: Streaming not supported'));
     }
 
     // fix paths if Windows style paths
