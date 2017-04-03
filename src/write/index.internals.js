@@ -7,7 +7,7 @@ module.exports = function(destPath, options) {
     PLUGIN_NAME = utils.PLUGIN_NAME,
     fs = require('graceful-fs'),
     path = require('path'),
-    stripBom = require('strip-bom'),
+    stripBom = require('strip-bom-string'),
     makeDebug = require('debug-fabulous')();
 
   var rootDebug = makeDebug(PLUGIN_NAME + ':write:internals');
