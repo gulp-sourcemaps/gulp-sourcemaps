@@ -6,7 +6,7 @@
   "repository": "git://github.com/floridoo/gulp-sourcemaps.git",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint ./src/**/*.js test/*.js",
+    "lint": "jshint ./src/**/*.js test/*.js",
     "test": "npm run lint && faucet test/*.js $@",
     "tap": "tape test/*.js",
     "cover": "istanbul cover --dir reports/coverage tape \"test/*.js\"",
@@ -27,7 +27,7 @@
     "acorn": "4.X",
     "convert-source-map": "1.X",
     "css": "2.X",
-    "debug-fabulous": "git://github.com/nmccready/debug-fabulous.git#0afa91423c37503158ad2a401c9232c96830aebf",
+    "debug-fabulous": "0.1.X",
     "detect-newline": "2.X",
     "graceful-fs": "4.X",
     "source-map": "0.X",
@@ -38,7 +38,6 @@
   "devDependencies": {
     "bootstrap": "3.3.7",
     "coveralls": "2.X",
-    "eslint": "^3.19.0",
     "faucet": "0.0.X",
     "gulp": "3.X",
     "gulp-concat": "2.X",

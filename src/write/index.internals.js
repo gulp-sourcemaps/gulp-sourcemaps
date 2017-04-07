@@ -78,11 +78,11 @@ module.exports = function(destPath, options) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
-            debug(function() { return 'No source content for "' + sourceMap.sources[i] + '". Loading from file.'; });
+            debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
             sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
           }
           catch (e) {
-            debug(function() { return 'source file not found: ' + sourcePath; });
+            debug('source file not found: ' + sourcePath);
           }
         }
       }
