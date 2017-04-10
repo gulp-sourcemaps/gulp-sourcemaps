@@ -2,42 +2,40 @@
 
 module.exports = function(destPath, options) {
 
-  var utils = require('../utils'),
-    unixStylePath = utils.unixStylePath,
-    PLUGIN_NAME = utils.PLUGIN_NAME,
-    fs = require('graceful-fs'),
-    path = require('path'),
-    stripBom = require('strip-bom-string'),
-    makeDebug = require('debug-fabulous')();
+  var utils = require('../utils');
+  var unixStylePath = utils.unixStylePath;
+  var fs = require('graceful-fs');
+  var path = require('path');
+  var stripBom = require('strip-bom-string');
+  var rootDebug = require('../debug').spawn('write:internals');
 
-  var rootDebug = makeDebug(PLUGIN_NAME + ':write:internals');
-  rootDebug(utils.logCb("options"));
-  rootDebug(utils.logCb(options));
+  rootDebug(function() { return "options"; });
+  rootDebug(function() { return options; });
 
   function setSourceRoot(file) {
-    var debug = makeDebug(PLUGIN_NAME + ':write:internals:setSourceRoot');
+    var debug = rootDebug.spawn('setSourceRoot');
 
     var sourceMap = file.sourceMap;
     if (typeof options.sourceRoot === 'function') {
-      debug(utils.logCb('is function'));
+      debug(function() { return 'is function'; });
       sourceMap.sourceRoot = options.sourceRoot(file);
     } else {
-      debug(utils.logCb('from options'));
+      debug(function() { return 'from options'; });
       sourceMap.sourceRoot = options.sourceRoot;
     }
     if (sourceMap.sourceRoot === null) {
-      debug(utils.logCb('undefined'));
+      debug(function() { return 'undefined'; });
       sourceMap.sourceRoot = undefined;
     }
   }
 
   function mapSources(file) {
-    var debug = makeDebug(PLUGIN_NAME + ':write:internals:mapSources');
+    var debug = rootDebug.spawn('mapSources');
 
     //NOTE: make sure source mapping happens after content has been loaded
     if (options.mapSources && typeof options.mapSources === 'function') {
-      debug(utils.logCb('**Option is deprecated, update to use sourcemap.mapSources stream**'));
-      debug(utils.logCb('function'));
+      debug(function() { return '**Option is deprecated, update to use sourcemap.mapSources stream**'; });
+      debug(function() { return 'function'; });
 
       file.sourceMap.sources = file.sourceMap.sources.map(function (filePath) {
         return options.mapSources(filePath, file);
@@ -45,22 +43,22 @@ module.exports = function(destPath, options) {
       return;
     }
 
-    debug(utils.logCb("file.path: " + file.path));
-    debug(utils.logCb("file.cwd: " + file.cwd));
-    debug(utils.logCb("file.base: " + file.base));
+    debug(function() { return "file.path: " + file.path; });
+    debug(function() { return "file.cwd: " + file.cwd; });
+    debug(function() { return "file.base: " + file.base; });
 
     file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
       // keep the references files like ../node_modules within the sourceRoot
-      debug(utils.logCb("filePath: " + filePath));
+      debug(function() { return "filePath: " + filePath; });
 
       if (options.mapSourcesAbsolute === true){
-        debug(utils.logCb('mapSourcesAbsolute'));
+        debug(function() { return 'mapSourcesAbsolute'; });
 
         if (!file.dirname){
-          debug(utils.logCb('!file.dirname'));
+          debug(function() { return '!file.dirname'; });
           filePath = path.join(file.base, filePath).replace(file.cwd, '');
         } else {
-            debug(utils.logCb('file.dirname: ' + file.dirname));
+            debug(function() { return 'file.dirname: ' + file.dirname; });
             filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
         }
       }
@@ -69,7 +67,7 @@ module.exports = function(destPath, options) {
   }
 
   function loadContent(file) {
-    var debug = makeDebug(PLUGIN_NAME + ':write:internals:loadContent');
+    var debug = rootDebug.spawn('loadContent');
 
     var sourceMap = file.sourceMap;
     if (options.includeContent) {
@@ -80,11 +78,11 @@ module.exports = function(destPath, options) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
-            debug(utils.logCb('No source content for "' + sourceMap.sources[i] + '". Loading from file.'));
+            debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
             sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
           }
           catch (e) {
-            debug(utils.logCb('source file not found: ' + sourcePath));
+            debug('source file not found: ' + sourcePath);
           }
         }
       }
@@ -94,7 +92,7 @@ module.exports = function(destPath, options) {
   }
 
   function  mapDestPath(file, stream) {
-    var debug = makeDebug(PLUGIN_NAME + ':write:internals:mapDestPath');
+    var debug = rootDebug.spawn('mapDestPath');
     var sourceMap = file.sourceMap;
 
     var comment,
@@ -157,11 +155,11 @@ module.exports = function(destPath, options) {
         }
         sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
-      debug(utils.logCb("destPath comment"));
+      debug(function() { return "destPath comment"; });
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
       if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
-        debug(utils.logCb("options.sourceMappingURL comment"));
+        debug(function() { return "options.sourceMappingURL comment"; });
         comment = commentFormatter(options.sourceMappingURL(file));
       }
     }
