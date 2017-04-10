@@ -134,6 +134,23 @@ gulp.task('javascript', function() {
 });
 ```
 
+#### Generate Identity Sourcemap
+
+The exported `identityMap` method allows you to generate a full valid source map encoding no changes (slower, only for Javascript and CSS) instead of the default empty source map (no mappings, fast). __Use this option if you get missing or incorrect mappings, e.g. when debugging.__
+
+Example:
+```javascript
+gulp.task('javascript', function() {
+  var stream = gulp.src('src/**/*.js')
+    .pipe(sourcemaps.init())
+      // An identity sourcemap will be generated at this step
+      .pipe(sourcemaps.identityMap())
+      .pipe(plugin1())
+      .pipe(plugin2())
+    .pipe(sourcemaps.write('../maps')
+    .pipe(gulp.dest('public/scripts'));
+});
+```
 
 
 ### Init Options
@@ -148,9 +165,7 @@ gulp.task('javascript', function() {
 
 - `identityMap`
 
-  Set to true to generate a full valid source map encoding no changes (slower, only
-  for Javascript and CSS) instead of the default empty source map (no mappings, fast).
-  Use this option if you get missing or incorrect mappings, e.g. when debugging.
+  __This option is deprecated. Upgrade to use our [`sourcemap.identityMap`](#generate-identity-sourcemap) API.__
 
 
 ### Write Options

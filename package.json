@@ -23,6 +23,7 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
+    "@gulp-sourcemaps/identity-map": "1.X",
     "@gulp-sourcemaps/map-sources": "1.X",
     "acorn": "4.X",
     "convert-source-map": "1.X",
