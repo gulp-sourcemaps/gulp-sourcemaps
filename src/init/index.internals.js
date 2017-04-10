@@ -36,6 +36,15 @@ module.exports = function(options, file, fileContent) {
     // fix source paths and sourceContent for imported source map
     if (sources.map) {
       sources.map.sourcesContent = sources.map.sourcesContent || [];
+      
+      if(sources.map.sourceRoot) {
+        sources.map.sources.forEach(function(source, i) {
+          sources.map.sources[i] = path.join(sources.map.sourceRoot, source);
+        });
+
+        sources.map.sourceRoot = undefined;
+      }
+
       sources.map.sources.forEach(function(source, i) {
         if (source.match(urlRegex)) {
           sources.map.sourcesContent[i] = sources.map.sourcesContent[i] || null;
