@@ -46,6 +46,7 @@ function init(options) {
     }
 
     if (!sourceMap && options.identityMap) {
+      debug(function() { return '**identityMap option is deprecated, update to use sourcemap.identityMap stream**'; });
       debug(function() {
         return 'identityMap';
       });

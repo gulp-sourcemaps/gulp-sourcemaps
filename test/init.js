@@ -4,6 +4,11 @@ var test = require('tape');
 //BEGIN PRE-HOOK of debug
 var yargs = require('yargs').argv;
 var debug = require('debug-fabulous')();
+var miss = require('mississippi');
+
+var from = miss.from;
+var pipe = miss.pipe;
+var concat = miss.concat;
 
 if (!yargs.ignoreLogTests){
   debug.save('gulp-sourcemaps:*');
@@ -151,6 +156,66 @@ test('init: should add a valid source map for css if wished', function(t) {
     t.fail('emitted error');
     t.end();
   }).write(makeFileCSS());
+});
+
+test('init: can replace `identityMap` option with sourcemap.identityMap stream (js file)', function(t) {
+  var file = makeFile();
+
+  function assert(files) {
+    t.ok(files[0], 'should pass something through');
+    t.ok(files[0] instanceof File, 'should pass a vinyl file through');
+    t.ok(files[0].sourceMap, 'should add a source map object');
+    t.equal(String(files[0].sourceMap.version), '3', 'should have version 3');
+    t.equal(files[0].sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
+    t.equal(files[0].sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
+    t.deepEqual(files[0].sourceMap.names, [
+      'helloWorld', 'console', 'log'
+    ], 'should add correct names');
+    t.equal(files[0].sourceMap.mappings, 'AAAA,YAAY;;AAEZ,SAASA,UAAU,CAAC,EAAE;IAClBC,OAAO,CAACC,GAAG,CAAC,cAAc,CAAC;AAC/B', 'should add correct mappings');
+  }
+
+  pipe([
+    from.obj([file]),
+    sourcemaps.init(),
+    sourcemaps.identityMap(),
+    sourcemaps.write(),
+    concat(assert)
+  ], function(err) {
+    if (err) {
+      t.fail('emitted error');
+    }
+
+    t.end();
+  });
+});
+
+test('init: can replace `identityMap` option with sourcemap.identityMap stream (css file)', function(t) {
+  var file = makeFileCSS();
+
+  function assert(files) {
+    t.ok(files[0], 'should pass something through');
+    t.ok(files[0] instanceof File, 'should pass a vinyl file through');
+    t.ok(files[0].sourceMap, 'should add a source map object');
+    t.equal(String(files[0].sourceMap.version), '3', 'should have version 3');
+    t.equal(files[0].sourceMap.sources[0], 'test.css', 'should add file to sources');
+    t.equal(files[0].sourceMap.sourcesContent[0], sourceContentCSS, 'should add file content to sourcesContent');
+    t.deepEqual(files[0].sourceMap.names, [], 'should add correct names');
+    t.equal(files[0].sourceMap.mappings, 'CAAC;GACE;GACA', 'should add correct mappings');
+  }
+
+  pipe([
+    from.obj([file]),
+    sourcemaps.init(),
+    sourcemaps.identityMap(),
+    sourcemaps.write(),
+    concat(assert)
+  ], function(err) {
+    if (err) {
+      t.fail('emitted error');
+    }
+
+    t.end();
+  });
 });
 
 test('init: should import an existing inline source map', function(t) {
