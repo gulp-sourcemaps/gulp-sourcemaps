@@ -26,7 +26,7 @@ gulp.task('javascript', function() {
 });
 ```
 
-All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to have support for `gulp-sourcemaps`. You can find a list of such plugins in the [wiki](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
+All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to have support for `gulp-sourcemaps`. You can find a list of such plugins in the [wiki](https://github.com/gulp-sourcemaps/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
 
 
 #### Write external source map files
@@ -311,9 +311,9 @@ gulp.task('javascript', function() {
 
   - Generate a source map for the transformation the plugin is applying
   - **Important**: Make sure the paths in the generated source map (`file` and `sources`) are relative to `file.base` (e.g. use `file.relative`).
-  - Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/floridoo/vinyl-sourcemaps-apply).
+  - Apply this source map to the vinyl `file`. E.g. by using [vinyl-sourcemaps-apply](https://github.com/gulp-sourcemaps/vinyl-sourcemaps-apply).
     This combines the source map of this plugin with the source maps coming from plugins further up the chain.
-  - Add your plugin to the [wiki page](https://github.com/floridoo/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support)
+  - Add your plugin to the [wiki page](https://github.com/gulp-sourcemaps/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support)
 
   #### Example:
 
@@ -386,7 +386,7 @@ For a few examples of debug you could use:
 
 [npm-image]: https://img.shields.io/npm/v/gulp-sourcemaps.svg
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
-[travis-image]: https://img.shields.io/travis/floridoo/gulp-sourcemaps.svg
-[travis-url]: https://travis-ci.org/floridoo/gulp-sourcemaps
-[coveralls-image]: https://img.shields.io/coveralls/floridoo/gulp-sourcemaps.svg
-[coveralls-url]: https://coveralls.io/r/floridoo/gulp-sourcemaps?branch=master
+[travis-image]: https://img.shields.io/travis/gulp-sourcemaps/gulp-sourcemaps.svg
+[travis-url]: https://travis-ci.org/gulp-sourcemaps/gulp-sourcemaps
+[coveralls-image]: https://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps.svg
+[coveralls-url]: https://coveralls.io/r/gulp-sourcemaps/gulp-sourcemaps?branch=master
