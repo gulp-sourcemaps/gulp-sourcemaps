@@ -132,7 +132,9 @@ test('combined: inline concatenated file', function(t) {
   });
 });
 
-test('combined: less: inline concatenated file', {timeout: 3000}, function(t) { //note ~1000 ms is fine locally, travis needs more
+test('combined: less: inline concatenated file', {timeout: 6000}, function(t) { //note ~1000 ms is fine locally, travis needs more
+  // note: on travis node 0.12 seems to have the brunt of the slowness
+  
   // proves that gulp-less compilation is not slow
   // https://github.com/floridoo/gulp-sourcemaps/issues/215
 
