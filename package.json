@@ -6,7 +6,7 @@
   "repository": "git://github.com/gulp-sourcemaps/gulp-sourcemaps.git",
   "main": "index.js",
   "scripts": {
-    "lint": "jshint ./src/**/*.js test/*.js",
+    "lint": "jshint ./src/**/*.js ./test/*.js",
     "test": "npm run lint && faucet test/*.js $@",
     "tape": "tape",
     "cover": "istanbul cover --dir reports/coverage tape \"test/*.js\"",
@@ -34,7 +34,7 @@
     "source-map": "0.X",
     "strip-bom-string": "1.X",
     "through2": "2.X",
-    "vinyl": "1.X"
+    "vinyl": "^2.1.0"
   },
   "devDependencies": {
     "bootstrap": "3.3.7",
