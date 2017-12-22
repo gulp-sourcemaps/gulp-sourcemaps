@@ -34,7 +34,7 @@
     "source-map": "0.X",
     "strip-bom-string": "1.X",
     "through2": "2.X",
-    "vinyl": "^2.1.0"
+    "vinyl": "2.X"
   },
   "devDependencies": {
     "bootstrap": "3.3.7",
