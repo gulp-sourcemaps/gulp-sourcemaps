@@ -53,7 +53,7 @@
     "mississippi": "1.X",
     "object-assign": "4.X",
     "tape": "4.X",
-    "yargs": "10.X"
+    "yargs": "7.X"
   },
   "files": [
     "index.js",
