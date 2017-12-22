@@ -33,8 +33,7 @@
     "graceful-fs": "4.X",
     "source-map": "0.X",
     "strip-bom-string": "1.X",
-    "through2": "2.X",
-    "vinyl": "2.X"
+    "through2": "2.X"
   },
   "devDependencies": {
     "bootstrap": "3.3.7",
@@ -53,6 +52,7 @@
     "mississippi": "1.X",
     "object-assign": "4.X",
     "tape": "4.X",
+    "vinyl": "2.X",
     "yargs": "7.X"
   },
   "files": [
