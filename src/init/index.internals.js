@@ -116,7 +116,7 @@ module.exports = function(options, file, fileContent) {
       sources.map = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
     } catch (e) {
       debug(function() { 
-        return 'warn: external source map not found or invalid: ' + mapFile + (e.message ? ', error: ' + e.message : '');
+        return 'warn: external source map not found or invalid: ' + mapFile + ' ' + (e.message || '');
       });
     }
   }
