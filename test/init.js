@@ -468,4 +468,28 @@ if (!yargs.ignoreLogTests){
     }).write(file);
 
   });
+
+  test('init: should output an error message if debug option is set, loadMaps: true, and source map file not found', function(t) {
+    var file = makeFile();
+    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=not-existent.js.map');
+
+    var history = [];
+    console.log('HOOKING');
+    var unhook = hookStd.stderr(function(s) {
+      history.push(s);
+    });
+    var pipeline = sourcemaps.init({loadMaps: true});
+
+    pipeline.on('data', function() {
+      unhook();
+      var hasRegex =  function(regex){
+        return function(s){
+          return regex.test(s);
+        };
+      };
+      console.log(history);
+      t.ok(history.some(hasRegex(/warn: external source map not found or invalid: /g)), 'should warn about missing source map file');
+      t.end();
+    }).write(file);
+  });
 }
