@@ -385,7 +385,7 @@ gulp.task('javascript', function() {
 
 ### Debugging
 
-All debugging output relys on [visionmedia/debug](https://github.com/visionmedia/debug). Fllow the directions to set the
+All debugging output relys on [visionmedia/debug](https://github.com/visionmedia/debug). Flow the directions to set the
 environment variable `$DEBUG`.
 
 For a few examples of debug you could use:
