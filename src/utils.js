@@ -63,6 +63,9 @@ var getInlinePreExisting = function(fileContent){
   }
 };
 
+var exceptionToString = function (exception) {
+  return exception.message || '';
+};
 
 module.exports = {
   unixStylePath: unixStylePath,
@@ -70,5 +73,6 @@ module.exports = {
   urlRegex: urlRegex,
   sourceMapUrlRegEx: sourceMapUrlRegEx,
   getCommentFormatter: getCommentFormatter,
-  getInlinePreExisting: getInlinePreExisting
+  getInlinePreExisting: getInlinePreExisting,
+  exceptionToString: exceptionToString
 };

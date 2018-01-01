@@ -8,6 +8,7 @@ var urlRegex = utils.urlRegex;
 var fs = require('graceful-fs');
 var path = require('path');
 var unixStylePath = utils.unixStylePath;
+var exceptionToString = utils.exceptionToString;
 
 module.exports = function(options, file, fileContent) {
 
@@ -116,7 +117,7 @@ module.exports = function(options, file, fileContent) {
       sources.map = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
     } catch (e) {
       debug(function() { 
-        return 'warn: external source map not found or invalid: ' + mapFile + ' ' + (e.message || '');
+        return 'warn: external source map not found or invalid: ' + mapFile + ' ' + exceptionToString(e);
       });
     }
   }
