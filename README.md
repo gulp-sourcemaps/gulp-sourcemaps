@@ -242,7 +242,7 @@ gulp.task('javascript', function() {
 
 - `destPath`
 
-  Set the destination path (the same you pass to `gulp.dest()`). If the source map destination path is not a subpath of the destination path, this is needed to get the correct path in the `file` property of the source map.
+  Set the destination path (the same you pass to `gulp.dest()`). If the source map destination path is not a sub path of the destination path, this is needed to get the correct path in the `file` property of the source map.
   In addition, it allows to automatically set a relative `sourceRoot` if none is set explicitly.
 
 - `sourceMappingURLPrefix`
@@ -362,7 +362,7 @@ gulp.task('javascript', function() {
   };
   ```
 
-  - **Very sourcemaps is working**
+  - **Verify sourcemaps are working**
 
     See example below or refer to [test/write.js](./test/write.js)
 
@@ -385,8 +385,8 @@ gulp.task('javascript', function() {
 
 ### Debugging
 
-All debugging output relys on [visionmedia/debug](https://github.com/visionmedia/debug). Fllow the directions to set the
-environment variable ``$DEBUG`.
+All debugging output relies on [visionmedia/debug](https://github.com/visionmedia/debug). Follow the directions to set the
+environment variable `$DEBUG`.
 
 For a few examples of debug you could use:
 
