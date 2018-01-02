@@ -8,6 +8,7 @@ var urlRegex = utils.urlRegex;
 var fs = require('graceful-fs');
 var path = require('path');
 var unixStylePath = utils.unixStylePath;
+var exceptionToString = utils.exceptionToString;
 
 module.exports = function(options, file, fileContent) {
 
@@ -94,6 +95,8 @@ module.exports = function(options, file, fileContent) {
   }
 
   function _getFileSources(sources) {
+    var debug = rootDebug.spawn('init:internals:loadMaps:_getFileSources');
+
     // look for source map comment referencing a source map file
     var mapComment = convert.mapFileCommentRegex.exec(sources.content);
 
@@ -112,7 +115,11 @@ module.exports = function(options, file, fileContent) {
 
     try {
       sources.map = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
-    } catch (e) {} //should we really swallow this error?
+    } catch (e) {
+      debug(function() { 
+        return 'warn: external source map not found or invalid: ' + mapFile + ' ' + exceptionToString(e);
+      });
+    }
   }
 
   return {
