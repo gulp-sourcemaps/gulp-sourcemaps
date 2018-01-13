@@ -41,7 +41,7 @@ module.exports = function(options, file, fileContent) {
           sources.map.sourcesContent[i] = sources.map.sourcesContent[i] || null;
           return;
         }
-        var absPath = path.resolve(sources.path, source);
+        var absPath = options.loadMaps ? path.resolve(sources.path, path.basename(source)) : path.resolve(sources.path, source);
         sources.map.sources[i] = unixStylePath(path.relative(file.base, absPath));
 
         if (!sources.map.sourcesContent[i]) {
