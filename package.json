@@ -30,7 +30,7 @@
     "debug-fabulous": "0.0.X",
     "detect-newline": "2.X",
     "graceful-fs": "4.X",
-    "source-map": "0.X",
+    "source-map": "~0.6.0",
     "strip-bom": "2.X",
     "through2": "2.X",
     "vinyl": "1.X"
