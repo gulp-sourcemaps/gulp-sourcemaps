@@ -13,7 +13,7 @@ var concat = miss.concat;
 
 // thank you https://stackoverflow.com/questions/23520232/compose-two-transform-streams-in-node-js#answer-24198606
 function compose() {
-  var args = Array.from(arguments);
+  var args = [].slice.call(arguments);
 
   args.forEach(function (s, i){
     if(i >= args.length - 1) return;
