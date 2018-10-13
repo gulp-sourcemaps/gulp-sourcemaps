@@ -5,30 +5,11 @@ var test = require('tape');
 var yargs = require('yargs').argv;
 var debug = require('debug-fabulous')();
 var miss = require('mississippi');
-// var through = require('through2');
+var compose = require('@gulp-sourcemaps/compose-transforms');
 
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
-
-// thank you https://stackoverflow.com/questions/23520232/compose-two-transform-streams-in-node-js#answer-24198606
-function compose() {
-  var args = [].slice.call(arguments);
-
-  args.forEach(function (s, i){
-    if(i >= args.length - 1) return;
-    var sNext = args[i+1];
-    s.pipe(sNext);
-    s.pipe = function (dest) {
-      return sNext.pipe(dest);
-    };
-    s.unpipe = function (dest) {
-        return sNext.unpipe(dest);
-    };
-  });
-
-  return args[0];
-}
 
 if (!yargs.ignoreLogTests){
   debug.save('gulp-sourcemaps:*');

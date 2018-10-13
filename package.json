@@ -34,6 +34,7 @@
     "through2": "2.X"
   },
   "devDependencies": {
+    "@gulp-sourcemaps/compose-transforms": "git://github.com/gulp-sourcemaps/compose-transforms.git#f2f79610f2deb8b0f896201f3e1092a9cdcaeab1",
     "coveralls": "2.X",
     "faucet": "0.0.X",
     "gulp": "3.X",
