@@ -5,10 +5,30 @@ var test = require('tape');
 var yargs = require('yargs').argv;
 var debug = require('debug-fabulous')();
 var miss = require('mississippi');
+// var through = require('through2');
 
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
+
+// thank you https://stackoverflow.com/questions/23520232/compose-two-transform-streams-in-node-js#answer-24198606
+function compose() {
+  var args = Array.from(arguments);
+
+  args.forEach(function (s, i){
+    if(i >= args.length - 1) return;
+    var sNext = args[i+1];
+    s.pipe(sNext);
+    s.pipe = function (dest) {
+      return sNext.pipe(dest);
+    };
+    s.unpipe = function (dest) {
+        return sNext.unpipe(dest);
+    };
+  });
+
+  return args[0];
+}
 
 if (!yargs.ignoreLogTests){
   debug.save('gulp-sourcemaps:*');
@@ -104,7 +124,9 @@ test('init: should emit an error if file content is a stream', function(t) {
 
 test('init: should add an empty source map', function(t) {
   var pipeline = sourcemaps.init();
-  pipeline.on('data', function(data) {
+
+  pipeline
+  .on('data', function(data) {
     t.ok(data, 'should pass something through');
     t.ok(data instanceof File, 'should pass a vinyl file through');
     t.ok(data.sourceMap, 'should add a source map object');
@@ -114,14 +136,15 @@ test('init: should add an empty source map', function(t) {
     t.deepEqual(data.sourceMap.names, [], 'should add empty names');
     t.equal(data.sourceMap.mappings, '', 'should add empty mappings');
     t.end();
-  }).on('error', function() {
+  }).on('error', function(error) {
+    console.error(error);
     t.fail('emitted error');
     t.end();
   }).write(makeFile());
 });
 
 test('init: should add a valid source map if wished', function(t) {
-  var pipeline = sourcemaps.init({identityMap: true});
+  var pipeline = compose(sourcemaps.init(), sourcemaps.identityMap());
   pipeline.on('data', function(data) {
     t.ok(data, 'should pass something through');
     t.ok(data instanceof File, 'should pass a vinyl file through');
@@ -141,7 +164,7 @@ test('init: should add a valid source map if wished', function(t) {
 });
 
 test('init: should add a valid source map for css if wished', function(t) {
-  var pipeline = sourcemaps.init({identityMap: true});
+  var pipeline = compose(sourcemaps.init(), sourcemaps.identityMap());
   pipeline.on('data', function(data) {
     t.ok(data, 'should pass something through');
     t.ok(data instanceof File, 'should pass a vinyl file through');
