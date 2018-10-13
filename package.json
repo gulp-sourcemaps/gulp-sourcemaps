@@ -34,7 +34,7 @@
     "through2": "2.X"
   },
   "devDependencies": {
-    "bootstrap": "3.3.7",
+    "bootstrap": "3.X",
     "coveralls": "2.X",
     "faucet": "0.0.X",
     "gulp": "3.X",
