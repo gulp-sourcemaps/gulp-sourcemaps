@@ -25,7 +25,6 @@
   "dependencies": {
     "@gulp-sourcemaps/identity-map": "1.X",
     "@gulp-sourcemaps/map-sources": "1.X",
-    "autoprefixer": "^9.1.5",
     "convert-source-map": "1.X",
     "debug-fabulous": "1.X",
     "detect-newline": "2.X",
