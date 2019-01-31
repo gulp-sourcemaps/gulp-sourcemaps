@@ -24,29 +24,27 @@ var getCommentFormatter = function (file) {
   var extension = file.relative.split('.').pop(),
     fileContents =  file.contents.toString(),
     newline =  detectNewline.graceful(fileContents || ''),
+    newlinePre =  newline,
     commentFormatter = function(url) {
       return '';
     };
 
   if (file.sourceMap.preExistingComment){
     debug(function() { return 'preExistingComment commentFormatter'; });
-    commentFormatter = function(url) {
-      return "//# sourceMappingURL=" + url + newline;
-    };
-    return commentFormatter;
+    newlinePre = '';
   }
 
   switch (extension) {
     case 'css':
       debug(function() { return 'css commentFormatter';});
       commentFormatter = function(url) {
-        return newline + "/*# sourceMappingURL=" + url + " */" + newline;
+        return newlinePre + "/*# sourceMappingURL=" + url + " */" + newline;
       };
       break;
     case 'js':
       debug(function() { return 'js commentFormatter'; });
       commentFormatter = function(url) {
-        return newline + "//# sourceMappingURL=" + url + newline;
+        return newlinePre + "//# sourceMappingURL=" + url + newline;
       };
       break;
     default:
