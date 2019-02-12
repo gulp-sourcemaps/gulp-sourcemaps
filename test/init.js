@@ -18,62 +18,9 @@ if (!yargs.ignoreLogTests){
 var sourcemaps = require('..');
 var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
-var path = require('path');
 var fs = require('fs');
 var hookStd = require('hook-std');
-
-var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
-var sourceContentCSS = fs.readFileSync(path.join(__dirname, 'assets/test.css')).toString();
-
-function makeFile() {
-  return new File({
-    cwd: __dirname,
-    base: path.join(__dirname, 'assets'),
-    path: path.join(__dirname, 'assets', 'helloworld.js'),
-    contents: new Buffer(sourceContent)
-  });
-}
-
-function makeNullFile() {
-  var junkBuffer = new Buffer([]);
-  junkBuffer.toString = function() {
-    return null;
-  };
-
-  return new File({
-    cwd: __dirname,
-    base: path.join(__dirname, 'assets'),
-    path: path.join(__dirname, 'assets', 'helloworld.js'),
-    contents: junkBuffer
-  });
-}
-
-function makeStreamFile() {
-  return new File({
-    cwd: __dirname,
-    base: path.join(__dirname, 'assets'),
-    path: path.join(__dirname, 'assets', 'helloworld.js'),
-    contents: new ReadableStream()
-  });
-}
-
-function makeFileWithInlineSourceMap() {
-  return new File({
-    cwd: __dirname,
-    base: path.join(__dirname, 'assets'),
-    path: path.join(__dirname, 'assets', 'all.js'),
-    contents: new Buffer('console.log("line 1.1"),console.log("line 1.2"),console.log("line 2.1"),console.log("line 2.2");\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYWxsLmpzIiwic291cmNlcyI6WyJ0ZXN0MS5qcyIsInRlc3QyLmpzIl0sIm5hbWVzIjpbImNvbnNvbGUiLCJsb2ciXSwibWFwcGluZ3MiOiJBQUFBQSxRQUFBQyxJQUFBLFlBQ0FELFFBQUFDLElBQUEsWUNEQUQsUUFBQUMsSUFBQSxZQUNBRCxRQUFBQyxJQUFBIiwic291cmNlc0NvbnRlbnQiOlsiY29uc29sZS5sb2coJ2xpbmUgMS4xJyk7XG5jb25zb2xlLmxvZygnbGluZSAxLjInKTtcbiIsImNvbnNvbGUubG9nKCdsaW5lIDIuMScpO1xuY29uc29sZS5sb2coJ2xpbmUgMi4yJyk7Il0sInNvdXJjZVJvb3QiOiIvc291cmNlLyJ9')
-  });
-}
-
-function makeFileCSS() {
-  return new File({
-    cwd: __dirname,
-    base: path.join(__dirname, 'assets'),
-    path: path.join(__dirname, 'assets', 'test.css'),
-    contents: new Buffer(sourceContentCSS)
-  });
-}
+var helpers = require('./testHelpers');
 
 test('init: should pass through when file is null', function(t) {
   // end inner conflict
@@ -99,7 +46,7 @@ test('init: should emit an error if file content is a stream', function(t) {
   }).on('error', function() {
     t.ok('should emit an error');
     t.end();
-  }).write(makeStreamFile());
+  }).write(helpers.makeStreamFile());
 });
 
 test('init: should add an empty source map', function(t) {
@@ -110,14 +57,14 @@ test('init: should add an empty source map', function(t) {
     t.ok(data.sourceMap, 'should add a source map object');
     t.equal(String(data.sourceMap.version), '3', 'should have version 3');
     t.equal(data.sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
-    t.equal(data.sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
+    t.equal(data.sourceMap.sourcesContent[0], helpers.sourceContent, 'should add file content to sourcesContent');
     t.deepEqual(data.sourceMap.names, [], 'should add empty names');
     t.equal(data.sourceMap.mappings, '', 'should add empty mappings');
     t.end();
   }).on('error', function() {
     t.fail('emitted error');
     t.end();
-  }).write(makeFile());
+  }).write(helpers.makeFile());
 });
 
 test('init: should add a valid source map if wished', function(t) {
@@ -128,7 +75,7 @@ test('init: should add a valid source map if wished', function(t) {
     t.ok(data.sourceMap, 'should add a source map object');
     t.equal(String(data.sourceMap.version), '3', 'should have version 3');
     t.equal(data.sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
-    t.equal(data.sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
+    t.equal(data.sourceMap.sourcesContent[0], helpers.sourceContent, 'should add file content to sourcesContent');
     t.deepEqual(data.sourceMap.names, [
       'helloWorld', 'console', 'log'
     ], 'should add correct names');
@@ -137,7 +84,7 @@ test('init: should add a valid source map if wished', function(t) {
   }).on('error', function() {
     t.fail('emitted error');
     t.end();
-  }).write(makeFile());
+  }).write(helpers.makeFile());
 });
 
 test('init: should add a valid source map for css if wished', function(t) {
@@ -148,18 +95,18 @@ test('init: should add a valid source map for css if wished', function(t) {
     t.ok(data.sourceMap, 'should add a source map object');
     t.equal(String(data.sourceMap.version), '3', 'should have version 3');
     t.equal(data.sourceMap.sources[0], 'test.css', 'should add file to sources');
-    t.equal(data.sourceMap.sourcesContent[0], sourceContentCSS, 'should add file content to sourcesContent');
+    t.equal(data.sourceMap.sourcesContent[0], helpers.sourceContentCSS, 'should add file content to sourcesContent');
     t.deepEqual(data.sourceMap.names, [], 'should add correct names');
     t.equal(data.sourceMap.mappings, 'CAAC;GACE;GACA', 'should add correct mappings');
     t.end();
   }).on('error', function() {
     t.fail('emitted error');
     t.end();
-  }).write(makeFileCSS());
+  }).write(helpers.makeFileCSS());
 });
 
 test('init: can replace `identityMap` option with sourcemap.identityMap stream (js file)', function(t) {
-  var file = makeFile();
+  var file = helpers.makeFile();
 
   function assert(files) {
     t.ok(files[0], 'should pass something through');
@@ -167,7 +114,7 @@ test('init: can replace `identityMap` option with sourcemap.identityMap stream (
     t.ok(files[0].sourceMap, 'should add a source map object');
     t.equal(String(files[0].sourceMap.version), '3', 'should have version 3');
     t.equal(files[0].sourceMap.sources[0], 'helloworld.js', 'should add file to sources');
-    t.equal(files[0].sourceMap.sourcesContent[0], sourceContent, 'should add file content to sourcesContent');
+    t.equal(files[0].sourceMap.sourcesContent[0], helpers.sourceContent, 'should add file content to sourcesContent');
     t.deepEqual(files[0].sourceMap.names, [
       'helloWorld', 'console', 'log'
     ], 'should add correct names');
@@ -190,7 +137,7 @@ test('init: can replace `identityMap` option with sourcemap.identityMap stream (
 });
 
 test('init: can replace `identityMap` option with sourcemap.identityMap stream (css file)', function(t) {
-  var file = makeFileCSS();
+  var file = helpers.makeFileCSS();
 
   function assert(files) {
     t.ok(files[0], 'should pass something through');
@@ -198,7 +145,7 @@ test('init: can replace `identityMap` option with sourcemap.identityMap stream (
     t.ok(files[0].sourceMap, 'should add a source map object');
     t.equal(String(files[0].sourceMap.version), '3', 'should have version 3');
     t.equal(files[0].sourceMap.sources[0], 'test.css', 'should add file to sources');
-    t.equal(files[0].sourceMap.sourcesContent[0], sourceContentCSS, 'should add file content to sourcesContent');
+    t.equal(files[0].sourceMap.sourcesContent[0], helpers.sourceContentCSS, 'should add file content to sourcesContent');
     t.deepEqual(files[0].sourceMap.names, [], 'should add correct names');
     t.equal(files[0].sourceMap.mappings, 'CAAC;GACE;GACA', 'should add correct mappings');
   }
@@ -237,12 +184,12 @@ test('init: should import an existing inline source map', function(t) {
   }).on('error', function() {
     t.fail('emitted error');
     t.end();
-  }).write(makeFileWithInlineSourceMap());
+  }).write(helpers.makeFileWithInlineSourceMap());
 });
 
 test('init: should load external source map file referenced in comment with the \/\/# syntax', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -255,9 +202,24 @@ test('init: should load external source map file referenced in comment with the 
   }).write(file);
 });
 
+test('init: css: should load external source map file referenced in comment with the \/\/*# syntax', function(t) {
+  var file = helpers.makeFileCSS();
+  file.contents = new Buffer(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
+
+  var pipeline = sourcemaps.init({loadMaps: true});
+  pipeline.on('data', function(data) {
+    t.ok(data.sourceMap, 'should add a source map object');
+    t.equal(String(data.sourceMap.version), '3', 'should have version 3');
+    t.deepEqual(data.sourceMap.sources, ['../test.css'], 'should have right sources');
+    t.deepEqual(data.sourceMap.sourcesContent, ['body {\n  background: #eee;\n  color: #888;\n}\n\n'], 'should have right sourcesContent');
+    t.equal(data.sourceMap.mappings, '', 'should have right mappings');
+    t.end();
+  }).write(file);
+});
+
 test('init: should remove source map comment with the \/\/# syntax', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -266,9 +228,21 @@ test('init: should remove source map comment with the \/\/# syntax', function(t)
   }).write(file);
 });
 
+test('init: css: should remove source map comment with the \/\/*# syntax', function(t) {
+  var file = helpers.makeFileCSS();
+  file.contents = new Buffer(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
+
+  var pipeline = sourcemaps.init({loadMaps: true});
+  pipeline.on('data', function(data) {
+    var actualContents = data.contents.toString();
+    t.notOk(/sourceMappingURL/.test(actualContents), 'should not have sourcemapping');
+    t.end();
+  }).write(file);
+});
+
 test('init: should load external source map file referenced in comment with the \/*# *\/ syntax', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -282,8 +256,8 @@ test('init: should load external source map file referenced in comment with the 
 });
 
 test('init: should remove source map comment with the \/\/# syntax', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -293,7 +267,7 @@ test('init: should remove source map comment with the \/\/# syntax', function(t)
 });
 
 test('init: should load external source map if no source mapping comment', function(t) {
-  var file = makeFile();
+  var file = helpers.makeFile();
   file.path = file.path.replace('helloworld.js', 'helloworld2.js');
 
   var pipeline = sourcemaps.init({loadMaps: true});
@@ -308,8 +282,8 @@ test('init: should load external source map if no source mapping comment', funct
 });
 
 test('init: should load external source map and add sourceContent if missing', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -327,8 +301,8 @@ test('init: should load external source map and add sourceContent if missing', f
 });
 
 test('init: should not throw when source file for sourceContent not found', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -348,7 +322,7 @@ test('init: should not throw when source file for sourceContent not found', func
 // vinyl 2.X breaks this spec, not exactly sure why but it is due to the following commit
 // https://github.com/gulpjs/vinyl/commit/ece4abf212c83aa3e2613c57a4a0fe96171d5755
 test('init: should use unix style paths in sourcemap', function(t) {
-  var file = makeFile();
+  var file = helpers.makeFile();
   file.base = file.cwd;
 
   var pipeline = sourcemaps.init();
@@ -360,8 +334,8 @@ test('init: should use unix style paths in sourcemap', function(t) {
 });
 
 test('init: should use sourceRoot when resolving path to sources', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -380,8 +354,8 @@ test('init: should use sourceRoot when resolving path to sources', function(t) {
 });
 
 test('init: should not load source content if the path is a url', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
+  var file = helpers.makeFile();
+  file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
 
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -405,7 +379,7 @@ test('init: should pass through when file already has a source map', function(t)
     sourcesContent: ['testContent']
   };
 
-  var file = makeFile();
+  var file = helpers.makeFile();
   file.sourceMap = sourceMap;
   var pipeline = sourcemaps.init({loadMaps: true});
   pipeline.on('data', function(data) {
@@ -435,15 +409,15 @@ test('init: handle null contents', function(t) {
   }).on('error', function() {
     t.fail('emitted error');
     t.end();
-  }).write(makeNullFile());
+  }).write(helpers.makeNullFile());
 });
 
 if (!yargs.ignoreLogTests){
   //should always be last as disabling a debug namespace does not work
   test('init: should output an error message if debug option is set and sourceContent is missing', function(t) {
 
-    var file = makeFile();
-    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+    var file = helpers.makeFile();
+    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
 
     var history = [];
     console.log('HOOKING');
@@ -470,8 +444,8 @@ if (!yargs.ignoreLogTests){
   });
 
   test('init: should output an error message if debug option is set, loadMaps: true, and source map file not found', function(t) {
-    var file = makeFile();
-    file.contents = new Buffer(sourceContent + '\n//# sourceMappingURL=not-existent.js.map');
+    var file = helpers.makeFile();
+    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=not-existent.js.map');
 
     var history = [];
     console.log('HOOKING');
