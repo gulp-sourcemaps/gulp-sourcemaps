@@ -17,8 +17,6 @@ if (!yargs.ignoreLogTests){
 //END PRE-HOOK of debug (must be loaded before our main module (sourcemaps))
 var sourcemaps = require('..');
 var File = require('vinyl');
-var ReadableStream = require('stream').Readable;
-var fs = require('fs');
 var hookStd = require('hook-std');
 var helpers = require('./testHelpers');
 
