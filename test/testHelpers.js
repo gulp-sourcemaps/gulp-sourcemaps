@@ -66,11 +66,11 @@ function makeFileCSS() {
 }
 
 module.exports = {
-  sourceContent,
-  sourceContentCSS,
-  makeFile,
-  makeFileCSS,
-  makeNullFile,
-  makeStreamFile,
-  makeFileWithInlineSourceMap
+  sourceContent: sourceContent,
+  sourceContentCSS: sourceContentCSS,
+  makeFile: makeFile,
+  makeFileCSS: makeFileCSS,
+  makeNullFile: makeNullFile,
+  makeStreamFile: makeStreamFile,
+  makeFileWithInlineSourceMap: makeFileWithInlineSourceMap
 };
