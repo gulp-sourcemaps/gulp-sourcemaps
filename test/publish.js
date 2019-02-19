@@ -19,11 +19,9 @@ test('publish: can load a published version', function(t) {
       try {
         // attempt to load a packed / unpacked potential deployed version
         require('../tmp/package/index');
-      }
-      catch (error){
+      } catch (error) {
         t.fail(error);
-      }
-      finally{
+      } finally {
         cleanUp(function() {
           t.end();
         });

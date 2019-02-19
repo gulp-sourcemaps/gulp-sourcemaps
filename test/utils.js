@@ -23,7 +23,7 @@ test('getCommentFormatter: gets a commenter with invalid extension', function(t)
   var commenter = utils.getCommentFormatter({
     relative: 'some.junk',
     contents: "var a = 'hello';",
-    sourceMap: { preExistingComment: true }
+    sourceMap: { preExistingComment: true },
   });
 
   t.true(commenter);

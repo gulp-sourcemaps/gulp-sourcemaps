@@ -1,6 +1,5 @@
 'use strict';
 
-var yargs = require('yargs').argv;
 var test = require('tape');
 var sourcemaps = require('..');
 var File = require('vinyl');
@@ -15,13 +14,15 @@ var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
 
-if (!yargs.ignoreLogTests){
+var ignoreLogTests = process.argv.indexOf('--ignore-log-tests') !== -1;
+
+if (!ignoreLogTests) {
   debug.save('gulp-sourcemaps:*');
   debug.enable(debug.load());
 }
 var assign = require('object-assign');
 var utils = require('../src/utils');
-var convert =  require('convert-source-map');
+var convert = require('convert-source-map');
 
 var sourceContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.js')).toString();
 var mappedContent = fs.readFileSync(path.join(__dirname, 'assets/helloworld.map.js')).toString();
@@ -33,11 +34,12 @@ function makeSourceMap(custom) {
     names: [],
     mappings: '',
     sources: ['helloworld.js'],
-    sourcesContent: [sourceContent]
+    sourcesContent: [sourceContent],
   };
 
-  if (custom)
-    assign(obj,custom);
+  if (custom) {
+    assign(obj, custom);
+  }
 
   return obj;
 }
@@ -51,7 +53,7 @@ function makeFile(custom) {
     cwd: __dirname,
     base: path.join(__dirname, 'assets'),
     path: path.join(__dirname, 'assets', 'helloworld.js'),
-    contents: new Buffer(sourceContent)
+    contents: new Buffer(sourceContent),
   });
   file.sourceMap = makeSourceMap(custom);
   return file;
@@ -62,9 +64,9 @@ function makeMappedFile() {
     cwd: __dirname,
     base: path.join(__dirname, 'assets'),
     path: path.join(__dirname, 'assets', 'helloworld.map.js'),
-    contents: new Buffer(mappedContent)
+    contents: new Buffer(mappedContent),
   });
-  file.sourceMap = makeSourceMap({preExistingComment:utils.getInlinePreExisting(mappedContent)});
+  file.sourceMap = makeSourceMap({ preExistingComment: utils.getInlinePreExisting(mappedContent) });
   return file;
 }
 
@@ -73,7 +75,7 @@ function makeNestedFile() {
     cwd: __dirname,
     base: path.join(__dirname, 'assets'),
     path: path.join(__dirname, 'assets', 'dir1', 'dir2', 'helloworld.js'),
-    contents: new Buffer(sourceContent)
+    contents: new Buffer(sourceContent),
   });
   file.sourceMap = makeSourceMap();
   return file;
@@ -84,7 +86,7 @@ function makeStreamFile() {
     cwd: __dirname,
     base: path.join(__dirname, 'assets'),
     path: path.join(__dirname, 'assets', 'helloworld.js'),
-    contents: new ReadableStream()
+    contents: new ReadableStream(),
   });
   file.sourceMap = {};
   return file;
@@ -185,32 +187,32 @@ test('write: preExistingComment', function(t) {
   var file = makeMappedFile();
   file.contents = new Buffer(convert.removeComments(file.contents.toString()));
 
-  sourcemaps.write({preExistingComment:true})
-  .on('data', function(data) {
-    t.ok(data, 'should pass something through');
-    t.ok(!!data.sourceMap.preExistingComment, 'should mark as preExistingComment');
-    t.equal(
-      String(data.contents),
-      sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n' ,'should add source map as comment');
-    t.end();
-  })
-  .on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  })
-  .write(file);
+  sourcemaps.write({ preExistingComment: true })
+    .on('data', function(data) {
+      t.ok(data, 'should pass something through');
+      t.ok(!!data.sourceMap.preExistingComment, 'should mark as preExistingComment');
+      t.equal(
+        String(data.contents),
+        sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n', 'should add source map as comment');
+      t.end();
+    })
+    .on('error', function() {
+      t.fail('emitted error');
+      t.end();
+    })
+    .write(file);
 });
 
 test('write: should write external map files', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', {destPath: 'dist'});
+  var pipeline = sourcemaps.write('../maps', { destPath: 'dist' });
   var fileCount = 0;
   var outFiles = [];
   var sourceMap;
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/helloworld.js')) {
           sourceMap = data.sourceMap;
@@ -222,13 +224,13 @@ test('write: should write external map files', function(t) {
           t.ok(data instanceof File, 'should pass a vinyl file through');
           t.equal(data.path, path.join(__dirname, 'maps/helloworld.js.map'));
           t.deepEqual(JSON.parse(data.contents), sourceMap, 'should have the file\'s source map as content');
-          t.equal(data.stat.isFile(), true, "should have correct stats");
-          t.equal(data.stat.isDirectory(), false, "should have correct stats");
-          t.equal(data.stat.isBlockDevice(), false, "should have correct stats");
-          t.equal(data.stat.isCharacterDevice(), false, "should have correct stats");
-          t.equal(data.stat.isSymbolicLink(), false, "should have correct stats");
-          t.equal(data.stat.isFIFO(), false, "should have correct stats");
-          t.equal(data.stat.isSocket(), false, "should have correct stats");
+          t.equal(data.stat.isFile(), true, 'should have correct stats');
+          t.equal(data.stat.isDirectory(), false, 'should have correct stats');
+          t.equal(data.stat.isBlockDevice(), false, 'should have correct stats');
+          t.equal(data.stat.isCharacterDevice(), false, 'should have correct stats');
+          t.equal(data.stat.isSymbolicLink(), false, 'should have correct stats');
+          t.equal(data.stat.isFIFO(), false, 'should have correct stats');
+          t.equal(data.stat.isSocket(), false, 'should have correct stats');
         }
       });
       t.end();
@@ -240,28 +242,28 @@ test('write: should write external map files', function(t) {
 });
 
 test('write:clone - should keep original file history', function(t) {
-    var file = makeFile();
-    var pipeline = sourcemaps.write('../maps', {destPath: 'dist'});
-    var outFiles = [];
-    var fileCount = 0;
-    pipeline
-        .on('data', function(data) {
-            outFiles.push(data);
-            fileCount++;
-            if (fileCount == 2) {
-                outFiles.reverse().map(function (data) {
-                    if (data.path === path.join(__dirname, 'maps/helloworld.js.map')) {
-                        t.equal(data.history[0], path.join(__dirname, 'assets', 'helloworld.js'), 'should keep file history');
-                    }
-                });
-                t.end();
-            }
-        })
-        .on('error', function() {
-            t.fail('emitted error');
-            t.end();
-        })
-        .write(file);
+  var file = makeFile();
+  var pipeline = sourcemaps.write('../maps', { destPath: 'dist' });
+  var outFiles = [];
+  var fileCount = 0;
+  pipeline
+    .on('data', function(data) {
+      outFiles.push(data);
+      fileCount++;
+      if (fileCount === 2) {
+        outFiles.reverse().map(function(data) {
+          if (data.path === path.join(__dirname, 'maps/helloworld.js.map')) {
+            t.equal(data.history[0], path.join(__dirname, 'assets', 'helloworld.js'), 'should keep file history');
+          }
+        });
+        t.end();
+      }
+    })
+    .on('error', function() {
+      t.fail('emitted error');
+      t.end();
+    })
+    .write(file);
 });
 
 test('write: should allow to rename map file', function(t) {
@@ -270,7 +272,7 @@ test('write: should allow to rename map file', function(t) {
     mapFile: function(mapFile) {
       return mapFile.replace('.js.map', '.map');
     },
-    destPath: 'dist'
+    destPath: 'dist',
   });
   var fileCount = 0;
   var outFiles = [];
@@ -278,7 +280,7 @@ test('write: should allow to rename map file', function(t) {
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/helloworld.js')) {
           sourceMap = data.sourceMap;
@@ -308,7 +310,7 @@ test('write: should create shortest path to map in file comment', function(t) {
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
           t.equal(String(data.contents), sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map\n', 'should add a comment referencing the source map file');
@@ -324,7 +326,7 @@ test('write: should create shortest path to map in file comment', function(t) {
 
 test('write: should write no comment with option addComment=false', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write({addComment: false});
+  var pipeline = sourcemaps.write({ addComment: false });
   pipeline.on('data', function(data) {
     t.equal(String(data.contents), sourceContent, 'should not change file content');
     t.end();
@@ -333,7 +335,7 @@ test('write: should write no comment with option addComment=false', function(t) 
 
 test('write: should not include source content with option includeContent=false', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write({includeContent: false});
+  var pipeline = sourcemaps.write({ includeContent: false });
   pipeline.on('data', function(data) {
     t.equal(data.sourceMap.sourcesContent, undefined, 'should not have source content');
     t.end();
@@ -365,7 +367,7 @@ test('write: should not throw when unable to fetch missing sourceContent', funct
 
 test('write: should set the sourceRoot by option sourceRoot', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot'});
+  var pipeline = sourcemaps.write({ sourceRoot: '/testSourceRoot' });
   pipeline.on('data', function(data) {
     t.deepEqual(data.sourceMap.sources, ['helloworld.js'], 'should have the correct sources');
     t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
@@ -375,7 +377,7 @@ test('write: should set the sourceRoot by option sourceRoot', function(t) {
 
 test('write: should set the mapSourcesAbsolute by option mapSourcesAbsolute', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write({sourceRoot: '/testSourceRoot', mapSourcesAbsolute: true});
+  var pipeline = sourcemaps.write({ sourceRoot: '/testSourceRoot', mapSourcesAbsolute: true });
   pipeline.on('data', function(data) {
     t.deepEqual(data.sourceMap.sources, ['/assets/helloworld.js'], 'should have the correct sources');
     t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
@@ -388,7 +390,7 @@ test('write: should set the sourceRoot by option sourceRoot, as a function', fun
   var pipeline = sourcemaps.write({
     sourceRoot: function() {
       return '/testSourceRoot';
-    }
+    },
   });
   pipeline.on('data', function(data) {
     t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
@@ -400,7 +402,7 @@ test('write: should automatically determine sourceRoot if destPath is set', func
   var file = makeNestedFile();
   var pipeline = sourcemaps.write('.', {
     destPath: 'dist',
-    includeContent: false
+    includeContent: false,
   });
   var fileCount = 0;
   var outFiles = [];
@@ -408,7 +410,7 @@ test('write: should automatically determine sourceRoot if destPath is set', func
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
           t.equal(data.sourceMap.sourceRoot, '../../../assets', 'should set correct sourceRoot');
@@ -427,14 +429,14 @@ test('write: should automatically determine sourceRoot if destPath is set', func
 
 test('write: should interpret relative path in sourceRoot as relative to destination', function(t) {
   var file = makeNestedFile();
-  var pipeline = sourcemaps.write('.', {sourceRoot: '../src'});
+  var pipeline = sourcemaps.write('.', { sourceRoot: '../src' });
   var fileCount = 0;
   var outFiles = [];
 
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
           t.equal(data.sourceMap.sourceRoot, '../../../src', 'should set relative sourceRoot');
@@ -453,14 +455,14 @@ test('write: should interpret relative path in sourceRoot as relative to destina
 
 test('write: should interpret relative path in sourceRoot as relative to destination (part 2)', function(t) {
   var file = makeNestedFile();
-  var pipeline = sourcemaps.write('.', {sourceRoot: ''});
+  var pipeline = sourcemaps.write('.', { sourceRoot: '' });
   var fileCount = 0;
   var outFiles = [];
 
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
           t.equal(data.sourceMap.sourceRoot, '../..', 'should set relative sourceRoot');
@@ -479,14 +481,14 @@ test('write: should interpret relative path in sourceRoot as relative to destina
 
 test('write: should interpret relative path in sourceRoot as relative to destination (part 3)', function(t) {
   var file = makeNestedFile();
-  var pipeline = sourcemaps.write('maps', {sourceRoot: '../src'});
+  var pipeline = sourcemaps.write('maps', { sourceRoot: '../src' });
   var fileCount = 0;
   var outFiles = [];
 
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
           t.equal(data.sourceMap.sourceRoot, '../../../../src', 'should set relative sourceRoot');
@@ -507,7 +509,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
   var file = makeNestedFile();
   var pipeline = sourcemaps.write('../maps', {
     sourceRoot: '../src',
-    destPath: 'dist'
+    destPath: 'dist',
   });
   var fileCount = 0;
   var outFiles = [];
@@ -515,7 +517,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
   pipeline.on('data', function(data) {
     outFiles.push(data);
     fileCount++;
-    if (fileCount == 2) {
+    if (fileCount === 2) {
       outFiles.reverse().map(function(data) {
         if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
           t.equal(data.sourceMap.sourceRoot, '../../../src', 'should set relative sourceRoot');
@@ -534,7 +536,7 @@ test('write: should interpret relative path in sourceRoot as relative to destina
 
 test('write: should accept a sourceMappingURLPrefix', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', {sourceMappingURLPrefix: 'https://asset-host.example.com'});
+  var pipeline = sourcemaps.write('../maps', { sourceMappingURLPrefix: 'https://asset-host.example.com' });
   pipeline.on('data', function(data) {
     if (/helloworld\.js$/.test(data.path)) {
       t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0], 'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
@@ -548,7 +550,7 @@ test('write: should accept a sourceMappingURLPrefix, as a function', function(t)
   var pipeline = sourcemaps.write('../maps', {
     sourceMappingURLPrefix: function() {
       return 'https://asset-host.example.com';
-    }
+    },
   });
   pipeline.on('data', function(data) {
     if (/helloworld\.js$/.test(data.path)) {
@@ -564,7 +566,7 @@ test('write: should invoke sourceMappingURLPrefix every time', function(t) {
     sourceMappingURLPrefix: function() {
       ++times;
       return 'https://asset-host.example.com/' + times;
-    }
+    },
   });
 
   pipeline.on('data', function(data) {
@@ -581,7 +583,7 @@ test('write: should invoke sourceMappingURLPrefix every time', function(t) {
 
 test('write: null as sourceRoot should not set the sourceRoot', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write({sourceRoot: null});
+  var pipeline = sourcemaps.write({ sourceRoot: null });
   pipeline.on('data', function(data) {
     t.equal(data.sourceMap.sourceRoot, undefined, 'should not set sourceRoot');
     t.end();
@@ -593,7 +595,7 @@ test('write: function returning null as sourceRoot should not set the sourceRoot
   var pipeline = sourcemaps.write({
     sourceRoot: function() {
       return null;
-    }
+    },
   });
   pipeline.on('data', function(data) {
     t.equal(data.sourceMap.sourceRoot, undefined, 'should set sourceRoot');
@@ -603,7 +605,7 @@ test('write: function returning null as sourceRoot should not set the sourceRoot
 
 test('write: empty string as sourceRoot should be kept', function(t) {
   var file = makeFile();
-  var pipeline = sourcemaps.write({sourceRoot: ''});
+  var pipeline = sourcemaps.write({ sourceRoot: '' });
   pipeline.on('data', function(data) {
     t.equal(data.sourceMap.sourceRoot, '', 'should keep empty string as sourceRoot');
     t.end();
@@ -615,7 +617,7 @@ test('write: should be able to fully control sourceMappingURL by the option sour
   var pipeline = sourcemaps.write('../aaa/bbb/', {
     sourceMappingURL: function(file) {
       return 'http://maps.example.com/' + file.relative + '.map';
-    }
+    },
   });
   pipeline.on('data', function(data) {
     if (/helloworld\.js$/.test(data.path)) {
@@ -629,9 +631,9 @@ test('write: should allow to change sources', function(t) {
   var file = makeFile();
   var pipeline = sourcemaps.write({
     mapSources: function(sourcePath, f) {
-      t.equal(file,f, 'vinyl file gets passed');
+      t.equal(file, f, 'vinyl file gets passed');
       return '../src/' + sourcePath;
-    }
+    },
   });
   pipeline.on('data', function(data) {
     t.deepEqual(data.sourceMap.sources, ['../src/helloworld.js'], 'should have the correct sources');
@@ -652,11 +654,11 @@ test('write: can replace `mapSources` option with sourcemap.mapSources stream', 
   pipe([
     from.obj([file]),
     sourcemaps.mapSources(function(sourcePath, f) {
-      t.equal(file,f, 'vinyl file gets passed');
+      t.equal(file, f, 'vinyl file gets passed');
       return '../src/' + sourcePath;
     }),
     sourcemaps.write(),
-    concat(assert)
+    concat(assert),
   ], function(err) {
     if (err) {
       t.fail('emitted error');
@@ -666,8 +668,8 @@ test('write: can replace `mapSources` option with sourcemap.mapSources stream', 
   });
 });
 
-if (!yargs.ignoreLogTests){
-  //should always be last as disabling a debug namespace does not work
+if (!ignoreLogTests) {
+  // Should always be last as disabling a debug namespace does not work
   test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
     var file = makeFile();
     file.sourceMap.sources[0] += '.invalid';
@@ -679,15 +681,14 @@ if (!yargs.ignoreLogTests){
     });
     var pipeline = sourcemaps.write();
 
-    var hasRegex =  function(regex){
-      return function(s){
+    var hasRegex = function(regex) {
+      return function(s) {
         return regex.test(s);
       };
     };
     pipeline.on('data', function() {
       unhook();
-      console.log(JSON.stringify(history));
-      t.ok(history.some(hasRegex(/No source content for "helloworld.js.invalid". Loading from file./g)), 'should log missing source content');
+      t.ok(history.some(hasRegex(/No source content for 'helloworld.js.invalid'. Loading from file./g)), 'should log missing source content');
       t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
       t.end();
     }).write(file);

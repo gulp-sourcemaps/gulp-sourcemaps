@@ -6,13 +6,11 @@
   "repository": "git://github.com/gulp-sourcemaps/gulp-sourcemaps.git",
   "main": "index.js",
   "scripts": {
-    "lint": "jshint ./src/**/*.js ./test/*.js",
-    "test": "npm run lint && faucet test/*.js $@",
-    "tape": "tape",
-    "cover": "istanbul cover --dir reports/coverage tape \"test/*.js\"",
-    "coveralls": "istanbul cover tape \"test/*.js\" --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
-    "serve": "http-server",
-    "test:int": "rm -rf ./tmp && tape ./test/integration.js"
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "mocha --async-only test/init.js",
+    "cover": "istanbul cover _mocha --report lcovonly",
+    "coveralls": "npm run cover && istanbul-coveralls"
   },
   "keywords": [
     "gulpplugin",
@@ -36,30 +34,30 @@
     "through2": "2.X"
   },
   "devDependencies": {
-    "bootstrap": "3.3.7",
-    "coveralls": "2.X",
-    "faucet": "0.0.X",
-    "gulp": "3.X",
-    "gulp-concat": "2.X",
-    "gulp-if": "2.X",
-    "gulp-less": "3.X",
-    "gulp-load-plugins": "1.X",
+    "bootstrap": "^3.4.1",
+    "eslint": "^2.13.0",
+    "eslint-config-gulp": "^3.0.1",
+    "expect": "^1.20.2",
+    "faucet": "0.0.1",
+    "gulp": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-if": "^2.0.2",
+    "gulp-less": "^4.0.1",
+    "gulp-load-plugins": "^1.5.0",
     "hook-std": "0.2.X",
-    "http-server": "0.10.X",
-    "istanbul": "0.X",
-    "jshint": "2.X",
-    "lodash": "4.X",
+    "istanbul": "^0.4.3",
+    "istanbul-coveralls": "^1.0.3",
     "mississippi": "1.X",
-    "object-assign": "4.X",
-    "tape": "4.X",
-    "vinyl": "2.X",
-    "yargs": "7.X"
+    "mocha": "^3.5.3",
+    "object-assign": "^4.1.1",
+    "tape": "^4.10.1",
+    "vinyl": "^2.2.0"
   },
   "files": [
     "index.js",
     "src"
   ],
   "engines": {
-    "node": ">=4"
+    "node": ">= 0.10"
   }
 }
