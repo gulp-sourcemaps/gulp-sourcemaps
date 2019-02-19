@@ -18,3 +18,14 @@ test('exceptionToString: returns empty string if message is not present', functi
   t.equal(result, '');
   t.end();
 });
+
+test('getCommentFormatter: gets a commenter with invalid extension', function(t) {
+  var commenter = utils.getCommentFormatter({
+    relative: 'some.junk',
+    contents: "var a = 'hello';",
+    sourceMap: { preExistingComment: true }
+  });
+
+  t.true(commenter);
+  t.end();
+});
