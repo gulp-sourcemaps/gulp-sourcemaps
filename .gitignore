@@ -6,3 +6,4 @@ reports
 *.lock
 tmp
 debug
+.vscode

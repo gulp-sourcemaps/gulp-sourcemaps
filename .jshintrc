@@ -1,6 +1,7 @@
 {
 	"node": true,
-	"strict": true,
+	"strict": "global",
 	"unused": "vars",
-  "undef": true
+  "undef": true,
+  "esversion": 2015
 }

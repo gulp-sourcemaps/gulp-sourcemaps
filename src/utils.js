@@ -19,40 +19,38 @@ So we either need to use a new instance of a regex everywhere.
 */
 var sourceMapUrlRegEx = function(){ return /\/\/\# sourceMappingURL\=.*/g;};
 
+var commentFormatters = {
+  css: function cssCommentFormatter(preLine, newline, url) {
+    return preLine + "/*# sourceMappingURL=" + url + " */" + newline;
+  },
+  js: function jsCommentFormatter(preLine, newline, url) {
+    return preLine + "//# sourceMappingURL=" + url + newline;
+  },
+  'default': function defaultFormatter() {
+    return '';
+  }
+}
+
 
 var getCommentFormatter = function (file) {
   var extension = file.relative.split('.').pop(),
-    fileContents =  file.contents.toString(),
-    newline =  detectNewline.graceful(fileContents || ''),
-    commentFormatter = function(url) {
-      return '';
-    };
+    fileContents = file.contents.toString(),
+    newline = detectNewline.graceful(fileContents || '');
 
-  if (file.sourceMap.preExistingComment){
-    debug(function() { return 'preExistingComment commentFormatter'; });
-    commentFormatter = function(url) {
-      return "//# sourceMappingURL=" + url + newline;
-    };
-    return commentFormatter;
+  var commentFormatter = commentFormatters.default;
+
+  if (file.sourceMap.preExistingComment) {
+    commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, '', newline)
+    debug(function () {
+      return 'preExistingComment commentFormatter ' + commentFormatter.name;
+    });
+  } else {
+    commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, newline, newline);
   }
 
-  switch (extension) {
-    case 'css':
-      debug(function() { return 'css commentFormatter';});
-      commentFormatter = function(url) {
-        return newline + "/*# sourceMappingURL=" + url + " */" + newline;
-      };
-      break;
-    case 'js':
-      debug(function() { return 'js commentFormatter'; });
-      commentFormatter = function(url) {
-        return newline + "//# sourceMappingURL=" + url + newline;
-      };
-      break;
-    default:
-      debug(function() { return 'unknown commentFormatter'; });
-  }
-
+  debug(function () {
+    return 'commentFormatter ' + commentFormatter.name;
+  });
   return commentFormatter;
 };
 
