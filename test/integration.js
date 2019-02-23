@@ -1,9 +1,14 @@
 'use strict';
+
+var expect = require('expect');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
-var test = require('tape');
 var sourcemaps = require('..');
 var debug = require('debug-fabulous')();
+var miss = require('mississippi');
+
+var pipe = miss.pipe;
+var concat = miss.concat;
 
 var ignoreLogTests = process.argv.indexOf('--ignore-log-tests') !== -1;
 
@@ -15,284 +20,225 @@ var join = require('path').join;
 var fs = require('fs');
 var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toString();
 
-
 function base64JSON(object) {
   return 'data:application/json;charset=utf8;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
 }
 
-function moveHtml(dest, t) {
-  return gulp.src(join(__dirname, './assets/*.html'))
-    .pipe(gulp.dest('tmp/' + dest))
-    .on('finish', t.end);
-}
-
 debug('running');
 
-test('combined: creates inline mapping', function(t) {
+describe('integrations', function() {
 
-  gulp.src(join(__dirname, './assets/helloworld.js'))
-    .pipe(sourcemaps.init())
-    .pipe(sourcemaps.write())
-    // .pipe(gulp.dest('tmp'))
-    .on('data', function(data) {
-      t.ok(data.sourceMap, 'should add a source map object');
-      t.deepEqual(
-        data.contents.toString(),
-        sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n',
-        'file should be sourcemapped'
-      );
-      t.end();
-    })
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('close', function() {
-      t.end();
-    });
-});
+  it('combined: creates inline mapping', function(done) {
 
-test('combined: creates preExistingComment , no new previous line', function(t) {
-  gulp.src(join(__dirname, './assets/helloworld.map.js'))
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe(sourcemaps.write())
-    // .pipe(gulp.dest('tmp'))
-    .on('data', function(data) {
-      t.ok(data.sourceMap, 'should add a source map object');
-      t.ok(!!data.sourceMap.preExistingComment, 'should know the sourcemap pre-existed');
-      t.deepEqual(
-        data.contents.toString(),
-        sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n',
-        'file should be sourcemapped'
-      );
-      t.end();
-    })
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('close', function() {
-      t.end();
-    });
-});
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap).toExist();
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n');
+    }
+
+    pipe([
+      gulp.src('assets/helloworld.js', { cwd: __dirname }),
+      sourcemaps.init(),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  it('combined: creates preExistingComment , no new previous line', function(done) {
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap).toExist();
+      expect(data.sourceMap.preExistingComment).toExist();
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n');
+    }
+
+    pipe([
+      gulp.src('assets/helloworld.map.js', { cwd: __dirname }),
+      sourcemaps.init({ loadMaps: true }),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
 
 
-test('combined mapped: concat files with final combined sourcemap file', function(t) {
+  it('combined mapped: concat files with final combined sourcemap file', function(done) {
 
-  gulp.src([
-    join(__dirname, './assets/*.js'),
-    '!' + join(__dirname, './assets/test*.js'),
-    '!' + join(__dirname, './assets/*map.js')]
-  )
-    .pipe(sourcemaps.init())
-    .pipe($.if('*.js', $.concat('index.js')))
-    .pipe(sourcemaps.write('.', { sourceRoot: '../../test/assets' }))
-    .pipe(gulp.dest('tmp/combined_map'))
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('data', function(data) {
-      if (/index\.js$/.test(data.path)) {
-        t.ok(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString()),
-          'concatenated file is mapped');
-        t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
-          'concatenated file is mapped once');
-      }
-    })
-    .on('finish', function() {
-      moveHtml('combined_map', t);
-    });
-});
+    function assert(results) {
+      var data = results[1];
+      // TODO: This might be flakey since it grabs index 1 from results
+      expect(/index\.js$/.test(data.path)).toEqual(true);
+      expect(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString())).toEqual(true);
+      expect(data.contents.toString().match(/\/\/# sourceMappingURL/g).length).toEqual(1);
+    }
 
-test('combined: inline concatenated file', function(t) {
+    pipe([
+      gulp.src(['assets/*.js', '!assets/test*.js', '!assets/*map.js'], { cwd: __dirname }),
+      sourcemaps.init(),
+      $.if('*.js', $.concat('index.js')),
+      sourcemaps.write('.', { sourceRoot: '../../test/assets' }),
+      concat(assert),
+    ], done);
+  });
 
-  gulp.src([
-    join(__dirname, './assets/*.js'),
-    '!' + join(__dirname, './assets/test*.js'),
-    '!' + join(__dirname, './assets/*map.js')]
-  )
-    .pipe(sourcemaps.init())
-    .pipe($.if('*.js', $.concat('index.js')))
-    .pipe(sourcemaps.write({ sourceRoot: '../../test/assets' }))
-    .pipe(gulp.dest('tmp/combined_inline'))
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('data', function(data) {
-      if (/index\.js$/.test(data.path)) {
-        t.ok(/\/\/# sourceMappingURL=data:application.*/.test(data.contents.toString()),
-          'concatenated file is mapped');
-        t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
-          'concatenated file is mapped once');
-      }
-    })
-    .on('finish', function() {
-      moveHtml('combined_inline', t);
-    });
-});
+  it('combined: inline concatenated file', function(done) {
 
-test('combined: less: inline concatenated file', { timeout: 6000 }, function(t) { // note ~1000 ms is fine locally, travis needs more
-  // note: on travis node 0.12 seems to have the brunt of the slowness
+    function assert(results) {
+      var data = results[0];
+      expect(/index\.js$/.test(data.path)).toEqual(true);
+      expect(/\/\/# sourceMappingURL=data:application.*/.test(data.contents.toString())).toEqual(true);
+      expect(data.contents.toString().match(/\/\/# sourceMappingURL/g).length).toEqual(1);
+    }
 
-  // proves that gulp-less compilation is not slow
-  // https://github.com/floridoo/gulp-sourcemaps/issues/215
+    pipe([
+      gulp.src(['assets/*.js', '!assets/test*.js', '!assets/*map.js'], { cwd: __dirname }),
+      sourcemaps.init(),
+      $.if('*.js', $.concat('index.js')),
+      sourcemaps.write({ sourceRoot: '../../test/assets' }),
+      concat(assert),
+    ], done);
+  });
 
-  gulp.src(join(__dirname, './assets/*.less'))
-    .pipe(sourcemaps.init())
-    .pipe($.if('*.less', $.less()))
-    .pipe(sourcemaps.write({ sourceRoot: '../../test/assets' }))
-    .pipe(gulp.dest('tmp/combined_inline_less'))
-    .once('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .once('finish', function() {
-      moveHtml('combined_inline_less', t);
-    });
-});
+  it('combined: less: inline concatenated file', function(done) {
+    // note ~1000 ms is fine locally, travis needs more
+    // note: on travis node 0.12 seems to have the brunt of the slowness
+    this.timeout(6000);
 
-test('combined: mapped preExisting', function(t) {
+    // proves that gulp-less compilation is not slow
+    // https://github.com/floridoo/gulp-sourcemaps/issues/215
 
-  gulp.src([
-    // picking a file with no existing sourcemap, if we use helloworld2 it will attempt to use helloworld2.js.map
-    join(__dirname, './assets/helloworld7.js'), // NO PRE-MAP at all
-    join(__dirname, './assets/helloworld.map.js'), // INLINE PRE-MAp
-  ])
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe($.if('*.js', $.concat('index.js')))
-    .pipe(sourcemaps.write('.', { sourceRoot: '../../test/assets' }))
-    .pipe(gulp.dest('tmp/combined_map_preExisting'))
-    .once('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('data', function(data) {
-      if (/index\.js$/.test(data.path)) {
-        t.ok(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString()),
-          'concatenated file is mapped');
-        t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
-          'concatenated file is mapped once');
-      }
-    })
-    .once('finish', function() {
-      moveHtml('combined_map_preExisting', t);
-    });
-});
+    pipe([
+      gulp.src('assets/*.less', { cwd: __dirname }),
+      sourcemaps.init(),
+      $.if('*.less', $.less()),
+      sourcemaps.write({ sourceRoot: '../../test/assets' }),
+      concat(),
+    ], done);
+  });
 
+  it('combined: mapped preExisting', function(done) {
 
-test('combined: inlined preExisting', function(t) {
+    function assert(results) {
+      var data = results[1];
+      // TODO: This might be flakey since it grabs index 1 from results
+      expect(/index\.js$/.test(data.path)).toEqual(true);
+      expect(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString())).toEqual(true);
+      expect(data.contents.toString().match(/\/\/# sourceMappingURL/g).length).toEqual(1);
+    }
 
-  gulp.src([
-    // picking a file with no existing sourcemap, if we use helloworld2 it will attempt to use helloworld2.js.map
-    join(__dirname, './assets/helloworld7.js'), // NO PRE-MAP at all
-    join(__dirname, './assets/helloworld.map.js'), // INLINE PRE-MAp
-  ])
-    .pipe(sourcemaps.init({ loadMaps: true }))
-    .pipe($.if('*.js', $.concat('index.js')))
-    .pipe(sourcemaps.write({ sourceRoot: '../../test/assets' }))
-    .pipe(gulp.dest('tmp/combined_inline_preExisting'))
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('data', function(data) {
-      if (/index\.js$/.test(data.path)) {
-        t.ok(/\/\/# sourceMappingURL=data:application.*/.test(data.contents.toString()),
-          'concatenated file is mapped');
-        t.equal(data.contents.toString().match(/\/\/# sourceMappingURL/g).length, 1,
-          'concatenated file is mapped once');
-      }
-    })
-    .on('finish', function() {
-      moveHtml('combined_inline_preExisting', t);
-    });
-});
-
-
-test('combined: mapped preExisting with two tasks', function(t) {
-
-  gulp.src(join(__dirname, './assets/helloworld7.js'))
-    .pipe(sourcemaps.init())
-    .pipe($.if('*.js', $.concat('h7.js')))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('tmp/combined_map_preExisting_two_task/tmp'))
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .on('finish', function() {
+    pipe([
+      // picking a file with no existing sourcemap, if we use helloworld2 it will attempt to use helloworld2.js.map
       gulp.src([
-        './tmp/combined_map_preExisting_two_task/tmp/h7.js',
-        join(__dirname, './assets/helloworld.map.js')])
-        .pipe(sourcemaps.init({ loadMaps: true }))
-        .pipe($.if('*.js', $.concat('index.js')))
-        .pipe(sourcemaps.write('.', { sourceRoot: '../../test/assets' }))
-        .pipe(gulp.dest('tmp/combined_map_preExisting_two_task'))
-        .on('finish', function() {
-          moveHtml('combined_map_preExisting_two_task', t);
-        });
-    });
-});
+        'assets/helloworld7.js', // NO PRE-MAP at all
+        'assets/helloworld.map.js', // INLINE PRE-MAp
+      ], { cwd: __dirname }),
+      sourcemaps.init({ loadMaps: true }),
+      $.if('*.js', $.concat('index.js')),
+      sourcemaps.write('.', { sourceRoot: '../../test/assets' }),
+      concat(assert),
+    ], done);
+  });
 
 
-// - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
-test('sources: is valid with concat', function(t) {
+  it('combined: inlined preExisting', function(done) {
 
-  gulp.src([
-    join(__dirname, './assets/test3.js'),
-    join(__dirname, './assets/test4.js'),
-  ])
-    .pipe(sourcemaps.init())
-    .pipe($.concat('index.js'))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('tmp/sources_concat'))
-    .on('data', function(file) {
-      if (!/.*\.map/.test(file.path)) {
+    function assert(results) {
+      var data = results[0];
+      expect(/index\.js$/.test(data.path)).toEqual(true);
+      expect(/\/\/# sourceMappingURL=data:application.*/.test(data.contents.toString())).toEqual(true);
+      expect(data.contents.toString().match(/\/\/# sourceMappingURL/g).length).toEqual(1);
+    }
+
+    pipe([
+      // picking a file with no existing sourcemap, if we use helloworld2 it will attempt to use helloworld2.js.map
+      gulp.src([
+        'assets/helloworld7.js', // NO PRE-MAP at all
+        'assets/helloworld.map.js', // INLINE PRE-MAp
+      ], { cwd: __dirname }),
+      sourcemaps.init({ loadMaps: true }),
+      $.if('*.js', $.concat('index.js')),
+      sourcemaps.write({ sourceRoot: '../../test/assets' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('combined: mapped preExisting with two tasks', function(done) {
+
+    function assert(results) {
+      var data = results[1];
+      // TODO: This might be flakey since it grabs index 1 from results
+      expect(/index\.js$/.test(data.path)).toEqual(true);
+      expect(/\/\/# sourceMappingURL=index.js.map/.test(data.contents.toString())).toEqual(true);
+      expect(data.contents.toString().match(/\/\/# sourceMappingURL/g).length).toEqual(1);
+    }
+
+    pipe([
+      gulp.src('assets/helloworld7.js', { cwd: __dirname }),
+      sourcemaps.init(),
+      $.if('*.js', $.concat('h7.js')),
+      sourcemaps.write('.'),
+      gulp.dest('tmp/combined_map_preExisting_two_task/tmp'),
+    ], function(err) {
+      if (err) {
+        done(err);
         return;
       }
 
-      var contents = JSON.parse(file.contents.toString());
-      contents.sources.forEach(function(s, i) {
-        t.deepEqual(s, 'test' + (i + 3) + '.js', 'source is correct, test' + (i + 3) + '.js');
-      });
-    })
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    }).on('finish', function() {
-      moveHtml('sources_concat', t);
+      pipe([
+        gulp.src(['../tmp/combined_map_preExisting_two_task/tmp/h7.js', 'assets/helloworld.map.js'], { cwd: __dirname }),
+        sourcemaps.init({ loadMaps: true }),
+        $.if('*.js', $.concat('index.js')),
+        sourcemaps.write('.', { sourceRoot: '../../test/assets' }),
+        concat(assert),
+      ], done);
     });
+  });
 
-});
 
-// - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
-test('sources: mapSourcesAbsolute: is valid with concat', function(t) {
+  // - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
+  it('sources: is valid with concat', function(done) {
 
-  gulp.src([
-    join(__dirname, './assets/test3.js'),
-    join(__dirname, './assets/test4.js'),
-  ])
-    .pipe(sourcemaps.init())
-    .pipe($.concat('index.js'))
-    .pipe(sourcemaps.write('.', { mapSourcesAbsolute: true }))
-    .pipe(gulp.dest('tmp/sources_concat'))
-    .on('data', function(file) {
-      if (!/.*\.map/.test(file.path)) {
-        return;
-      }
+    function assert(results) {
+      var data = results[0];
+      // TODO: This might be flakey since it grabs index 0 from results
+      expect(/.*\.map/.test(data.path)).toEqual(true);
 
-      var contents = JSON.parse(file.contents.toString());
+      var contents = JSON.parse(data.contents.toString());
       contents.sources.forEach(function(s, i) {
-        t.deepEqual(s, '/test/assets/test' + (i + 3) + '.js', 'source is correct, test' + (i + 3) + '.js');
+        expect(s).toEqual('test' + (i + 3) + '.js');
       });
-    })
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    }).on('finish', function() {
-      moveHtml('sources_concat', t);
-    });
+    }
 
+    pipe([
+      gulp.src(['assets/test3.js', 'assets/test4.js'], { cwd: __dirname }),
+      sourcemaps.init(),
+      $.concat('index.js'),
+      sourcemaps.write('.'),
+      concat(assert),
+    ], done);
+  });
+
+  // - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
+  it('sources: mapSourcesAbsolute: is valid with concat', function(done) {
+
+    function assert(results) {
+      var data = results[0];
+      // TODO: This might be flakey since it grabs index 0 from results
+      expect(/.*\.map/.test(data.path)).toEqual(true);
+
+      var contents = JSON.parse(data.contents.toString());
+      contents.sources.forEach(function(s, i) {
+        expect(s).toEqual('/test/assets/test' + (i + 3) + '.js');
+      });
+    }
+
+    pipe([
+      // This changed to `test/assets/` because join isn't valid globs
+      gulp.src(['test/assets/test3.js', 'test/assets/test4.js']),
+      sourcemaps.init(),
+      $.concat('index.js'),
+      sourcemaps.write('.', { mapSourcesAbsolute: true }),
+      concat(assert),
+    ], done);
+  });
 });
