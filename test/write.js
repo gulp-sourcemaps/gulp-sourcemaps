@@ -1,6 +1,6 @@
 'use strict';
 
-var test = require('tape');
+var expect = require('expect');
 var sourcemaps = require('..');
 var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
@@ -92,605 +92,654 @@ function makeStreamFile() {
   return file;
 }
 
-test('write: should pass through when file is null', function(t) {
-  var file = new File();
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.ok(data, 'should pass something through');
-    t.ok(data instanceof File, 'should pass a vinyl file through');
-    t.deepEqual(data, file, 'should not change file');
-    t.equal(data.contents, null, 'should not change file content');
-    t.end();
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
+describe('write', function() {
 
-test('write: should pass through when file has no source map', function(t) {
-  var file = makeFile();
-  delete file.sourceMap;
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.ok(data, 'should pass something through');
-    t.ok(data instanceof File, 'should pass a vinyl file through');
-    t.deepEqual(data, file, 'should not change file');
-    t.equal(String(data.contents), sourceContent, 'should not change file content');
-    t.end();
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
+  it('should pass through when file is null', function(done) {
+    var file = new File();
 
-test('write: should emit an error if file content is a stream', function(t) {
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function() {
-    t.fail('should emit an error');
-    t.end();
-  }).on('error', function() {
-    t.ok('should emit an error');
-    t.end();
-  }).write(makeStreamFile());
-});
-
-test('write: should write an inline source map', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.ok(data, 'should pass something through');
-    t.ok(data instanceof File, 'should pass a vinyl file through');
-    t.deepEqual(data, file, 'should not change file');
-    t.equal(String(data.contents), sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n', 'should add source map as comment');
-    t.end();
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should use CSS comments if CSS file', function(t) {
-  var file = makeFile();
-  file.path = file.path.replace('.js', '.css');
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.equal(String(data.contents), sourceContent + '\n/*# sourceMappingURL=' + base64JSON(data.sourceMap) + ' */\n', 'should add source map with CSS comment');
-    t.end();
-  }).write(file);
-});
-
-test('write: should write no comment if not JS or CSS file', function(t) {
-  var file = makeFile();
-  file.path = file.path.replace('.js', '.txt');
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.equal(String(data.contents), sourceContent);
-    t.end();
-  }).write(file);
-});
-
-test('write: should detect whether a file uses \\n or \\r\\n and follow the existing style', function(t) {
-  var file = makeFile();
-  file.contents = new Buffer(file.contents.toString().replace(/\n/g, '\r\n'));
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.ok(data, 'should pass something through');
-    t.equal(String(data.contents), sourceContent.replace(/\n/g, '\r\n') + '\r\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\r\n', 'should add source map as comment');
-    t.end();
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: preExistingComment', function(t) {
-  var file = makeMappedFile();
-  file.contents = new Buffer(convert.removeComments(file.contents.toString()));
-
-  sourcemaps.write({ preExistingComment: true })
-    .on('data', function(data) {
-      t.ok(data, 'should pass something through');
-      t.ok(!!data.sourceMap.preExistingComment, 'should mark as preExistingComment');
-      t.equal(
-        String(data.contents),
-        sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n', 'should add source map as comment');
-      t.end();
-    })
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .write(file);
-});
-
-test('write: should write external map files', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', { destPath: 'dist' });
-  var fileCount = 0;
-  var outFiles = [];
-  var sourceMap;
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/helloworld.js')) {
-          sourceMap = data.sourceMap;
-          t.ok(data instanceof File, 'should pass a vinyl file through');
-          t.deepEqual(data, file, 'should not change file');
-          t.equal(String(data.contents), sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map\n', 'should add a comment referencing the source map file');
-          t.equal(sourceMap.file, '../dist/helloworld.js');
-        } else {
-          t.ok(data instanceof File, 'should pass a vinyl file through');
-          t.equal(data.path, path.join(__dirname, 'maps/helloworld.js.map'));
-          t.deepEqual(JSON.parse(data.contents), sourceMap, 'should have the file\'s source map as content');
-          t.equal(data.stat.isFile(), true, 'should have correct stats');
-          t.equal(data.stat.isDirectory(), false, 'should have correct stats');
-          t.equal(data.stat.isBlockDevice(), false, 'should have correct stats');
-          t.equal(data.stat.isCharacterDevice(), false, 'should have correct stats');
-          t.equal(data.stat.isSymbolicLink(), false, 'should have correct stats');
-          t.equal(data.stat.isFIFO(), false, 'should have correct stats');
-          t.equal(data.stat.isSocket(), false, 'should have correct stats');
-        }
-      });
-      t.end();
+    function assert(results) {
+      var data = results[0];
+      expect(data).toExist();
+      expect(data instanceof File).toEqual(true);
+      expect(data).toBe(file);
+      expect(data.contents).toEqual(null);
     }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
 
-test('write:clone - should keep original file history', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', { destPath: 'dist' });
-  var outFiles = [];
-  var fileCount = 0;
-  pipeline
-    .on('data', function(data) {
-      outFiles.push(data);
-      fileCount++;
-      if (fileCount === 2) {
-        outFiles.reverse().map(function(data) {
-          if (data.path === path.join(__dirname, 'maps/helloworld.js.map')) {
-            t.equal(data.history[0], path.join(__dirname, 'assets', 'helloworld.js'), 'should keep file history');
-          }
-        });
-        t.end();
-      }
-    })
-    .on('error', function() {
-      t.fail('emitted error');
-      t.end();
-    })
-    .write(file);
-});
-
-test('write: should allow to rename map file', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', {
-    mapFile: function(mapFile) {
-      return mapFile.replace('.js.map', '.map');
-    },
-    destPath: 'dist',
-  });
-  var fileCount = 0;
-  var outFiles = [];
-  var sourceMap;
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/helloworld.js')) {
-          sourceMap = data.sourceMap;
-          t.ok(data instanceof File, 'should pass a vinyl file through');
-          t.deepEqual(data, file, 'should not change file');
-          t.equal(String(data.contents), sourceContent + '\n//# sourceMappingURL=../maps/helloworld.map\n', 'should add a comment referencing the source map file');
-          t.equal(sourceMap.file, '../dist/helloworld.js');
-        } else {
-          t.ok(data instanceof File, 'should pass a vinyl file through');
-          t.equal(data.path, path.join(__dirname, 'maps/helloworld.map'));
-          t.deepEqual(JSON.parse(data.contents), sourceMap, 'should have the file\'s source map as content');
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should create shortest path to map in file comment', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('dir1/maps');
-  var fileCount = 0;
-  var outFiles = [];
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
-          t.equal(String(data.contents), sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map\n', 'should add a comment referencing the source map file');
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should write no comment with option addComment=false', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({ addComment: false });
-  pipeline.on('data', function(data) {
-    t.equal(String(data.contents), sourceContent, 'should not change file content');
-    t.end();
-  }).write(file);
-});
-
-test('write: should not include source content with option includeContent=false', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({ includeContent: false });
-  pipeline.on('data', function(data) {
-    t.equal(data.sourceMap.sourcesContent, undefined, 'should not have source content');
-    t.end();
-  }).write(file);
-});
-
-test('write: should fetch missing sourceContent', function(t) {
-  var file = makeFile();
-  delete file.sourceMap.sourcesContent;
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.notEqual(data.sourceMap.sourcesContent, undefined, 'should have source content');
-    t.deepEqual(data.sourceMap.sourcesContent, [sourceContent], 'should have correct source content');
-    t.end();
-  }).write(file);
-});
-
-test('write: should not throw when unable to fetch missing sourceContent', function(t) {
-  var file = makeFile();
-  file.sourceMap.sources[0] += '.invalid';
-  delete file.sourceMap.sourcesContent;
-  var pipeline = sourcemaps.write();
-  pipeline.on('data', function(data) {
-    t.notEqual(data.sourceMap.sourcesContent, undefined, 'should have source content');
-    t.deepEqual(data.sourceMap.sourcesContent, [], 'should have correct source content');
-    t.end();
-  }).write(file);
-});
-
-test('write: should set the sourceRoot by option sourceRoot', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({ sourceRoot: '/testSourceRoot' });
-  pipeline.on('data', function(data) {
-    t.deepEqual(data.sourceMap.sources, ['helloworld.js'], 'should have the correct sources');
-    t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
-    t.end();
-  }).write(file);
-});
-
-test('write: should set the mapSourcesAbsolute by option mapSourcesAbsolute', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({ sourceRoot: '/testSourceRoot', mapSourcesAbsolute: true });
-  pipeline.on('data', function(data) {
-    t.deepEqual(data.sourceMap.sources, ['/assets/helloworld.js'], 'should have the correct sources');
-    t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
-    t.end();
-  }).write(file);
-});
-
-test('write: should set the sourceRoot by option sourceRoot, as a function', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({
-    sourceRoot: function() {
-      return '/testSourceRoot';
-    },
-  });
-  pipeline.on('data', function(data) {
-    t.equal(data.sourceMap.sourceRoot, '/testSourceRoot', 'should set sourceRoot');
-    t.end();
-  }).write(file);
-});
-
-test('write: should automatically determine sourceRoot if destPath is set', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('.', {
-    destPath: 'dist',
-    includeContent: false,
-  });
-  var fileCount = 0;
-  var outFiles = [];
-
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
-          t.equal(data.sourceMap.sourceRoot, '../../../assets', 'should set correct sourceRoot');
-          t.equal(data.sourceMap.file, 'helloworld.js');
-        } else {
-          t.equal(data.path, path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should interpret relative path in sourceRoot as relative to destination', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('.', { sourceRoot: '../src' });
-  var fileCount = 0;
-  var outFiles = [];
-
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
-          t.equal(data.sourceMap.sourceRoot, '../../../src', 'should set relative sourceRoot');
-          t.equal(data.sourceMap.file, 'helloworld.js');
-        } else {
-          t.equal(data.path, path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should interpret relative path in sourceRoot as relative to destination (part 2)', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('.', { sourceRoot: '' });
-  var fileCount = 0;
-  var outFiles = [];
-
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
-          t.equal(data.sourceMap.sourceRoot, '../..', 'should set relative sourceRoot');
-          t.equal(data.sourceMap.file, 'helloworld.js');
-        } else {
-          t.equal(data.path, path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should interpret relative path in sourceRoot as relative to destination (part 3)', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('maps', { sourceRoot: '../src' });
-  var fileCount = 0;
-  var outFiles = [];
-
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
-          t.equal(data.sourceMap.sourceRoot, '../../../../src', 'should set relative sourceRoot');
-          t.equal(data.sourceMap.file, '../../../dir1/dir2/helloworld.js');
-        } else {
-          t.equal(data.path, path.join(__dirname, 'assets/maps/dir1/dir2/helloworld.js.map'));
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should interpret relative path in sourceRoot as relative to destination (part 4)', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('../maps', {
-    sourceRoot: '../src',
-    destPath: 'dist',
-  });
-  var fileCount = 0;
-  var outFiles = [];
-
-  pipeline.on('data', function(data) {
-    outFiles.push(data);
-    fileCount++;
-    if (fileCount === 2) {
-      outFiles.reverse().map(function(data) {
-        if (data.path === path.join(__dirname, 'assets/dir1/dir2/helloworld.js')) {
-          t.equal(data.sourceMap.sourceRoot, '../../../src', 'should set relative sourceRoot');
-          t.equal(data.sourceMap.file, '../../../dist/dir1/dir2/helloworld.js');
-        } else {
-          t.equal(data.path, path.join(__dirname, 'maps/dir1/dir2/helloworld.js.map'));
-        }
-      });
-      t.end();
-    }
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: should accept a sourceMappingURLPrefix', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', { sourceMappingURLPrefix: 'https://asset-host.example.com' });
-  pipeline.on('data', function(data) {
-    if (/helloworld\.js$/.test(data.path)) {
-      t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0], 'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
-      t.end();
-    }
-  }).write(file);
-});
-
-test('write: should accept a sourceMappingURLPrefix, as a function', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write('../maps', {
-    sourceMappingURLPrefix: function() {
-      return 'https://asset-host.example.com';
-    },
-  });
-  pipeline.on('data', function(data) {
-    if (/helloworld\.js$/.test(data.path)) {
-      t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0], 'sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
-      t.end();
-    }
-  }).write(file);
-});
-
-test('write: should invoke sourceMappingURLPrefix every time', function(t) {
-  var times = 0;
-  var pipeline = sourcemaps.write('../maps', {
-    sourceMappingURLPrefix: function() {
-      ++times;
-      return 'https://asset-host.example.com/' + times;
-    },
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
   });
 
-  pipeline.on('data', function(data) {
-    if (/helloworld\.js$/.test(data.path)) {
-      t.equal(String(data.contents).match(/sourceMappingURL.*\n$/)[0], 'sourceMappingURL=https://asset-host.example.com/' + times + '/maps/helloworld.js.map\n');
-      if (times >= 3) {
-        t.end();
-        return;
-      }
-      pipeline.write(makeFile());
-    }
-  }).write(makeFile());
-});
+  it('should pass through when file has no source map', function(done) {
+    var file = makeFile();
+    delete file.sourceMap;
 
-test('write: null as sourceRoot should not set the sourceRoot', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({ sourceRoot: null });
-  pipeline.on('data', function(data) {
-    t.equal(data.sourceMap.sourceRoot, undefined, 'should not set sourceRoot');
-    t.end();
-  }).write(file);
-});
-
-test('write: function returning null as sourceRoot should not set the sourceRoot', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({
-    sourceRoot: function() {
-      return null;
-    },
-  });
-  pipeline.on('data', function(data) {
-    t.equal(data.sourceMap.sourceRoot, undefined, 'should set sourceRoot');
-    t.end();
-  }).write(file);
-});
-
-test('write: empty string as sourceRoot should be kept', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({ sourceRoot: '' });
-  pipeline.on('data', function(data) {
-    t.equal(data.sourceMap.sourceRoot, '', 'should keep empty string as sourceRoot');
-    t.end();
-  }).write(file);
-});
-
-test('write: should be able to fully control sourceMappingURL by the option sourceMappingURL', function(t) {
-  var file = makeNestedFile();
-  var pipeline = sourcemaps.write('../aaa/bbb/', {
-    sourceMappingURL: function(file) {
-      return 'http://maps.example.com/' + file.relative + '.map';
-    },
-  });
-  pipeline.on('data', function(data) {
-    if (/helloworld\.js$/.test(data.path)) {
-      t.equal(String(data.contents), sourceContent + '\n//# sourceMappingURL=http://maps.example.com/dir1/dir2/helloworld.js.map\n', 'should add source map comment with custom url');
-      t.end();
-    }
-  }).write(file);
-});
-
-test('write: should allow to change sources', function(t) {
-  var file = makeFile();
-  var pipeline = sourcemaps.write({
-    mapSources: function(sourcePath, f) {
-      t.equal(file, f, 'vinyl file gets passed');
-      return '../src/' + sourcePath;
-    },
-  });
-  pipeline.on('data', function(data) {
-    t.deepEqual(data.sourceMap.sources, ['../src/helloworld.js'], 'should have the correct sources');
-    t.end();
-  }).on('error', function() {
-    t.fail('emitted error');
-    t.end();
-  }).write(file);
-});
-
-test('write: can replace `mapSources` option with sourcemap.mapSources stream', function(t) {
-  var file = makeFile();
-
-  function assert(files) {
-    t.deepEqual(files[0].sourceMap.sources, ['../src/helloworld.js'], 'should have the correct sources');
-  }
-
-  pipe([
-    from.obj([file]),
-    sourcemaps.mapSources(function(sourcePath, f) {
-      t.equal(file, f, 'vinyl file gets passed');
-      return '../src/' + sourcePath;
-    }),
-    sourcemaps.write(),
-    concat(assert),
-  ], function(err) {
-    if (err) {
-      t.fail('emitted error');
+    function assert(results) {
+      var data = results[0];
+      expect(data).toExist();
+      expect(data instanceof File).toEqual(true);
+      expect(data).toBe(file);
+      expect(data.contents.toString()).toEqual(sourceContent);
     }
 
-    t.end();
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
   });
-});
 
-if (!ignoreLogTests) {
-  // Should always be last as disabling a debug namespace does not work
-  test('write: should output an error message if debug option is set and sourceContent is missing', function(t) {
+  it('should emit an error if file content is a stream', function(done) {
+    var file = makeStreamFile();
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(),
+    ], function(err) {
+      expect(err).toExist();
+      done();
+    });
+  });
+
+  it('should write an inline source map', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data).toExist();
+      expect(data instanceof File).toEqual(true);
+      expect(data).toBe(file);
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  it('should use CSS comments if CSS file', function(done) {
+    var file = makeFile();
+    file.path = file.path.replace('.js', '.css');
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.contents.toString()).toEqual(sourceContent + '\n/*# sourceMappingURL=' + base64JSON(data.sourceMap) + ' */\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  it('should write no comment if not JS or CSS file', function(done) {
+    var file = makeFile();
+    file.path = file.path.replace('.js', '.txt');
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.contents.toString()).toEqual(sourceContent);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  it('should detect whether a file uses \\n or \\r\\n and follow the existing style', function(done) {
+    var file = makeFile();
+    file.contents = new Buffer(file.contents.toString().replace(/\n/g, '\r\n'));
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.contents.toString()).toEqual(sourceContent.replace(/\n/g, '\r\n') + '\r\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\r\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  it('preExistingComment', function(done) {
+    var file = makeMappedFile();
+    file.contents = new Buffer(convert.removeComments(file.contents.toString()));
+
+    function assert(results) {
+      var data = results[0];
+      expect(data).toExist();
+      expect(data.sourceMap.preExistingComment).toExist();
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=' + base64JSON(data.sourceMap) + '\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ preExistingComment: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should write external map files', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile instanceof File).toEqual(true);
+      expect(dataFile).toBe(file);
+      expect(dataFile.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map\n');
+      expect(dataFile.sourceMap.file).toEqual('../dist/helloworld.js');
+
+      var mapFile = results[0];
+      expect(mapFile instanceof File).toEqual(true);
+      expect(/maps\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(JSON.parse(mapFile.contents)).toEqual(dataFile.sourceMap);
+      expect(mapFile.stat.isFile()).toEqual(true);
+      expect(mapFile.stat.isDirectory()).toEqual(false);
+      expect(mapFile.stat.isBlockDevice()).toEqual(false);
+      expect(mapFile.stat.isCharacterDevice()).toEqual(false);
+      expect(mapFile.stat.isSymbolicLink()).toEqual(false);
+      expect(mapFile.stat.isFIFO()).toEqual(false);
+      expect(mapFile.stat.isSocket()).toEqual(false);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../maps', { destPath: 'dist' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('clone - should keep original file history', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(/maps\/helloworld.js.map/.test(data.path)).toEqual(true);
+      expect(/assets\/helloworld.js/.test(data.history[0])).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../maps', { destPath: 'dist' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should allow to rename map file', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile instanceof File).toEqual(true);
+      expect(dataFile).toBe(file);
+      expect(dataFile.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=../maps/helloworld.map\n');
+      expect(dataFile.sourceMap.file).toEqual('../dist/helloworld.js');
+
+      var mapFile = results[0];
+      expect(mapFile instanceof File).toEqual(true);
+      expect(/maps\/helloworld.map/.test(mapFile.path)).toEqual(true);
+      expect(JSON.parse(mapFile.contents)).toEqual(dataFile.sourceMap);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../maps', {
+        mapFile: function(mapFile) {
+          return mapFile.replace('.js.map', '.map');
+        },
+        destPath: 'dist',
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should create shortest path to map in file comment', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var data = results[1];
+      expect(/assets\/dir1\/dir2\/helloworld.js/.test(data.path)).toEqual(true);
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('dir1/maps'),
+      concat(assert),
+    ], done);
+  });
+
+  it('should write no comment with option addComment=false', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.contents.toString()).toEqual(sourceContent);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ addComment: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should not include source content with option includeContent=false', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourcesContent).toEqual(undefined);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ includeContent: false }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should fetch missing sourceContent', function(done) {
+    var file = makeFile();
+    delete file.sourceMap.sourcesContent;
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourcesContent).toExist();
+      expect(data.sourceMap.sourcesContent).toEqual([sourceContent]);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  it('should not throw when unable to fetch missing sourceContent', function(done) {
     var file = makeFile();
     file.sourceMap.sources[0] += '.invalid';
     delete file.sourceMap.sourcesContent;
 
-    var history = [];
-    var unhook = hookStd.stderr(function(s) {
-      history.push(s);
-    });
-    var pipeline = sourcemaps.write();
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourcesContent).toExist();
+      expect(data.sourceMap.sourcesContent).toEqual([]);
+    }
 
-    var hasRegex = function(regex) {
-      return function(s) {
-        return regex.test(s);
-      };
-    };
-    pipeline.on('data', function() {
-      unhook();
-      t.ok(history.some(hasRegex(/No source content for 'helloworld.js.invalid'. Loading from file./g)), 'should log missing source content');
-      t.ok(history.some(hasRegex(/source file not found: /g)), 'should warn about missing file');
-      t.end();
-    }).write(file);
+    pipe([
+      from.obj([file]),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
   });
-}
+
+  it('should set the sourceRoot by option sourceRoot', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sources).toEqual(['helloworld.js']);
+      expect(data.sourceMap.sourceRoot).toEqual('/testSourceRoot');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ sourceRoot: '/testSourceRoot' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should set the mapSourcesAbsolute by option mapSourcesAbsolute', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sources).toEqual(['/assets/helloworld.js']);
+      expect(data.sourceMap.sourceRoot).toEqual('/testSourceRoot');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ sourceRoot: '/testSourceRoot', mapSourcesAbsolute: true }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should set the sourceRoot by option sourceRoot, as a function', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourceRoot).toEqual('/testSourceRoot');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({
+        sourceRoot: function() {
+          return '/testSourceRoot';
+        },
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should automatically determine sourceRoot if destPath is set', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.sourceMap.sourceRoot).toEqual('../../../assets');
+      expect(dataFile.sourceMap.file).toEqual('helloworld.js');
+      var mapFile = results[0];
+      expect(/assets\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('.', {
+        destPath: 'dist',
+        includeContent: false,
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should interpret relative path in sourceRoot as relative to destination', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.sourceMap.sourceRoot).toEqual('../../../src');
+      expect(dataFile.sourceMap.file).toEqual('helloworld.js');
+      var mapFile = results[0];
+      expect(/assets\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('.', { sourceRoot: '../src' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should interpret relative path in sourceRoot as relative to destination (part 2)', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.sourceMap.sourceRoot).toEqual('../..');
+      expect(dataFile.sourceMap.file).toEqual('helloworld.js');
+      var mapFile = results[0];
+      expect(/assets\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('.', { sourceRoot: '' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should interpret relative path in sourceRoot as relative to destination (part 3)', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.sourceMap.sourceRoot).toEqual('../../../../src');
+      expect(dataFile.sourceMap.file).toEqual('../../../dir1/dir2/helloworld.js');
+      var mapFile = results[0];
+      expect(/assets\/maps\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('maps', { sourceRoot: '../src' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should interpret relative path in sourceRoot as relative to destination (part 4)', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var dataFile = results[1];
+      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.sourceMap.sourceRoot).toEqual('../../../src');
+      expect(dataFile.sourceMap.file).toEqual('../../../dist/dir1/dir2/helloworld.js');
+      var mapFile = results[0];
+      expect(/maps\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../maps', {
+        sourceRoot: '../src',
+        destPath: 'dist',
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should accept a sourceMappingURLPrefix', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[1];
+      expect(/helloworld\.js$/.test(data.path)).toEqual(true);
+      expect(data.contents.toString().match(/sourceMappingURL.*\n$/)[0]).toEqual('sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../maps', { sourceMappingURLPrefix: 'https://asset-host.example.com' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should accept a sourceMappingURLPrefix, as a function', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[1];
+      expect(/helloworld\.js$/.test(data.path)).toEqual(true);
+      expect(data.contents.toString().match(/sourceMappingURL.*\n$/)[0]).toEqual('sourceMappingURL=https://asset-host.example.com/maps/helloworld.js.map\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: function() {
+          return 'https://asset-host.example.com';
+        },
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should invoke sourceMappingURLPrefix every time', function(done) {
+    var times = 0;
+
+    var files = [
+      makeFile(),
+      makeFile(),
+      makeFile(),
+    ];
+
+    function assert(results) {
+      // Only the files, not maps
+      [results[1], results[3], results[5]].forEach(function(data, idx) {
+        expect(/helloworld\.js$/.test(data.path)).toEqual(true);
+        expect(data.contents.toString().match(/sourceMappingURL.*\n$/)[0]).toEqual('sourceMappingURL=https://asset-host.example.com/' + (idx + 1) + '/maps/helloworld.js.map\n');
+      });
+    }
+
+    pipe([
+      from.obj(files),
+      sourcemaps.write('../maps', {
+        sourceMappingURLPrefix: function() {
+          ++times;
+          return 'https://asset-host.example.com/' + times;
+        },
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('null as sourceRoot should not set the sourceRoot', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourceRoot).toEqual(undefined);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ sourceRoot: null }),
+      concat(assert),
+    ], done);
+  });
+
+  it('function returning null as sourceRoot should not set the sourceRoot', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourceRoot).toEqual(undefined);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({
+        sourceRoot: function() {
+          return null;
+        },
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('empty string as sourceRoot should be kept', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sourceRoot).toEqual('');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({ sourceRoot: '' }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should be able to fully control sourceMappingURL by the option sourceMappingURL', function(done) {
+    var file = makeNestedFile();
+
+    function assert(results) {
+      var data = results[1];
+      expect(/helloworld\.js$/.test(data.path)).toEqual(true);
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=http://maps.example.com/dir1/dir2/helloworld.js.map\n');
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write('../aaa/bbb/', {
+        sourceMappingURL: function(file) {
+          return 'http://maps.example.com/' + file.relative + '.map';
+        },
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('should allow to change sources', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sources).toEqual(['../src/helloworld.js']);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.write({
+        mapSources: function(sourcePath, f) {
+          expect(file).toEqual(f);
+          return '../src/' + sourcePath;
+        },
+      }),
+      concat(assert),
+    ], done);
+  });
+
+  it('can replace `mapSources` option with sourcemap.mapSources stream', function(done) {
+    var file = makeFile();
+
+    function assert(results) {
+      var data = results[0];
+      expect(data.sourceMap.sources).toEqual(['../src/helloworld.js']);
+    }
+
+    pipe([
+      from.obj([file]),
+      sourcemaps.mapSources(function(sourcePath, f) {
+        expect(file).toEqual(f);
+        return '../src/' + sourcePath;
+      }),
+      sourcemaps.write(),
+      concat(assert),
+    ], done);
+  });
+
+  if (!ignoreLogTests) {
+    // Should always be last as disabling a debug namespace does not work
+    it('should output an error message if debug option is set and sourceContent is missing', function(done) {
+      var file = makeFile();
+      file.sourceMap.sources[0] += '.invalid';
+      delete file.sourceMap.sourcesContent;
+
+      var history = [];
+
+      var unhook = hookStd.stderr(function(s) {
+        history.push(s);
+      });
+
+      function assert() {
+        unhook();
+        var hasRegex = function(regex) {
+          return function(s) {
+            return regex.test(s);
+          };
+        };
+
+        expect(history.some(hasRegex(/No source content for "helloworld.js.invalid". Loading from file./g))).toEqual(true);
+        expect(history.some(hasRegex(/source file not found: /g))).toEqual(true);
+      }
+
+      pipe([
+        from.obj([file]),
+        sourcemaps.write(),
+        concat(assert),
+      ], done);
+    });
+  }
+});
