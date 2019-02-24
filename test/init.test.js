@@ -19,7 +19,7 @@ if (!ignoreLogTests) {
 var sourcemaps = require('..');
 var File = require('vinyl');
 var hookStd = require('hook-std');
-var helpers = require('./testHelpers');
+var helpers = require('./test-helpers');
 
 describe('init', function() {
 
