@@ -38,7 +38,6 @@
     "eslint": "^2.13.0",
     "eslint-config-gulp": "^3.0.1",
     "expect": "^1.20.2",
-    "faucet": "0.0.1",
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-if": "^2.0.2",
@@ -50,7 +49,6 @@
     "mississippi": "1.X",
     "mocha": "^3.5.3",
     "object-assign": "^4.1.1",
-    "tape": "^4.10.1",
     "vinyl": "^2.2.0"
   },
   "files": [
