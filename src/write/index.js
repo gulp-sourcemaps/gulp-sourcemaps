@@ -13,10 +13,10 @@ var internalsInit = require('./index.internals');
 function write(destPath, options) {
   var debug = require('../debug').spawn('write');
 
-  debug(function() { return "destPath"; });
+  debug(function() { return 'destPath'; });
   debug(function() { return destPath; });
 
-  debug(function() { return "original options";});
+  debug(function() { return 'original options';});
   debug(function() { return options; });
 
   if (options === undefined && typeof destPath !== 'string') {
@@ -26,21 +26,22 @@ function write(destPath, options) {
   options = options || {};
 
   // set defaults for options if unset
-  if (options.includeContent === undefined)
+  if (options.includeContent === undefined) {
     options.includeContent = true;
-  if (options.addComment === undefined)
+  }
+  if (options.addComment === undefined) {
     options.addComment = true;
-  if (options.charset === undefined)
-    options.charset = "utf8";
+  }
+  if (options.charset === undefined) {
+    options.charset = 'utf8';
+  }
 
-  debug(function() { return "derrived options"; });
+  debug(function() { return 'derrived options'; });
   debug(function() { return options; });
 
   var internals = internalsInit(destPath, options);
 
   function sourceMapWrite(file, encoding, callback) {
-    /*jshint validthis:true */
-
     if (file.isNull() || !file.sourceMap) {
       this.push(file);
       return callback();
@@ -61,8 +62,6 @@ function write(destPath, options) {
     this.push(file);
     callback();
   }
-
-
 
   return through.obj(sourceMapWrite);
 }

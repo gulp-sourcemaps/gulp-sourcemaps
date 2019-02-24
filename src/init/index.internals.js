@@ -18,12 +18,14 @@ module.exports = function(options, file, fileContent) {
       path: '',
       map: null,
       content: fileContent,
-      preExistingComment: null
+      preExistingComment: null,
     };
 
     _getInlineSources(sources);
-    if (!sources.map) // ahh not inline, so try file
+    if (!sources.map) {
+      // ahh not inline, so try file
       _getFileSources(sources);
+    }
 
     _fixSources(sources);
 
@@ -57,7 +59,7 @@ module.exports = function(options, file, fileContent) {
           // if current file: use content
           if (absPath === file.path) {
             sourceContent = sources.content;
-          } else { //attempt load content from file
+          } else { // attempt load content from file
             try {
               debug(function() { return 'No source content for "' + source + '". Loading from file.'; });
               sourceContent = stripBom(fs.readFileSync(absPath, 'utf8'));
@@ -82,8 +84,9 @@ module.exports = function(options, file, fileContent) {
     // Try to read inline source map
     sources.map = convert.fromSource(sources.content, options.largeFile);
 
-    if (!sources.map)
+    if (!sources.map) {
       return sources;
+    }
 
     sources.map = sources.map.toObject();
     // sources in map are relative to the source file
@@ -116,13 +119,13 @@ module.exports = function(options, file, fileContent) {
     try {
       sources.map = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
     } catch (e) {
-      debug(function() { 
+      debug(function() {
         return 'warn: external source map not found or invalid: ' + mapFile + ' ' + exceptionToString(e);
       });
     }
   }
 
   return {
-    loadMaps: loadMaps
+    loadMaps: loadMaps,
   };
 };
