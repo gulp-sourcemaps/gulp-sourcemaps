@@ -16,7 +16,7 @@ describe('mock publish', function() {
   beforeEach(makeTestPackage);
   afterEach(cleanUp);
 
-  // with regards to averting npm publishing disasters https://github.com/floridoo/gulp-sourcemaps/issues/246
+  // with regards to averting npm publishing disasters https://github.com/gulp-sourcemaps/gulp-sourcemaps/issues/246
   it('can load a published version', function(done) {
     try {
       // attempt to load a packed / unpacked potential deployed version

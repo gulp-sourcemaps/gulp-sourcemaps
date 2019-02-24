@@ -105,7 +105,7 @@ describe('integrations', function() {
     this.timeout(6000);
 
     // proves that gulp-less compilation is not slow
-    // https://github.com/floridoo/gulp-sourcemaps/issues/215
+    // https://github.com/gulp-sourcemaps/gulp-sourcemaps/issues/215
 
     pipe([
       gulp.src('assets/*.less', { cwd: __dirname }),
@@ -195,7 +195,7 @@ describe('integrations', function() {
   });
 
 
-  // - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
+  // - thanks @twiggy https://github.com/gulp-sourcemaps/gulp-sourcemaps/issues/270#issuecomment-271723208
   it('sources: is valid with concat', function(done) {
 
     function assert(results) {
@@ -218,7 +218,7 @@ describe('integrations', function() {
     ], done);
   });
 
-  // - thanks @twiggy https://github.com/floridoo/gulp-sourcemaps/issues/270#issuecomment-271723208
+  // - thanks @twiggy https://github.com/gulp-sourcemaps/gulp-sourcemaps/issues/270#issuecomment-271723208
   it('sources: mapSourcesAbsolute: is valid with concat', function(done) {
 
     function assert(results) {
