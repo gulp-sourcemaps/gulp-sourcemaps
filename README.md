@@ -406,8 +406,8 @@ For a few examples of debug you could use:
 [travis-url]: https://travis-ci.org/gulp-sourcemaps/gulp-sourcemaps
 [travis-image]: http://img.shields.io/travis/gulp-sourcemaps/gulp-sourcemaps.svg?label=travis-ci
 
-[appveyor-url]: https://ci.appveyor.com/project/gulp-sourcemaps/gulp-sourcemaps
-[appveyor-image]: https://img.shields.io/appveyor/ci/gulp-sourcemaps/gulp-sourcemaps.svg?label=appveyor
+[appveyor-url]: https://ci.appveyor.com/project/phated/gulp-sourcemaps
+[appveyor-image]: https://img.shields.io/appveyor/ci/phated/gulp-sourcemaps.svg?label=appveyor
 
 [coveralls-url]: https://coveralls.io/r/gulp-sourcemaps/gulp-sourcemaps
 [coveralls-image]: http://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps/master.svg
