@@ -233,7 +233,8 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      console.log('debugging', dataFile.path);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/helloworld.js'));
       expect(dataFile instanceof File).toEqual(true);
       expect(dataFile).toBe(file);
       expect(dataFile.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=../maps/helloworld.js.map\n');
@@ -241,7 +242,7 @@ describe('write', function() {
 
       var mapFile = results[0];
       expect(mapFile instanceof File).toEqual(true);
-      expect(/maps\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'maps/helloworld.js.map'));
       expect(JSON.parse(mapFile.contents)).toEqual(dataFile.sourceMap);
       expect(mapFile.stat.isFile()).toEqual(true);
       expect(mapFile.stat.isDirectory()).toEqual(false);
@@ -264,8 +265,8 @@ describe('write', function() {
 
     function assert(results) {
       var data = results[0];
-      expect(/maps\/helloworld.js.map/.test(data.path)).toEqual(true);
-      expect(/assets\/helloworld.js/.test(data.history[0])).toEqual(true);
+      expect(data.path).toEqual(path.join(__dirname, 'maps/helloworld.js.map'));
+      expect(data.history[0]).toEqual(path.join(__dirname, 'assets/helloworld.js'));
     }
 
     pipe([
@@ -280,7 +281,7 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/helloworld.js'));
       expect(dataFile instanceof File).toEqual(true);
       expect(dataFile).toBe(file);
       expect(dataFile.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=../maps/helloworld.map\n');
@@ -288,7 +289,7 @@ describe('write', function() {
 
       var mapFile = results[0];
       expect(mapFile instanceof File).toEqual(true);
-      expect(/maps\/helloworld.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'maps/helloworld.map'));
       expect(JSON.parse(mapFile.contents)).toEqual(dataFile.sourceMap);
     }
 
@@ -309,7 +310,7 @@ describe('write', function() {
 
     function assert(results) {
       var data = results[1];
-      expect(/assets\/dir1\/dir2\/helloworld.js/.test(data.path)).toEqual(true);
+      expect(data.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js'));
       expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=../maps/dir1/dir2/helloworld.js.map\n');
     }
 
@@ -441,11 +442,11 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js'));
       expect(dataFile.sourceMap.sourceRoot).toEqual('../../../assets');
       expect(dataFile.sourceMap.file).toEqual('helloworld.js');
       var mapFile = results[0];
-      expect(/assets\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
     }
 
     pipe([
@@ -463,11 +464,11 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js'));
       expect(dataFile.sourceMap.sourceRoot).toEqual('../../../src');
       expect(dataFile.sourceMap.file).toEqual('helloworld.js');
       var mapFile = results[0];
-      expect(/assets\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
     }
 
     pipe([
@@ -482,11 +483,11 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js'));
       expect(dataFile.sourceMap.sourceRoot).toEqual('../..');
       expect(dataFile.sourceMap.file).toEqual('helloworld.js');
       var mapFile = results[0];
-      expect(/assets\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js.map'));
     }
 
     pipe([
@@ -501,11 +502,11 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js'));
       expect(dataFile.sourceMap.sourceRoot).toEqual('../../../../src');
       expect(dataFile.sourceMap.file).toEqual('../../../dir1/dir2/helloworld.js');
       var mapFile = results[0];
-      expect(/assets\/maps\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'assets/maps/dir1/dir2/helloworld.js.map'));
     }
 
     pipe([
@@ -520,11 +521,11 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      expect(/assets\/dir1\/dir2\/helloworld.js/.test(dataFile.path)).toEqual(true);
+      expect(dataFile.path).toEqual(path.join(__dirname, 'assets/dir1/dir2/helloworld.js'));
       expect(dataFile.sourceMap.sourceRoot).toEqual('../../../src');
       expect(dataFile.sourceMap.file).toEqual('../../../dist/dir1/dir2/helloworld.js');
       var mapFile = results[0];
-      expect(/maps\/dir1\/dir2\/helloworld.js.map/.test(mapFile.path)).toEqual(true);
+      expect(mapFile.path).toEqual(path.join(__dirname, 'maps/dir1/dir2/helloworld.js.map'));
     }
 
     pipe([
@@ -657,14 +658,15 @@ describe('write', function() {
     function assert(results) {
       var data = results[1];
       expect(/helloworld\.js$/.test(data.path)).toEqual(true);
-      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=http://maps.example.com/dir1/dir2/helloworld.js.map\n');
+      expect(data.contents.toString()).toEqual(sourceContent + '\n//# sourceMappingURL=http://maps.example.com/helloworld.js.map\n');
     }
 
     pipe([
       from.obj([file]),
       sourcemaps.write('../aaa/bbb/', {
         sourceMappingURL: function(file) {
-          return 'http://maps.example.com/' + file.relative + '.map';
+          // This avoids file.relative because Windows path separators
+          return 'http://maps.example.com/' + file.basename + '.map';
         },
       }),
       concat(assert),

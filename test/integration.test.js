@@ -6,6 +6,7 @@ var $ = require('gulp-load-plugins')();
 var sourcemaps = require('..');
 var debug = require('debug-fabulous')();
 var miss = require('mississippi');
+var rimraf = require('rimraf');
 
 var pipe = miss.pipe;
 var concat = miss.concat;
@@ -27,6 +28,10 @@ function base64JSON(object) {
 debug('running');
 
 describe('integrations', function() {
+
+  after(function(cb) {
+    rimraf('./tmp', cb);
+  });
 
   it('combined: creates inline mapping', function(done) {
 

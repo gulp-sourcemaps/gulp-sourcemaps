@@ -49,6 +49,7 @@
     "mississippi": "1.X",
     "mocha": "^3.5.3",
     "object-assign": "^4.1.1",
+    "rimraf": "^2.6.3",
     "vinyl": "^2.2.0"
   },
   "files": [
