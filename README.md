@@ -1,8 +1,8 @@
-## gulp-sourcemaps  [![NPM version][npm-image]][npm-url] [![build status][travis-image]][travis-url] [![Test coverage][coveralls-image]][coveralls-url]
+# gulp-sourcemaps
 
-### Branching
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Travis Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
-__2.X now supports node 0.10+ due to switching out a dependency.__
+Sourcemap support for gulpjs.
 
 ### Usage
 
@@ -399,9 +399,15 @@ For a few examples of debug you could use:
   DEBUG='gulp-sourcemaps:write:,gulp-sourcemaps:init:**' #write/index.internals.js and init/index.internals.js
 ```
 
-[npm-image]: https://img.shields.io/npm/v/gulp-sourcemaps.svg
+[downloads-image]: http://img.shields.io/npm/dm/gulp-sourcemaps.svg
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
-[travis-image]: https://img.shields.io/travis/gulp-sourcemaps/gulp-sourcemaps.svg
+[npm-image]: http://img.shields.io/npm/v/gulp-sourcemaps.svg
+
 [travis-url]: https://travis-ci.org/gulp-sourcemaps/gulp-sourcemaps
-[coveralls-image]: https://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps.svg
-[coveralls-url]: https://coveralls.io/r/gulp-sourcemaps/gulp-sourcemaps?branch=master
+[travis-image]: http://img.shields.io/travis/gulp-sourcemaps/gulp-sourcemaps.svg?label=travis-ci
+
+[appveyor-url]: https://ci.appveyor.com/project/gulp-sourcemaps/gulp-sourcemaps
+[appveyor-image]: https://img.shields.io/appveyor/ci/gulp-sourcemaps/gulp-sourcemaps.svg?label=appveyor
+
+[coveralls-url]: https://coveralls.io/r/gulp-sourcemaps/gulp-sourcemaps
+[coveralls-image]: http://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps/master.svg
