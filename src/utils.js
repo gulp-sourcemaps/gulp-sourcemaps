@@ -1,6 +1,6 @@
 'use strict';
-var path = require('path'),
-  detectNewline = require('detect-newline');
+var path = require('path');
+var detectNewline = require('detect-newline');
 
 function unixStylePath(filePath) {
   return filePath.split(path.sep).join('/');
@@ -17,53 +17,54 @@ See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-wh
 
 So we either need to use a new instance of a regex everywhere.
 */
-var sourceMapUrlRegEx = function(){ return /\/\/\# sourceMappingURL\=.*/g;};
+function sourceMapUrlRegEx() {
+  return /\/\/\# sourceMappingURL\=.*/g;
+}
 
 var commentFormatters = {
   css: function cssCommentFormatter(preLine, newline, url) {
-    return preLine + "/*# sourceMappingURL=" + url + " */" + newline;
+    return preLine + '/*# sourceMappingURL=' + url + ' */' + newline;
   },
   js: function jsCommentFormatter(preLine, newline, url) {
-    return preLine + "//# sourceMappingURL=" + url + newline;
+    return preLine + '//# sourceMappingURL=' + url + newline;
   },
-  'default': function defaultFormatter() {
+  default: function defaultFormatter() {
     return '';
-  }
-}
+  },
+};
 
-
-var getCommentFormatter = function (file) {
-  var extension = file.relative.split('.').pop(),
-    fileContents = file.contents.toString(),
-    newline = detectNewline.graceful(fileContents || '');
+function getCommentFormatter(file) {
+  var extension = file.relative.split('.').pop();
+  var fileContents = file.contents.toString();
+  var newline = detectNewline.graceful(fileContents || '');
 
   var commentFormatter = commentFormatters.default;
 
   if (file.sourceMap.preExistingComment) {
-    commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, '', newline)
-    debug(function () {
+    commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, '', newline);
+    debug(function() {
       return 'preExistingComment commentFormatter ' + commentFormatter.name;
     });
   } else {
     commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, newline, newline);
   }
 
-  debug(function () {
+  debug(function() {
     return 'commentFormatter ' + commentFormatter.name;
   });
   return commentFormatter;
-};
+}
 
-var getInlinePreExisting = function(fileContent){
-  if(sourceMapUrlRegEx().test(fileContent)){
+function getInlinePreExisting(fileContent) {
+  if (sourceMapUrlRegEx().test(fileContent)) {
     debug(function() { return 'has preExisting'; });
     return fileContent.match(sourceMapUrlRegEx())[0];
   }
-};
+}
 
-var exceptionToString = function (exception) {
+function exceptionToString(exception) {
   return exception.message || '';
-};
+}
 
 module.exports = {
   unixStylePath: unixStylePath,
@@ -72,5 +73,5 @@ module.exports = {
   sourceMapUrlRegEx: sourceMapUrlRegEx,
   getCommentFormatter: getCommentFormatter,
   getInlinePreExisting: getInlinePreExisting,
-  exceptionToString: exceptionToString
+  exceptionToString: exceptionToString,
 };

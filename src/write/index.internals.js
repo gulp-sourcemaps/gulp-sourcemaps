@@ -9,7 +9,7 @@ module.exports = function(destPath, options) {
   var stripBom = require('strip-bom-string');
   var rootDebug = require('../debug').spawn('write:internals');
 
-  rootDebug(function() { return "options"; });
+  rootDebug(function() { return 'options'; });
   rootDebug(function() { return options; });
 
   function setSourceRoot(file) {
@@ -32,34 +32,34 @@ module.exports = function(destPath, options) {
   function mapSources(file) {
     var debug = rootDebug.spawn('mapSources');
 
-    //NOTE: make sure source mapping happens after content has been loaded
+    // NOTE: make sure source mapping happens after content has been loaded
     if (options.mapSources && typeof options.mapSources === 'function') {
       debug(function() { return '**Option is deprecated, update to use sourcemap.mapSources stream**'; });
       debug(function() { return 'function'; });
 
-      file.sourceMap.sources = file.sourceMap.sources.map(function (filePath) {
+      file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
         return options.mapSources(filePath, file);
       });
       return;
     }
 
-    debug(function() { return "file.path: " + file.path; });
-    debug(function() { return "file.cwd: " + file.cwd; });
-    debug(function() { return "file.base: " + file.base; });
+    debug(function() { return 'file.path: ' + file.path; });
+    debug(function() { return 'file.cwd: ' + file.cwd; });
+    debug(function() { return 'file.base: ' + file.base; });
 
     file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
       // keep the references files like ../node_modules within the sourceRoot
-      debug(function() { return "filePath: " + filePath; });
+      debug(function() { return 'filePath: ' + filePath; });
 
-      if (options.mapSourcesAbsolute === true){
+      if (options.mapSourcesAbsolute === true) {
         debug(function() { return 'mapSourcesAbsolute'; });
 
-        if (!file.dirname){
+        if (!file.dirname) {
           debug(function() { return '!file.dirname'; });
           filePath = path.join(file.base, filePath).replace(file.cwd, '');
         } else {
-            debug(function() { return 'file.dirname: ' + file.dirname; });
-            filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
+          debug(function() { return 'file.dirname: ' + file.dirname; });
+          filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
         }
       }
       return unixStylePath(filePath);
@@ -80,8 +80,7 @@ module.exports = function(destPath, options) {
           try {
             debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
             sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
-          }
-          catch (e) {
+          } catch (e) {
             debug('source file not found: ' + sourcePath);
           }
         }
@@ -95,8 +94,8 @@ module.exports = function(destPath, options) {
     var debug = rootDebug.spawn('mapDestPath');
     var sourceMap = file.sourceMap;
 
-    var comment,
-      commentFormatter = utils.getCommentFormatter(file);
+    var comment;
+    var commentFormatter = utils.getCommentFormatter(file);
 
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
@@ -129,18 +128,17 @@ module.exports = function(destPath, options) {
         }
       }
 
-      var sourceMapFile;
-      sourceMapFile = file.clone(options.clone || {deep:false, contents:false});
+      var sourceMapFile = file.clone(options.clone || { deep: false, contents: false });
       sourceMapFile.path = sourceMapPath;
       sourceMapFile.contents = new Buffer(JSON.stringify(sourceMap));
       sourceMapFile.stat = {
-        isFile: function () { return true; },
-        isDirectory: function () { return false; },
-        isBlockDevice: function () { return false; },
-        isCharacterDevice: function () { return false; },
-        isSymbolicLink: function () { return false; },
-        isFIFO: function () { return false; },
-        isSocket: function () { return false; }
+        isFile: function() { return true; },
+        isDirectory: function() { return false; },
+        isBlockDevice: function() { return false; },
+        isCharacterDevice: function() { return false; },
+        isSymbolicLink: function() { return false; },
+        isFIFO: function() { return false; },
+        isSocket: function() { return false; },
       };
       stream.push(sourceMapFile);
 
@@ -155,17 +153,17 @@ module.exports = function(destPath, options) {
         }
         sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
-      debug(function() { return "destPath comment"; });
+      debug(function() { return 'destPath comment'; });
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
       if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
-        debug(function() { return "options.sourceMappingURL comment"; });
+        debug(function() { return 'options.sourceMappingURL comment'; });
         comment = commentFormatter(options.sourceMappingURL(file));
       }
     }
 
     // append source map comment
-    if (options.addComment){
+    if (options.addComment) {
       file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
     }
   }
@@ -174,6 +172,6 @@ module.exports = function(destPath, options) {
     setSourceRoot: setSourceRoot,
     loadContent: loadContent,
     mapSources: mapSources,
-    mapDestPath: mapDestPath
+    mapDestPath: mapDestPath,
   };
 };

@@ -1,7 +1,0 @@
-{
-	"node": true,
-	"strict": "global",
-	"unused": "vars",
-  "undef": true,
-  "esversion": 2015
-}

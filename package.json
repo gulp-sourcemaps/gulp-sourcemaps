@@ -6,13 +6,11 @@
   "repository": "git://github.com/gulp-sourcemaps/gulp-sourcemaps.git",
   "main": "index.js",
   "scripts": {
-    "lint": "jshint ./src/**/*.js ./test/*.js",
-    "test": "npm run lint && faucet test/*.js $@",
-    "tape": "tape",
-    "cover": "istanbul cover --dir reports/coverage tape \"test/*.js\"",
-    "coveralls": "istanbul cover tape \"test/*.js\" --report lcovonly && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
-    "serve": "http-server",
-    "test:int": "rm -rf ./tmp && tape ./test/integration.js"
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "mocha --async-only",
+    "cover": "istanbul cover _mocha --report lcovonly",
+    "coveralls": "npm run cover && istanbul-coveralls"
   },
   "keywords": [
     "gulpplugin",
@@ -23,43 +21,41 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "@gulp-sourcemaps/identity-map": "1.X",
-    "@gulp-sourcemaps/map-sources": "1.X",
-    "acorn": "5.X",
-    "convert-source-map": "1.X",
-    "css": "2.X",
-    "debug-fabulous": "1.X",
-    "detect-newline": "2.X",
-    "graceful-fs": "4.X",
-    "source-map": "~0.6.0",
-    "strip-bom-string": "1.X",
-    "through2": "2.X"
+    "@gulp-sourcemaps/identity-map": "^1.0.0",
+    "@gulp-sourcemaps/map-sources": "^1.0.0",
+    "acorn": "^5.0.0",
+    "convert-source-map": "^1.0.0",
+    "css": "^2.0.0",
+    "debug-fabulous": "^1.0.0",
+    "detect-newline": "^2.0.0",
+    "graceful-fs": "^4.0.0",
+    "source-map": "^0.6.0",
+    "strip-bom-string": "^1.0.0",
+    "through2": "^2.0.0"
   },
   "devDependencies": {
-    "bootstrap": "3.3.7",
-    "coveralls": "2.X",
-    "faucet": "0.0.X",
-    "gulp": "3.X",
-    "gulp-concat": "2.X",
-    "gulp-if": "2.X",
-    "gulp-less": "3.X",
-    "gulp-load-plugins": "1.X",
+    "bootstrap": "^3.4.1",
+    "eslint": "^2.13.0",
+    "eslint-config-gulp": "^3.0.1",
+    "expect": "^1.20.2",
+    "gulp": "^4.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-if": "^2.0.2",
+    "gulp-less": "^3.0.0",
+    "gulp-load-plugins": "^1.5.0",
     "hook-std": "0.2.X",
-    "http-server": "0.10.X",
-    "istanbul": "0.X",
-    "jshint": "2.X",
-    "lodash": "4.X",
+    "istanbul": "^0.4.3",
+    "istanbul-coveralls": "^1.0.3",
     "mississippi": "1.X",
-    "object-assign": "4.X",
-    "tape": "4.X",
-    "vinyl": "2.X",
-    "yargs": "7.X"
+    "mocha": "^3.5.3",
+    "object-assign": "^4.1.1",
+    "vinyl": "^2.2.0"
   },
   "files": [
     "index.js",
     "src"
   ],
   "engines": {
-    "node": ">=4"
+    "node": ">= 0.10"
   }
 }

@@ -15,8 +15,6 @@ function init(options) {
   var debug = require('../debug').spawn('init');
 
   function sourceMapInit(file, encoding, callback) {
-    /*jshint validthis:true */
-
     // pass through if file is null or already has a source map
     if (file.isNull() || file.sourceMap) {
       this.push(file);
@@ -52,18 +50,19 @@ function init(options) {
       });
       var fileType = path.extname(file.path);
       var source = unixStylePath(file.relative);
-      var generator = new SourceMapGenerator({file: source});
+      var generator = new SourceMapGenerator({ file: source });
 
       if (fileType === '.js') {
-        var tokenizer = acorn.tokenizer(fileContent, {locations: true});
+        var tokenizer = acorn.tokenizer(fileContent, { locations: true });
         while (true) {
           var token = tokenizer.getToken();
-          if (token.type.label === "eof")
+          if (token.type.label === 'eof') {
             break;
+          }
           var mapping = {
             original: token.loc.start,
             generated: token.loc.start,
-            source: source
+            source: source,
           };
           if (token.type.label === 'name') {
             mapping.name = token.value;
@@ -72,16 +71,15 @@ function init(options) {
         }
         generator.setSourceContent(source, fileContent);
         sourceMap = generator.toJSON();
-
       } else if (fileType === '.css') {
         debug('css');
-        var ast = css.parse(fileContent, {silent: true});
+        var ast = css.parse(fileContent, { silent: true });
         debug(function() {
           return ast;
         });
         var registerTokens = function(ast) {
           if (ast.position) {
-            generator.addMapping({original: ast.position.start, generated: ast.position.start, source: source});
+            generator.addMapping({ original: ast.position.start, generated: ast.position.start, source: source });
           }
 
           function logAst(key, ast) {
@@ -95,12 +93,12 @@ function init(options) {
 
           for (var key in ast) {
             logAst(key, ast);
-            if (key !== "position") {
+            if (key !== 'position') {
               if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
                 registerTokens(ast[key]);
               } else if (Array.isArray(ast[key])) {
                 debug(function() {
-                  return "@@@@ ast[key] isArray @@@@";
+                  return '@@@@ ast[key] isArray @@@@';
                 });
                 for (var i = 0; i < ast[key].length; i++) {
                   registerTokens(ast[key][i]);
@@ -122,11 +120,11 @@ function init(options) {
         names: [],
         mappings: '',
         sources: [unixStylePath(file.relative)],
-        sourcesContent: [fileContent]
+        sourcesContent: [fileContent],
       };
-    }
-    else if(preExistingComment !== null && typeof preExistingComment !== 'undefined')
+    } else if (preExistingComment !== null && typeof preExistingComment !== 'undefined') {
       sourceMap.preExistingComment = preExistingComment;
+    }
 
     sourceMap.file = unixStylePath(file.relative);
     file.sourceMap = sourceMap;
