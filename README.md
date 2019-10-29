@@ -6,6 +6,8 @@ Sourcemap support for gulpjs.
 
 ### Usage
 
+All the examples here works with Gulp 4. To see examples related to Gulp 3, [you can read them here](https://github.com/gulp-sourcemaps/gulp-sourcemaps/blob/v2.6.5/README.md).
+
 #### Write inline source maps
 Inline source maps are embedded in the source file.
 
@@ -16,14 +18,17 @@ var plugin1 = require('gulp-plugin1');
 var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
-gulp.task('javascript', function() {
+function javascript() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
       .pipe(plugin1())
       .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
-});
+};
+
+
+exports.javascript = javascript;
 ```
 
 All plugins between `sourcemaps.init()` and `sourcemaps.write()` need to have support for `gulp-sourcemaps`. You can find a list of such plugins in the [wiki](https://github.com/gulp-sourcemaps/gulp-sourcemaps/wiki/Plugins-with-gulp-sourcemaps-support).
@@ -40,14 +45,16 @@ var plugin1 = require('gulp-plugin1');
 var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
-gulp.task('javascript', function() {
+function javascript() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
       .pipe(plugin1())
       .pipe(plugin2())
     .pipe(sourcemaps.write('../maps'))
     .pipe(gulp.dest('dist'));
-});
+};
+
+exports.javascript = javascript;
 ```
 
 #### Load existing source maps
@@ -61,14 +68,16 @@ var plugin1 = require('gulp-plugin1');
 var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
-gulp.task('javascript', function() {
+function javascript() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(plugin1())
       .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
-});
+};
+
+exports.javascript = javascript;
 ```
 
 #### Handle large files
@@ -82,14 +91,16 @@ var plugin1 = require('gulp-plugin1');
 var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
-gulp.task('javascript', function() {
+function javascript() {
   gulp.src('src/**/*.js')
     .pipe(sourcemaps.init({largeFile: true}))
       .pipe(plugin1())
       .pipe(plugin2())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
-});
+};
+
+exports.javascript = javascript;
 ```
 
 #### Handle source files from different directories
@@ -103,14 +114,16 @@ var plugin1 = require('gulp-plugin1');
 var plugin2 = require('gulp-plugin2');
 var sourcemaps = require('gulp-sourcemaps');
 
-gulp.task('javascript', function() {
+function javascript() {
 gulp.src(['src/test.js', 'src/testdir/test2.js'], { base: 'src' })
     .pipe(sourcemaps.init())
       .pipe(plugin1())
       .pipe(plugin2())
     .pipe(sourcemaps.write('../maps'))
     .pipe(gulp.dest('dist'));
-});
+};
+
+exports.javascript = javascript;
 ```
 
 #### Alter `sources` property on sourcemaps
@@ -119,7 +132,7 @@ The exported `mapSources` method gives full control over the source paths. It ta
 
 Example:
 ```javascript
-gulp.task('javascript', function() {
+function javascript() {
   var stream = gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
       .pipe(plugin1())
@@ -131,7 +144,9 @@ gulp.task('javascript', function() {
       }))
     .pipe(sourcemaps.write('../maps')
     .pipe(gulp.dest('public/scripts'));
-});
+};
+
+exports.javascript = javascript;
 ```
 
 #### Generate Identity Sourcemap
@@ -140,7 +155,7 @@ The exported `identityMap` method allows you to generate a full valid source map
 
 Example:
 ```javascript
-gulp.task('javascript', function() {
+function javascript() {
   var stream = gulp.src('src/**/*.js')
     .pipe(sourcemaps.init())
       // An identity sourcemap will be generated at this step
@@ -149,7 +164,9 @@ gulp.task('javascript', function() {
       .pipe(plugin2())
     .pipe(sourcemaps.write('../maps')
     .pipe(gulp.dest('public/scripts'));
-});
+};
+
+exports.javascript = javascript;
 ```
 
 
@@ -176,14 +193,16 @@ gulp.task('javascript', function() {
 
   Example:
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
         .pipe(plugin2())
       .pipe(sourcemaps.write('../maps', {addComment: false}))
       .pipe(gulp.dest('dist'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
 
 - `includeContent`
@@ -200,19 +219,21 @@ gulp.task('javascript', function() {
 
   Example:
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
         .pipe(plugin2())
       .pipe(sourcemaps.write({includeContent: false, sourceRoot: '/src'}))
       .pipe(gulp.dest('dist'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
 
   Example (using a function):
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
@@ -224,19 +245,23 @@ gulp.task('javascript', function() {
         }
        }))
       .pipe(gulp.dest('dist'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
 
   Example (relative path):
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
         .pipe(plugin2())
       .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: '../src'}))
       .pipe(gulp.dest('dist'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
   In this case for a file written to `dist/subdir/example.js`, the source map is written to `dist/subdir/example.js.map` and the sourceRoot will be `../../src` (resulting in the full source path `../../src/subdir/example.js`).
 
@@ -251,7 +276,7 @@ gulp.task('javascript', function() {
 
   Example:
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
@@ -260,7 +285,9 @@ gulp.task('javascript', function() {
         sourceMappingURLPrefix: 'https://asset-host.example.com/assets'
       }))
       .pipe(gulp.dest('public/scripts'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
 
   This will result in a source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/assets/maps/helloworld.js.map`.
@@ -271,7 +298,7 @@ gulp.task('javascript', function() {
 
   Example:
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
@@ -282,7 +309,9 @@ gulp.task('javascript', function() {
         }
       }))
       .pipe(gulp.dest('public/scripts'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
 
   This will result in a source mapping URL comment like `sourceMappingURL=https://asset-host.example.com/helloworld.js.map`.
@@ -293,7 +322,7 @@ gulp.task('javascript', function() {
 
   Example:
   ```javascript
-  gulp.task('javascript', function() {
+  function javascript() {
     var stream = gulp.src('src/**/*.js')
       .pipe(sourcemaps.init())
         .pipe(plugin1())
@@ -305,7 +334,9 @@ gulp.task('javascript', function() {
         }
       }))
       .pipe(gulp.dest('public/scripts'));
-  });
+  };
+
+  exports.javascript = javascript;
   ```
 
 - `mapSources`
