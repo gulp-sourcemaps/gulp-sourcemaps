@@ -18,7 +18,7 @@ See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-wh
 So we either need to use a new instance of a regex everywhere.
 */
 function sourceMapUrlRegEx() {
-  return /\/\/\# sourceMappingURL\=.*/g;
+  return /\/\/# sourceMappingURL=.*/g;
 }
 
 var commentFormatters = {
