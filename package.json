@@ -1,6 +1,6 @@
 {
   "name": "gulp-sourcemaps",
-  "version": "2.6.5",
+  "version": "3.0.0-0",
   "description": "Sourcemap support for gulpjs.",
   "homepage": "http://github.com/gulp-sourcemaps/gulp-sourcemaps",
   "repository": "git://github.com/gulp-sourcemaps/gulp-sourcemaps.git",
@@ -21,9 +21,9 @@
   "author": "Florian Reiterer <me@florianreiterer.com>",
   "license": "ISC",
   "dependencies": {
-    "@gulp-sourcemaps/identity-map": "^1.0.0",
+    "@gulp-sourcemaps/identity-map": "^2.0.1",
     "@gulp-sourcemaps/map-sources": "^1.0.0",
-    "acorn": "^5.0.0",
+    "acorn": "^6.4.1",
     "convert-source-map": "^1.0.0",
     "css": "^2.0.0",
     "debug-fabulous": "^1.0.0",
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "bootstrap": "^3.4.1",
-    "eslint": "^2.13.0",
+    "eslint": "^5.16.0",
     "eslint-config-gulp": "^3.0.1",
     "expect": "^1.20.2",
     "gulp": "^4.0.0",
@@ -57,6 +57,6 @@
     "src"
   ],
   "engines": {
-    "node": ">= 0.10"
+    "node": ">= 6"
   }
 }

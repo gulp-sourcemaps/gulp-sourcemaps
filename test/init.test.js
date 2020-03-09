@@ -159,7 +159,7 @@ describe('init', function() {
       expect(data.sourceMap.sources[0]).toEqual('test.css');
       expect(data.sourceMap.sourcesContent[0]).toEqual(helpers.sourceContentCSS);
       expect(data.sourceMap.names).toEqual([]);
-      expect(data.sourceMap.mappings).toEqual('CAAC;GACE;GACA');
+      expect(data.sourceMap.mappings).toEqual('AAAA;EACE,gBAAgB;EAChB,WAAW;AACb');
     }
 
     pipe([
@@ -194,7 +194,7 @@ describe('init', function() {
     ], done);
   });
 
-  it('should load external source map file referenced in comment with the \/\/# syntax', function(done) {
+  it('should load external source map file referenced in comment with the //# syntax', function(done) {
     var file = helpers.makeFile();
     file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
 
@@ -214,7 +214,7 @@ describe('init', function() {
     ], done);
   });
 
-  it('css: should load external source map file referenced in comment with the \/\/*# syntax', function(done) {
+  it('css: should load external source map file referenced in comment with the //*# syntax', function(done) {
     var file = helpers.makeFileCSS();
     file.contents = new Buffer(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
 
@@ -234,7 +234,7 @@ describe('init', function() {
     ], done);
   });
 
-  it('should remove source map comment with the \/\/# syntax', function(done) {
+  it('should remove source map comment with the //# syntax', function(done) {
     var file = helpers.makeFile();
     file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
 
@@ -250,7 +250,7 @@ describe('init', function() {
     ], done);
   });
 
-  it('init: css: should remove source map comment with the \/\/*# syntax', function(done) {
+  it('init: css: should remove source map comment with the //*# syntax', function(done) {
     var file = helpers.makeFileCSS();
     file.contents = new Buffer(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
 
@@ -267,7 +267,7 @@ describe('init', function() {
     ], done);
   });
 
-  it('should load external source map file referenced in comment with the \/*# *\/ syntax', function(done) {
+  it('should load external source map file referenced in comment with the /*# */ syntax', function(done) {
     var file = helpers.makeFile();
     file.contents = new Buffer(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
 
@@ -287,7 +287,7 @@ describe('init', function() {
     ], done);
   });
 
-  it('should remove source map comment with the \/\/# syntax', function(done) {
+  it('should remove source map comment with the //# syntax', function(done) {
     var file = helpers.makeFile();
     file.contents = new Buffer(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
 
