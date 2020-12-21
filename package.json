@@ -43,7 +43,7 @@
     "gulp-if": "^2.0.2",
     "gulp-less": "^3.0.0",
     "gulp-load-plugins": "^1.5.0",
-    "hook-std": "0.2.X",
+    "hook-std": "2.0.X",
     "istanbul": "^0.4.3",
     "istanbul-coveralls": "^1.0.3",
     "mississippi": "1.X",

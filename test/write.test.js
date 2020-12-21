@@ -721,12 +721,13 @@ describe('write', function() {
 
       var history = [];
 
-      var unhook = hookStd.stderr(function(s) {
+      var promise = hookStd.stderr(function(s) {
         history.push(s);
       });
 
-      function assert() {
-        unhook();
+      async function assert() {
+        promise.unhook();
+        await promise;
         var hasRegex = function(regex) {
           return function(s) {
             return regex.test(s);
