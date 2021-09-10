@@ -378,7 +378,7 @@ exports.javascript = javascript;
 
       // do normal plugin logic
       var result = myTransform(file.contents, options);
-      file.contents = new Buffer(result.code);
+      file.contents = Buffer.from(result.code);
 
       // apply source map to the chain
       if (file.sourceMap) {
