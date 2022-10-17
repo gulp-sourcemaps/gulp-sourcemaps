@@ -5,7 +5,7 @@ var through = require('through2');
 var path = require('path');
 var acorn = require('acorn');
 var SourceMapGenerator = require('source-map').SourceMapGenerator;
-var css = require('css');
+var css = require('css-tree');
 var initInternals = require('./index.internals');
 
 /**
@@ -73,7 +73,7 @@ function init(options) {
         sourceMap = generator.toJSON();
       } else if (fileType === '.css') {
         debug('css');
-        var ast = css.parse(fileContent, { silent: true });
+        var ast = css.parse(fileContent);
         debug(function() {
           return ast;
         });
