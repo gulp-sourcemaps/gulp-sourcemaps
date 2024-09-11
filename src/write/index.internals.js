@@ -99,7 +99,7 @@ module.exports = function(destPath, options) {
 
     if (destPath === undefined || destPath === null) {
       // encode source map into comment
-      var base64Map = new Buffer(JSON.stringify(sourceMap)).toString('base64');
+      var base64Map = Buffer.from(JSON.stringify(sourceMap)).toString('base64');
       comment = commentFormatter('data:application/json;charset=' + options.charset + ';base64,' + base64Map);
     } else {
       var mapFile = path.join(destPath, file.relative) + '.map';
@@ -130,7 +130,7 @@ module.exports = function(destPath, options) {
 
       var sourceMapFile = file.clone(options.clone || { deep: false, contents: false });
       sourceMapFile.path = sourceMapPath;
-      sourceMapFile.contents = new Buffer(JSON.stringify(sourceMap));
+      sourceMapFile.contents = Buffer.from(JSON.stringify(sourceMap));
       sourceMapFile.stat = {
         isFile: function() { return true; },
         isDirectory: function() { return false; },
@@ -164,7 +164,7 @@ module.exports = function(destPath, options) {
 
     // append source map comment
     if (options.addComment) {
-      file.contents = Buffer.concat([file.contents, new Buffer(comment)]);
+      file.contents = Buffer.concat([file.contents, Buffer.from(comment)]);
     }
   }
 
