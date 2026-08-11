@@ -4,6 +4,16 @@
 
 Sourcemap support for gulpjs.
 
+## Strict No LLM / No AI Policy
+
+No LLMs for issues.
+
+No LLMs for patches / pull requests.
+
+No LLMs for comments on the bug tracker, including translation.
+
+English is encouraged, but not required. You are welcome to post in your native language and rely on others to have their own translation tools of choice to interpret your words.
+
 ### Usage
 
 All the examples here works with Gulp 4. To see examples related to Gulp 3, [you can read them here](https://github.com/gulp-sourcemaps/gulp-sourcemaps/blob/v2.6.5/README.md).
