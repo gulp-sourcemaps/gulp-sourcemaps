@@ -8,7 +8,7 @@ function unixStylePath(filePath) {
 
 var PLUGIN_NAME = require('../package.json').name;
 
-var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
+var urlRegex = /^(https?|webpack(-[^:]+)?|file):\/\//;
 
 var debug = require('./debug').spawn('utils');
 /*
