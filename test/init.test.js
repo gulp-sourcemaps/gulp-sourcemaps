@@ -196,7 +196,7 @@ describe('init', function() {
 
   it('should load external source map file referenced in comment with the //# syntax', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
+    file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
 
     function assert(results) {
       var data = results[0];
@@ -216,7 +216,7 @@ describe('init', function() {
 
   it('css: should load external source map file referenced in comment with the //*# syntax', function(done) {
     var file = helpers.makeFileCSS();
-    file.contents = new Buffer(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
+    file.contents = Buffer.from(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
 
     function assert(results) {
       var data = results[0];
@@ -236,7 +236,7 @@ describe('init', function() {
 
   it('should remove source map comment with the //# syntax', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
+    file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld2.js.map');
 
     function assert(results) {
       var data = results[0];
@@ -252,7 +252,7 @@ describe('init', function() {
 
   it('init: css: should remove source map comment with the //*# syntax', function(done) {
     var file = helpers.makeFileCSS();
-    file.contents = new Buffer(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
+    file.contents = Buffer.from(helpers.sourceContentCSS + '\n/*# sourceMappingURL=test.css.map */');
 
     function assert(results) {
       var data = results[0];
@@ -269,7 +269,7 @@ describe('init', function() {
 
   it('should load external source map file referenced in comment with the /*# */ syntax', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
+    file.contents = Buffer.from(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
 
     function assert(results) {
       var data = results[0];
@@ -289,7 +289,7 @@ describe('init', function() {
 
   it('should remove source map comment with the //# syntax', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
+    file.contents = Buffer.from(helpers.sourceContent + '\n/*# sourceMappingURL=helloworld2.js.map */');
 
     function assert(results) {
       var data = results[0];
@@ -325,7 +325,7 @@ describe('init', function() {
 
   it('should load external source map and add sourceContent if missing', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
+    file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld3.js.map');
 
     function assert(results) {
       var data = results[0];
@@ -345,7 +345,7 @@ describe('init', function() {
 
   it('should not throw when source file for sourceContent not found', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+    file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
 
     function assert(results) {
       var data = results[0];
@@ -384,7 +384,7 @@ describe('init', function() {
 
   it('should use sourceRoot when resolving path to sources', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
+    file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld5.js.map');
 
     function assert(results) {
       var data = results[0];
@@ -405,7 +405,7 @@ describe('init', function() {
 
   it('should not load source content if the path is a url', function(done) {
     var file = helpers.makeFile();
-    file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
+    file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld6.js.map');
 
     function assert(results) {
       var data = results[0];
@@ -477,7 +477,7 @@ describe('init', function() {
     it('should output an error message if debug option is set and sourceContent is missing', function(done) {
 
       var file = helpers.makeFile();
-      file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
+      file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
 
       var history = [];
 
@@ -506,7 +506,7 @@ describe('init', function() {
 
     it('should output an error message if debug option is set, loadMaps: true, and source map file not found', function(done) {
       var file = helpers.makeFile();
-      file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=not-existent.js.map');
+      file.contents = Buffer.from(helpers.sourceContent + '\n//# sourceMappingURL=not-existent.js.map');
 
       var history = [];
 

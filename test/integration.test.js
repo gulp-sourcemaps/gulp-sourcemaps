@@ -22,7 +22,7 @@ var fs = require('fs');
 var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toString();
 
 function base64JSON(object) {
-  return 'data:application/json;charset=utf8;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
+  return 'data:application/json;charset=utf8;base64,' + Buffer.from(JSON.stringify(object)).toString('base64');
 }
 
 debug('running');
