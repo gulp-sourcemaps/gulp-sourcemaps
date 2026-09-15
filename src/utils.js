@@ -10,7 +10,6 @@ var PLUGIN_NAME = require('../package.json').name;
 
 var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
 
-var debug = require('./debug').spawn('utils');
 /*
 So reusing the same ref for a regex (with global (g)) is from a poor decision in js.
 See http://stackoverflow.com/questions/10229144/bug-with-regexp-in-javascript-when-do-global-search
@@ -42,22 +41,15 @@ function getCommentFormatter(file) {
 
   if (file.sourceMap.preExistingComment) {
     commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, '', newline);
-    debug(function() {
-      return 'preExistingComment commentFormatter ' + commentFormatter.name;
-    });
   } else {
     commentFormatter = (commentFormatters[extension] || commentFormatter).bind(undefined, newline, newline);
   }
 
-  debug(function() {
-    return 'commentFormatter ' + commentFormatter.name;
-  });
   return commentFormatter;
 }
 
 function getInlinePreExisting(fileContent) {
   if (sourceMapUrlRegEx().test(fileContent)) {
-    debug(function() { return 'has preExisting'; });
     return fileContent.match(sourceMapUrlRegEx())[0];
   }
 }

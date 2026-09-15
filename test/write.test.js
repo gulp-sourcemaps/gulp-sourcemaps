@@ -6,20 +6,12 @@ var File = require('vinyl');
 var ReadableStream = require('stream').Readable;
 var path = require('path');
 var fs = require('fs');
-var hookStd = require('hook-std');
-var debug = require('debug-fabulous')();
 var miss = require('mississippi');
 
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
 
-var ignoreLogTests = process.argv.indexOf('--ignore-log-tests') !== -1;
-
-if (!ignoreLogTests) {
-  debug.save('gulp-sourcemaps:*');
-  debug.enable(debug.load());
-}
 var assign = require('object-assign');
 var utils = require('../src/utils');
 var convert = require('convert-source-map');
@@ -233,7 +225,6 @@ describe('write', function() {
 
     function assert(results) {
       var dataFile = results[1];
-      console.log('debugging', dataFile.path);
       expect(dataFile.path).toEqual(path.join(__dirname, 'assets/helloworld.js'));
       expect(dataFile instanceof File).toEqual(true);
       expect(dataFile).toBe(file);
@@ -712,36 +703,4 @@ describe('write', function() {
     ], done);
   });
 
-  if (!ignoreLogTests) {
-    // Should always be last as disabling a debug namespace does not work
-    it('should output an error message if debug option is set and sourceContent is missing', function(done) {
-      var file = makeFile();
-      file.sourceMap.sources[0] += '.invalid';
-      delete file.sourceMap.sourcesContent;
-
-      var history = [];
-
-      var unhook = hookStd.stderr(function(s) {
-        history.push(s);
-      });
-
-      function assert() {
-        unhook();
-        var hasRegex = function(regex) {
-          return function(s) {
-            return regex.test(s);
-          };
-        };
-
-        expect(history.some(hasRegex(/No source content for "helloworld.js.invalid". Loading from file./g))).toEqual(true);
-        expect(history.some(hasRegex(/source file not found: /g))).toEqual(true);
-      }
-
-      pipe([
-        from.obj([file]),
-        sourcemaps.write(),
-        concat(assert),
-      ], done);
-    });
-  }
 });

@@ -1,7 +1,6 @@
 'use strict';
 
 var utils = require('../utils');
-var rootDebug = require('../debug');
 var convert = require('convert-source-map');
 var stripBom = require('strip-bom-string');
 var urlRegex = utils.urlRegex;
@@ -33,7 +32,6 @@ module.exports = function(options, file, fileContent) {
   }
 
   function _fixSources(sources) {
-    var debug = rootDebug.spawn('init:internals:loadMaps:_fixSources');
 
     // fix source paths and sourceContent for imported source map
     if (sources.map) {
@@ -61,10 +59,9 @@ module.exports = function(options, file, fileContent) {
             sourceContent = sources.content;
           } else { // attempt load content from file
             try {
-              debug(function() { return 'No source content for "' + source + '". Loading from file.'; });
               sourceContent = stripBom(fs.readFileSync(absPath, 'utf8'));
             } catch (e) {
-              debug(function() { return 'warn: source file not found: ' + absPath; });
+              console.warn('source file not found: ' + absPath);
             }
           }
           sources.map.sourcesContent[i] = sourceContent;
@@ -78,7 +75,6 @@ module.exports = function(options, file, fileContent) {
   }
 
   function _getInlineSources(sources) {
-    var debug = rootDebug.spawn('init:internals:loadMaps:_getInlineSources');
 
     sources.preExistingComment = utils.getInlinePreExisting(sources.content);
     // Try to read inline source map
@@ -92,13 +88,11 @@ module.exports = function(options, file, fileContent) {
     // sources in map are relative to the source file
     sources.path = path.dirname(file.path);
     if (!options.largeFile) {
-      debug('comment REMOVED');
       sources.content = convert.removeComments(sources.content);
     }
   }
 
   function _getFileSources(sources) {
-    var debug = rootDebug.spawn('init:internals:loadMaps:_getFileSources');
 
     // look for source map comment referencing a source map file
     var mapComment = convert.mapFileCommentRegex.exec(sources.content);
@@ -119,9 +113,7 @@ module.exports = function(options, file, fileContent) {
     try {
       sources.map = JSON.parse(stripBom(fs.readFileSync(mapFile, 'utf8')));
     } catch (e) {
-      debug(function() {
-        return 'warn: external source map not found or invalid: ' + mapFile + ' ' + exceptionToString(e);
-      });
+      console.warn('external source map not found or invalid: ' + mapFile + ' ' + exceptionToString(e));
     }
   }
 

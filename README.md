@@ -424,22 +424,6 @@ exports.javascript = javascript;
   init.end();
   ```
 
-### Debugging
-
-All debugging output relies on [visionmedia/debug](https://github.com/visionmedia/debug). Follow the directions to set the
-environment variable `$DEBUG`.
-
-For a few examples of debug you could use:
-
-```sh
-  DEBUG='gulp-sourcemaps:*' #everything
-  DEBUG='gulp-sourcemaps:init' #init/index.js
-  DEBUG='gulp-sourcemaps:init:*' #init/index.internals.js
-  DEBUG='gulp-sourcemaps:write:' #write/index.js
-  DEBUG='gulp-sourcemaps:write:*' #write/index.internals.js
-  DEBUG='gulp-sourcemaps:write:,gulp-sourcemaps:init:**' #write/index.internals.js and init/index.internals.js
-```
-
 [downloads-image]: http://img.shields.io/npm/dm/gulp-sourcemaps.svg
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
 [npm-image]: http://img.shields.io/npm/v/gulp-sourcemaps.svg
