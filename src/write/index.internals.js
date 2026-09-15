@@ -7,35 +7,25 @@ module.exports = function(destPath, options) {
   var fs = require('graceful-fs');
   var path = require('path');
   var stripBom = require('strip-bom-string');
-  var rootDebug = require('../debug').spawn('write:internals');
-
-  rootDebug(function() { return 'options'; });
-  rootDebug(function() { return options; });
 
   function setSourceRoot(file) {
-    var debug = rootDebug.spawn('setSourceRoot');
 
     var sourceMap = file.sourceMap;
     if (typeof options.sourceRoot === 'function') {
-      debug(function() { return 'is function'; });
       sourceMap.sourceRoot = options.sourceRoot(file);
     } else {
-      debug(function() { return 'from options'; });
       sourceMap.sourceRoot = options.sourceRoot;
     }
     if (sourceMap.sourceRoot === null) {
-      debug(function() { return 'undefined'; });
       sourceMap.sourceRoot = undefined;
     }
   }
 
   function mapSources(file) {
-    var debug = rootDebug.spawn('mapSources');
 
     // NOTE: make sure source mapping happens after content has been loaded
     if (options.mapSources && typeof options.mapSources === 'function') {
-      debug(function() { return '**Option is deprecated, update to use sourcemap.mapSources stream**'; });
-      debug(function() { return 'function'; });
+      console.warn('**mapSources option is deprecated, update to use sourcemap.mapSources stream**');
 
       file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
         return options.mapSources(filePath, file);
@@ -43,22 +33,14 @@ module.exports = function(destPath, options) {
       return;
     }
 
-    debug(function() { return 'file.path: ' + file.path; });
-    debug(function() { return 'file.cwd: ' + file.cwd; });
-    debug(function() { return 'file.base: ' + file.base; });
-
     file.sourceMap.sources = file.sourceMap.sources.map(function(filePath) {
       // keep the references files like ../node_modules within the sourceRoot
-      debug(function() { return 'filePath: ' + filePath; });
 
       if (options.mapSourcesAbsolute === true) {
-        debug(function() { return 'mapSourcesAbsolute'; });
 
         if (!file.dirname) {
-          debug(function() { return '!file.dirname'; });
           filePath = path.join(file.base, filePath).replace(file.cwd, '');
         } else {
-          debug(function() { return 'file.dirname: ' + file.dirname; });
           filePath = path.resolve(file.dirname, filePath).replace(file.cwd, '');
         }
       }
@@ -67,7 +49,6 @@ module.exports = function(destPath, options) {
   }
 
   function loadContent(file) {
-    var debug = rootDebug.spawn('loadContent');
 
     var sourceMap = file.sourceMap;
     if (options.includeContent) {
@@ -78,10 +59,9 @@ module.exports = function(destPath, options) {
         if (!sourceMap.sourcesContent[i]) {
           var sourcePath = path.resolve(file.base, sourceMap.sources[i]);
           try {
-            debug('No source content for "' + sourceMap.sources[i] + '". Loading from file.');
             sourceMap.sourcesContent[i] = stripBom(fs.readFileSync(sourcePath, 'utf8'));
           } catch (e) {
-            debug('source file not found: ' + sourcePath);
+            console.warn('source file not found: ' + sourcePath);
           }
         }
       }
@@ -91,7 +71,6 @@ module.exports = function(destPath, options) {
   }
 
   function  mapDestPath(file, stream) {
-    var debug = rootDebug.spawn('mapDestPath');
     var sourceMap = file.sourceMap;
 
     var comment;
@@ -153,11 +132,9 @@ module.exports = function(destPath, options) {
         }
         sourceMapPathRelative = prefix + path.join('/', sourceMapPathRelative);
       }
-      debug(function() { return 'destPath comment'; });
       comment = commentFormatter(unixStylePath(sourceMapPathRelative));
 
       if (options.sourceMappingURL && typeof options.sourceMappingURL === 'function') {
-        debug(function() { return 'options.sourceMappingURL comment'; });
         comment = commentFormatter(options.sourceMappingURL(file));
       }
     }

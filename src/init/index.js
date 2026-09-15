@@ -12,7 +12,6 @@ var initInternals = require('./index.internals');
  * Initialize source mapping chain
  */
 function init(options) {
-  var debug = require('../debug').spawn('init');
 
   function sourceMapInit(file, encoding, callback) {
     // pass through if file is null or already has a source map
@@ -28,9 +27,6 @@ function init(options) {
     if (options === undefined) {
       options = {};
     }
-    debug(function() {
-      return options;
-    });
 
     var fileContent = file.contents.toString();
     var sourceMap, preExistingComment;
@@ -44,10 +40,8 @@ function init(options) {
     }
 
     if (!sourceMap && options.identityMap) {
-      debug(function() { return '**identityMap option is deprecated, update to use sourcemap.identityMap stream**'; });
-      debug(function() {
-        return 'identityMap';
-      });
+      console.warn('**identityMap option is deprecated, update to use sourcemap.identityMap stream**');
+
       var fileType = path.extname(file.path);
       var source = unixStylePath(file.relative);
       var generator = new SourceMapGenerator({ file: source });
@@ -72,34 +66,18 @@ function init(options) {
         generator.setSourceContent(source, fileContent);
         sourceMap = generator.toJSON();
       } else if (fileType === '.css') {
-        debug('css');
         var ast = css.parse(fileContent, { silent: true });
-        debug(function() {
-          return ast;
-        });
+
         var registerTokens = function(ast) {
           if (ast.position) {
             generator.addMapping({ original: ast.position.start, generated: ast.position.start, source: source });
           }
 
-          function logAst(key, ast) {
-            debug(function() {
-              return 'key: ' + key;
-            });
-            debug(function() {
-              return ast[key];
-            });
-          }
-
           for (var key in ast) {
-            logAst(key, ast);
             if (key !== 'position') {
               if (Object.prototype.toString.call(ast[key]) === '[object Object]') {
                 registerTokens(ast[key]);
               } else if (Array.isArray(ast[key])) {
-                debug(function() {
-                  return '@@@@ ast[key] isArray @@@@';
-                });
                 for (var i = 0; i < ast[key].length; i++) {
                   registerTokens(ast[key][i]);
                 }

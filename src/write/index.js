@@ -11,13 +11,6 @@ var internalsInit = require('./index.internals');
  *
  */
 function write(destPath, options) {
-  var debug = require('../debug').spawn('write');
-
-  debug(function() { return 'destPath'; });
-  debug(function() { return destPath; });
-
-  debug(function() { return 'original options';});
-  debug(function() { return options; });
 
   if (options === undefined && typeof destPath !== 'string') {
     options = destPath;
@@ -35,9 +28,6 @@ function write(destPath, options) {
   if (options.charset === undefined) {
     options.charset = 'utf8';
   }
-
-  debug(function() { return 'derrived options'; });
-  debug(function() { return options; });
 
   var internals = internalsInit(destPath, options);
 

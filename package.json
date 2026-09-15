@@ -7,10 +7,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "mocha --async-only",
-    "cover": "istanbul cover _mocha --report lcovonly",
-    "coveralls": "npm run cover && istanbul-coveralls"
+    "test": "mocha --async-only"
   },
   "keywords": [
     "gulpplugin",
@@ -26,7 +23,6 @@
     "acorn": "^6.4.1",
     "convert-source-map": "^1.0.0",
     "css": "^3.0.0",
-    "debug-fabulous": "^2.0.8",
     "detect-newline": "^2.0.0",
     "graceful-fs": "^4.0.0",
     "source-map": "^0.6.0",
@@ -43,9 +39,6 @@
     "gulp-if": "^2.0.2",
     "gulp-less": "^3.0.0",
     "gulp-load-plugins": "^1.5.0",
-    "hook-std": "0.2.X",
-    "istanbul": "^0.4.3",
-    "istanbul-coveralls": "^1.0.3",
     "mississippi": "1.X",
     "mocha": "^3.5.3",
     "object-assign": "^4.1.1",
