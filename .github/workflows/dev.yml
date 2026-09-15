@@ -1,0 +1,54 @@
+name: dev
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - phated/ci
+env:
+  CI: true
+
+jobs:
+  test:
+    name: Tests for Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [16, 18, 20, 22, 24]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - node: 10
+            os: ubuntu-latest
+          - node: 12
+            os: ubuntu-latest
+          - node: 14
+            os: ubuntu-latest
+          - node: 10
+            os: windows-latest
+          - node: 12
+            os: windows-latest
+          - node: 14
+            os: windows-latest
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Set Node.js version
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Check node version
+        run: node --version
+
+      - name: Check npm version
+        run: npm --version
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
