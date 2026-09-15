@@ -1,6 +1,6 @@
 # gulp-sourcemaps
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Travis Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 Sourcemap support for gulpjs.
 
@@ -428,11 +428,8 @@ exports.javascript = javascript;
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
 [npm-image]: http://img.shields.io/npm/v/gulp-sourcemaps.svg
 
-[travis-url]: https://travis-ci.org/gulp-sourcemaps/gulp-sourcemaps
-[travis-image]: http://img.shields.io/travis/gulp-sourcemaps/gulp-sourcemaps.svg?label=travis-ci
-
-[appveyor-url]: https://ci.appveyor.com/project/phated/gulp-sourcemaps
-[appveyor-image]: https://img.shields.io/appveyor/ci/phated/gulp-sourcemaps.svg?label=appveyor
+[ci-url]: https://github.com/gulp-sourcemaps/gulp-sourcemaps/actions/workflows/dev.yml
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulp-sourcemaps/gulp-sourcemaps/dev.yml?style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulp-sourcemaps/gulp-sourcemaps
-[coveralls-image]: http://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps/master.svg
+[coveralls-image]: https://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps/main.svg?style=flat-square
