@@ -1,24 +1,14 @@
 'use strict';
 
 var expect = require('expect');
-// BEGIN PRE-HOOK of debug
-var debug = require('debug-fabulous')();
 var miss = require('mississippi');
 
 var from = miss.from;
 var pipe = miss.pipe;
 var concat = miss.concat;
 
-var ignoreLogTests = process.argv.indexOf('--ignore-log-tests') !== -1;
-
-if (!ignoreLogTests) {
-  debug.save('gulp-sourcemaps:*');
-  debug.enable(debug.load());
-}
-// END PRE-HOOK of debug (must be loaded before our main module (sourcemaps))
 var sourcemaps = require('..');
 var File = require('vinyl');
-var hookStd = require('hook-std');
 var helpers = require('./test-helpers');
 
 describe('init', function() {
@@ -472,64 +462,4 @@ describe('init', function() {
     ], done);
   });
 
-  if (!ignoreLogTests) {
-    // should always be last as disabling a debug namespace does not work
-    it('should output an error message if debug option is set and sourceContent is missing', function(done) {
-
-      var file = helpers.makeFile();
-      file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=helloworld4.js.map');
-
-      var history = [];
-
-      var unhook = hookStd.stderr(function(s) {
-        history.push(s);
-      });
-
-      function assert() {
-        unhook();
-        var hasRegex = function(regex) {
-          return function(s) {
-            return regex.test(s);
-          };
-        };
-
-        expect(history.some(hasRegex(/No source content for "missingfile". Loading from file./g))).toEqual(true);
-        expect(history.some(hasRegex(/source file not found: /g))).toEqual(true);
-      }
-
-      pipe([
-        from.obj([file]),
-        sourcemaps.init({ loadMaps: true }),
-        concat(assert),
-      ], done);
-    });
-
-    it('should output an error message if debug option is set, loadMaps: true, and source map file not found', function(done) {
-      var file = helpers.makeFile();
-      file.contents = new Buffer(helpers.sourceContent + '\n//# sourceMappingURL=not-existent.js.map');
-
-      var history = [];
-
-      var unhook = hookStd.stderr(function(s) {
-        history.push(s);
-      });
-
-      function assert() {
-        unhook();
-        var hasRegex = function(regex) {
-          return function(s) {
-            return regex.test(s);
-          };
-        };
-
-        expect(history.some(hasRegex(/warn: external source map not found or invalid: /g))).toEqual(true);
-      }
-
-      pipe([
-        from.obj([file]),
-        sourcemaps.init({ loadMaps: true }),
-        concat(assert),
-      ], done);
-    });
-  }
 });

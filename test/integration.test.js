@@ -4,19 +4,12 @@ var expect = require('expect');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var sourcemaps = require('..');
-var debug = require('debug-fabulous')();
 var miss = require('mississippi');
 var rimraf = require('rimraf');
 
 var pipe = miss.pipe;
 var concat = miss.concat;
 
-var ignoreLogTests = process.argv.indexOf('--ignore-log-tests') !== -1;
-
-if (!ignoreLogTests) {
-  debug.save('gulp-sourcemaps:*');
-  debug.enable(debug.load());
-}
 var join = require('path').join;
 var fs = require('fs');
 var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toString();
@@ -24,8 +17,6 @@ var sourceContent = fs.readFileSync(join(__dirname, 'assets/helloworld.js')).toS
 function base64JSON(object) {
   return 'data:application/json;charset=utf8;base64,' + new Buffer(JSON.stringify(object)).toString('base64');
 }
-
-debug('running');
 
 describe('integrations', function() {
 

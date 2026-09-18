@@ -1,6 +1,6 @@
 # gulp-sourcemaps
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Travis Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 Sourcemap support for gulpjs.
 
@@ -424,31 +424,12 @@ exports.javascript = javascript;
   init.end();
   ```
 
-### Debugging
-
-All debugging output relies on [visionmedia/debug](https://github.com/visionmedia/debug). Follow the directions to set the
-environment variable `$DEBUG`.
-
-For a few examples of debug you could use:
-
-```sh
-  DEBUG='gulp-sourcemaps:*' #everything
-  DEBUG='gulp-sourcemaps:init' #init/index.js
-  DEBUG='gulp-sourcemaps:init:*' #init/index.internals.js
-  DEBUG='gulp-sourcemaps:write:' #write/index.js
-  DEBUG='gulp-sourcemaps:write:*' #write/index.internals.js
-  DEBUG='gulp-sourcemaps:write:,gulp-sourcemaps:init:**' #write/index.internals.js and init/index.internals.js
-```
-
 [downloads-image]: http://img.shields.io/npm/dm/gulp-sourcemaps.svg
 [npm-url]: https://www.npmjs.com/package/gulp-sourcemaps
 [npm-image]: http://img.shields.io/npm/v/gulp-sourcemaps.svg
 
-[travis-url]: https://travis-ci.org/gulp-sourcemaps/gulp-sourcemaps
-[travis-image]: http://img.shields.io/travis/gulp-sourcemaps/gulp-sourcemaps.svg?label=travis-ci
-
-[appveyor-url]: https://ci.appveyor.com/project/phated/gulp-sourcemaps
-[appveyor-image]: https://img.shields.io/appveyor/ci/phated/gulp-sourcemaps.svg?label=appveyor
+[ci-url]: https://github.com/gulp-sourcemaps/gulp-sourcemaps/actions/workflows/dev.yml
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulp-sourcemaps/gulp-sourcemaps/dev.yml?style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulp-sourcemaps/gulp-sourcemaps
-[coveralls-image]: http://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps/master.svg
+[coveralls-image]: https://img.shields.io/coveralls/gulp-sourcemaps/gulp-sourcemaps/main.svg?style=flat-square

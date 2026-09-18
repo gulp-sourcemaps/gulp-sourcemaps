@@ -4,6 +4,7 @@
     "max-depth": [1, 5],
     "max-statements": [1, 50],
     "max-len": [1, { "code": 140 }],
-    "no-constant-condition": 0
+    "no-constant-condition": 0,
+    "no-console": 0
   }
 }
