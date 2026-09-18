@@ -8,7 +8,7 @@ function unixStylePath(filePath) {
 
 var PLUGIN_NAME = require('../package.json').name;
 
-var urlRegex = /^(https?|webpack(-[^:]+)?):\/\//;
+var urlRegex = /^(https?|webpack(-[^:]+)?|file):\/\//;
 
 /*
 So reusing the same ref for a regex (with global (g)) is from a poor decision in js.
